@@ -1,59 +1,12 @@
-#!/usr/bin/env python
-# coding: utf8
-
-import argparse
 import copy
 import io
 import json
 import os
-import pdfkit
 import pysam
 import re
 import sys
-import matplotlib
 
 import numpy as np 
-
-##############
-## Function ##
-##############
-def abort(help, msg=""):
-	print(msg)
-	print(help)
-	sys.exit(1)
-
-def checkFile(path):
-	if os.path.exists(path):
-		return True
-	return False	
-		
-##################
-## Parsing Args ##
-##################
-
-description = 'Create Pdf report metagenomic shotgun'
-parser = argparse.ArgumentParser(description=description)
-
-parser.add_argument('-i', required=True, dest='bam',
-	action='store',help='Bam file')
-parser.add_argument('-o', required=True, dest='output',
-	action='store',help='File count txt')
-
-if len(sys.argv) <= 1: 
-	abort(parser.print_help() )
-else: 
-	args = parser.parse_args()
-
-fbam = args.bam
-foutput = args.output
-
-BASESOFTCLIP = 4
-BASESOFTCLIP_TOLERATE = 2
-
-bam = pysam.AlignmentFile(fbam, "rb")
-
-print(fbam)
-data = {}
 
 
 def cigar2position(cigars, start):
@@ -78,6 +31,25 @@ def cigar2position(cigars, start):
 		else:
 			start += 1
 	return data
+
+		
+##################
+## Parsing Args ##
+##################
+'''
+
+fbam = args.bam
+foutput = args.output
+
+BASESOFTCLIP = 4
+BASESOFTCLIP_TOLERATE = 2
+
+bam = pysam.AlignmentFile(fbam, "rb")
+
+print(fbam)
+data = {}
+
+
 	
 	
 
@@ -127,13 +99,13 @@ for aligned_segment in reads:
 
 	fusionSecondary = False
 	start = 0
-	'''
-	if aligned_segment.reference_name == "chr9":
-		start = fusion_abl[0]
-		fusionSecondary = True
-	elif aligned_segment.reference_name == "chr22":
-		start = fusion_bcr[0]
-	'''
+
+	#if aligned_segment.reference_name == "chr9":
+	#	start = fusion_abl[0]
+	#	fusionSecondary = True
+	#elif aligned_segment.reference_name == "chr22":
+	#	start = fusion_bcr[0]
+
 	if aligned_segment.reference_name == "chr4":
 		start = fusion_bcr[0]
 	if not start in cigar2pos.keys(): 
@@ -249,4 +221,4 @@ print("SplitRead %s \nSoftClip %s \nDiffChr %s" % (split_read, softclip, diffchr
 print("Dup %s\n" % (dup,))
 with open(foutput, "w") as fod:
 	json.dump(data, fod, indent=4)
-
+'''

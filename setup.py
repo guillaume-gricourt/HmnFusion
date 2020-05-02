@@ -8,14 +8,10 @@ from setuptools import setup, find_packages
 setup_args = {}
 
 install_requires=[
-	'cnvkit >= 0.9.6',
-	'django >= 1.11.25',
-	'Jinja2 >= 2.10.3',
-	'networkx >= 2.4.0',
-	'seaborn >= 0.9.0',
-	'pdfkit >= 0.6.1',
-	'pysam >= 0.10.0',
-	'xlsxwriter >= 1.1.6',
+	'beautifulsoup4 >= 4.9.0',
+	'lxml >= 4.5.0',
+	'pandas >= 0.20.3',
+	'pysam >= 0.10.0'
 ]
 
 DIR = (os.path.dirname(__file__) or '.')
