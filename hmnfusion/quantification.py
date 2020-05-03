@@ -1,15 +1,51 @@
-import copy
-import io
 import json
-import os
+import logging
 import pysam
 import re
-import sys
 
 import numpy as np 
+import pandas as pd
 
+from .utils import read_json, update_list, write_json, Region, Fusion
 
-def cigar2position(cigars, start):
+RE_REGION = re.compile(r'\D*(\d+):(\d+)')
+
+# Bed.
+def read_bed(filename):
+	isHeader = 0
+	with open(filename) as fid:
+		if 'track' in fid.readline():
+			isHeader=1
+	bed = pd.read_csv(filename, sep='\t', usecols=[0,1,2], names=["chrom", "start", "end"], dtype={"chrom":str, "start":int, "end":int}, skiprows=isHeader)
+	return bed
+
+# Parsing regions.
+def _parse_region(region):
+	m = re.search(RE_REGION, region)
+	if m:
+		chrom = int(m.group(1))
+		pos = int(m.group(2))
+	return (chrom, pos)
+
+def check_region(sregion):
+	region = _parse_region(sregion)
+	if max(region) == 0:
+		return False
+	return True
+
+def build_region(sregion):
+	fusion = Fusion()
+	fusion.first.chrom, fusion.first.position = _parse_region(sregion)
+	return fusion
+
+def parse_hmnfusion_json(filename):
+	data = read_json(filename)
+	fusions = []
+	for key in sorted(data["fusions"].keys()):
+		fusions.append(Fusion.from_dict(data["fusions"][key]))
+	return fusions
+
+def _cigar2position(cigars, start):
 	data = {}
 	if cigars[0][0] in [4, 5]:
 		for i in range(cigars[0][1]):
@@ -32,193 +68,103 @@ def cigar2position(cigars, start):
 			start += 1
 	return data
 
-		
-##################
-## Parsing Args ##
-##################
-'''
 
-fbam = args.bam
-foutput = args.output
-
-BASESOFTCLIP = 4
-BASESOFTCLIP_TOLERATE = 2
-
-bam = pysam.AlignmentFile(fbam, "rb")
-
-print(fbam)
-data = {}
-
-
-	
-	
-
-#bed_bcr = ("chr4", 54265897, 54280889)
-#fusion_bcr = (54266930, 54266931)
-
-bed_bcr = ("chr4", 55140698, 55141140)
-fusion_bcr = (55141043, 55141044)
-
-
-#bed_bcr = ("chr22", 23631700, 23634833)
-#fusion_bcr = (23632549, 23632550)
-#bed_abl = ("chr9", 133615450, 133615900)
-#fusion_abl = (133615629, 133615630)
-
-#cov = bam.count_coverage(contig=chrom, start=start, stop=stop)
-#print("coverage %s" %(cov,))
-
-coverage = 0
-diffchr = 0
-split_read = 0
-softclip = 0
-
-col = 0
-
-dup = 0
-
-already_count = set()
-
-reads_soft_clips = []
-data = {}
-data["split"] = []
-data["chrom"] = []
-data["clip"] = []
-
-reads = [ x for x in bam.fetch(bed_bcr[0], bed_bcr[1], bed_bcr[2]) if not x.is_duplicate and not x.is_unmapped]
-#reads += [ x for x in bam.fetch(bed_abl[0], bed_abl[1], bed_abl[2]) if not x.is_duplicate and not x.is_unmapped]
-
-for aligned_segment in reads: 
-	
-	reference_start = aligned_segment.reference_start
-	cigars = aligned_segment.cigartuples
-	cigar2pos = cigar2position(cigars, reference_start)
-	
-	sens = "2" if aligned_segment.is_read2 else "1"
-	name_segment = aligned_segment.query_name + "-" + sens
-
-	fusionSecondary = False
-	start = 0
-
-	#if aligned_segment.reference_name == "chr9":
-	#	start = fusion_abl[0]
-	#	fusionSecondary = True
-	#elif aligned_segment.reference_name == "chr22":
-	#	start = fusion_bcr[0]
-
-	if aligned_segment.reference_name == "chr4":
-		start = fusion_bcr[0]
-	if not start in cigar2pos.keys(): 
-		continue
-
-
-	if aligned_segment.is_supplementary:
-		continue
-			
-	coverage += 1
-
-
-	isFound = False
-
-
-	
-	
-	#Split
-	if aligned_segment.has_tag("SA"):
-		split_read += 1
-		#print("split read " + name_segment)
-		
-		if name_segment in already_count:
-			dup += 1
-			print([ str(x) for x in reads if x.query_name == "M03869:187:000000000-CNMKC:1:1103:10744:20313"])
-			print(aligned_segment)
-			sys.exit(0)	
-		#print(aligned_segment)
-		data["split"] += [name_segment]
-		already_count.add(name_segment)
-		isFound = True
-
-		continue
-		
-	#Other Chrom
-	if not aligned_segment.is_secondary and not aligned_segment.is_supplementary and aligned_segment.is_paired:	
-		if not aligned_segment.mate_is_unmapped and not aligned_segment.is_unmapped:
-			if aligned_segment.next_reference_id != aligned_segment.reference_id:
-				diffchr += 1
-				#print("other " + name_segment)
-				if name_segment in already_count:
-					dup += 1
-					print([ str(x) for x in reads if x.query_name == "M03869:187:000000000-CNMKC:1:1103:10744:20313"])
-					print(aligned_segment)
-					sys.exit(0)
-
-				#print(name_segment)
-				#print(aligned_segment)
-				data["chrom"] += [name_segment]
-				already_count.add(name_segment)
-				isFound = True
-
-				continue
-	
-	#Check clip		
-	#reference_start = aligned_segment.reference_start
-	reference_end = aligned_segment.reference_end
-	reference_length = aligned_segment.reference_length
-	
-	#cigars = aligned_segment.cigartuples
-	#cigar2pos = cigar2position(cigars, reference_start)
-	
-	#cigars = aligned_segment.cigartuples
-	isSoftClip = []
-	#Down
-	softClipFound = False
-	
-	#if name_segment == "M03869:187:000000000-CNMKC:1:1113:3350:7281":
-	#	print(cigar2pos)
+def _select_bed(x, region):
+	if x['chrom'] == region.chrom:
+		if x['start'] <= region.position and x['end'] >= region.position:
+			return True
+	return False
 		
 
-	for i in range(BASESOFTCLIP + BASESOFTCLIP_TOLERATE):
-		if cigar2pos.get(start-i-1,0) in [4, 5]:
-			isSoftClip.append(True)
+def run(params, bed, fusions):
+
+	alignment = pysam.AlignmentFile(params['falignment']['path'], params['falignment']['mode'])
+
+	to_delete = []
+	isSkip = False
+	for ix, fusion in enumerate(fusions):
+
+		# Check fusion against bed.
+		sub_first, sub_second = pd.DataFrame(columns=bed.columns), pd.DataFrame(columns=bed.columns)
+		if fusion.first.is_init():
+			sel = bed.apply(_select_bed, axis=1, args=(fusion.first,))
+			sub_first = bed[sel]
+		if fusion.second.is_init():
+			sel = bed.apply(_select_bed, axis=1, args=(fusion.second,))
+			sub_second = bed[sel]
+		if len(sub_first) > 1 or len(sub_second) > 1:
+			logging.warning('Fusion %s is found multiple times in bed -> skipping'%(fusion,))
+			isSkip = True
+		if len(sub_first) + len(sub_second) == 2 :
+			logging.warning('Fusion %s is found on left and right of breakpoint in the bed -> skipping'%(fusion,))
+			isSkip = True
+		if len(sub_first) + len(sub_second) == 0 :
+			logging.warning("Fusion %s isn't found on left or right of breakpoint in the bed -> skipping"%(fusion,))
+			isSkip = True
+
+		if isSkip:
+			to_delete.append(ix)
+			continue
+		# Init.
+		bed_sel = pd.DataFrame(columns=bed.columns)
+		region = Region()
+		if len(sub_first) == 1:
+			bed_sel = sub_first
+			region = fusion.first
+		elif len(sub_second) == 1:
+			bed_sel = sub_second
+			region = fusion.second
 		else:
-			isSoftClip.append(False)
-	
-	if sum(isSoftClip) >= BASESOFTCLIP:
-		softclip += 1
-		softClipFound = True
-		#print("Down : " + aligned_segment.query_name)
-	isSoftClip = []	
-	if not softClipFound:
-		for i in range(BASESOFTCLIP + BASESOFTCLIP_TOLERATE):
-			if cigar2pos.get(start+i+2,0) in [4, 5]:
-				isSoftClip.append(True)
-			else:
-				isSoftClip.append(False)
-		if sum(isSoftClip) >= BASESOFTCLIP:
-			softclip += 1
-			#print("Up : " + aligned_segment.query_name)
-			softClipFound = True
-			
-	
-	if softClipFound:
-		reads_soft_clips.append(name_segment)
-		if name_segment in already_count:
-			dup += 1
-			print([ str(x) for x in reads if x.query_name == "M03869:187:000000000-CNMKC:1:1103:10744:20313"])
-			print(aligned_segment)
-			sys.exit(0)			
-		already_count.add(name_segment)
-		isFound = True
-		
+			logging.warning("Fusion %s, something bad happened -> skipping"%(fusion,))
+		count = dict(coverage=0, split=0, mate=0, clipped=0)
+		# Run. 
+		for aligned_segment in alignment.fetch(bed_sel.iloc[0, 0], bed_sel.iloc[0, 1], bed_sel.iloc[0, 2]):
+			# Filtering.
+			if aligned_segment.is_unmapped or aligned_segment.is_duplicate or aligned_segment.is_supplementary:
+				continue
 
-		
-			
-reads_soft_clips = sorted(reads_soft_clips)
+			cigar2pos = _cigar2position(aligned_segment.cigartuples, aligned_segment.reference_start)				
+			if not region.position in cigar2pos.keys(): 
+				continue
 
-#print('\n'.join(reads_soft_clips))
-print("Coverage %s\n" % (coverage,))
-print("SplitRead %s \nSoftClip %s \nDiffChr %s" % (split_read, softclip, diffchr))
-print("Dup %s\n" % (dup,))
-with open(foutput, "w") as fod:
-	json.dump(data, fod, indent=4)
-'''
+			count['coverage'] += 1
+			# Count split reads.
+			if aligned_segment.has_tag("SA"):
+				count['split'] += 1
+				continue
+			
+			# Count other Chrom.
+			if aligned_segment.is_paired:	
+				if not aligned_segment.mate_is_unmapped and not aligned_segment.is_unmapped:
+					if aligned_segment.next_reference_id != aligned_segment.reference_id:
+						count['mate'] += 1
+						continue
+		
+			# Count reads clipped.
+			count_clipped = np.zeros((2, params['clipped']['interval']))
+			for i in range(params['clipped']['interval']):
+				if cigar2pos.get(region.position-i-1,0) in [4, 5]:
+					count_clipped[0][i] = 1
+				if cigar2pos.get(region.position+i+1,0) in [4, 5]:
+					count_clipped[1][i] = 1
+			
+			if np.max(np.sum(count_clipped, axis=1)) >= params['clipped']['count']:
+				count['clipped'] += 1
+		fusion.depth = count['coverage']
+		fusion.evidence = count['split'] + count['mate'] + count['clipped']
+		print(fusion)
+	for rec in fusions:
+		print("Rec")
+		print(rec)
+	fusions = update_list(fusions, to_delete)
+	return fusions
+
+# Write.
+def write(filename, finputs, params, fusions):
+	data = {}
+	data['inputs'] = finputs
+	data['parameters'] = params
+	data['fusions'] = {}
+	for ix, fusion in enumerate(fusions):
+		data['fusions'][str(ix)] = fusion.to_dict()
+	write_json(filename, data)

@@ -10,7 +10,7 @@ setup_args = {}
 install_requires=[
 	'beautifulsoup4 >= 4.9.0',
 	'lxml >= 4.5.0',
-	'pandas >= 0.20.3',
+	'pandas >= 1.0.0',
 	'pysam >= 0.10.0'
 ]
 

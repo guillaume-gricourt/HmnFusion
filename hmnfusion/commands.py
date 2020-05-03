@@ -40,11 +40,11 @@ def _cmd_extract_fusion(args):
 	foutput = args.output
 	# Check if all exists.
 	if not os.path.isfile(finputs['genefuse']['path']):
-		abort("File Genefuse doesn't exist : %s"%(fgenefuse['path'],))
+		abort(AP, "File Genefuse doesn't exist : %s"%(fgenefuse['path'],))
 	if not os.path.isfile(finputs['lumpy']['path']):
-		abort("File Lumpy doesn't exist : %s"%(flumpy['path'],))
+		abort(AP, "File Lumpy doesn't exist : %s"%(flumpy['path'],))
 	if not os.path.isdir(os.path.dirname(foutput)):
-		abort("Outdir doesn't exist : %s"%(foutput,))
+		abort(AP, "Outdir doesn't exist : %s"%(foutput,))
 
 	# Run.
 	fusions = {}
@@ -98,40 +98,98 @@ def _cmd_quantification(args):
 	logging.info('Start analysis')
 
 	# Check if all exists.
+	logging.info('Check args')
+	finputs = {}
 	foutput = args.output
-	if args.hmnfusion_json and not os.path.isfile(args.hmnfusion_json):
-		abort("HmnFusion Json file doesn't exist : %s"%(args.hmnfusion_json,))
+	finputs['output'] = foutput
+	if args.hmnfusion_json:
+		finputs['hmnfusion_json'] = args.hmnfusion_json
+		if not os.path.isfile(finputs['hmnfusion_json']):
+			abort(AP, "HmnFusion Json file doesn't exist : %s"%(finputs['hmnfusion_json'],))
 	if args.region:
-		chrom, pos = 0, 0
-		m = re.search(r'\D*(\d+):(\d+)', args.region)
-		if m:
-			chrom = int(m.group(1))
-			pos = int(m.group(2))
-		if chrom == 0 or pos == 0:
-			abort("Region format is not well formated. Required <chrom>:<position>")
-	if not os.path.isfile(args.input_bam):
-		abort("Bam file doesn't exist : %s"%(args.input_bam,))
+		if not quantification.check_region(args.region):
+			abort(AP, "Region format is not well formated. Required <chrom>:<position>")
+		finputs['region'] = args.region
+
+	falignment_path = ''
+	falignment_mode = ''
+	if args.input_bam:
+		falignment_path = args.input_bam
+		falignment_mode = 'rb'
+	if args.input_sam:
+		falignment_path = args.input_sam
+		falignment_mode = 'r'
+	finputs['alignment'] = {}
+	finputs['alignment']['path'] = falignment_path
+	finputs['alignment']['mode'] = falignment_mode
+	if not os.path.isfile(finputs['alignment']['path']):
+		abort(AP, "Input alignment file doesn't exist : %s"%(finputs['alignment']['path'],))
+	finputs['bed'] = args.input_bed
 	if not os.path.isfile(args.input_bed):
-		abort("Bed file doesn't exist : %s"%(args.input_bed,))
-	if not os.path.isdir(os.path.dirname(foutput)):
-		abort("Outdir doesn't exist : %s"%(foutput,))
+		abort(AP, "Bed file doesn't exist : %s"%(args.input_bed,))
+	if not os.path.isdir(os.path.dirname(os.path.abspath(finputs['output']))):
+		abort(AP, "Outdir doesn't exist : %s"%(finputs['output'],))
 
+	params = dict(falignment=dict(path=finputs['alignment']['path'], mode=finputs['alignment']['mode']), clipped=dict(count=args.baseclipped_count, interval=args.baseclipped_interval))
+
+	if params['clipped']['count'] < 1: 
+		logging.warning('Parameter base clipped count is too low, is set to 1 pb')
+		params['clipped']['count'] = 1
+	elif params['clipped']['count'] > 20:
+		logging.warning('Parameter base clipped count is too high, is set to 20 pb')
+		params['clipped']['count'] = 20
+	if params['clipped']['interval'] < 1: 
+		logging.warning('Parameter base clipped interval is too low, is set to 1 pb')
+		params['clipped']['interval'] = 1
+	elif params['clipped']['interval'] > 20:
+		logging.warning('Parameter base clipped interval is too high, is set to 20 pb')
+		params['clipped']['interval'] = 20
+	if params['clipped']['count'] > params['clipped']['interval']:
+		logging.warning('Parameter base clipped count is higher than parameter base clipped interval -> count is set equal than interval : %s pb instead of %s pb'%(params['clipped']['interval'], params['clipped']['count']))
+		params['clipped']['count'] = params['clipped']['interval']
+	
 	# Parsing bed file.
-
-	fusions = []	
+	logging.info('Parsing bed file')
+	bed = quantification.read_bed(args.input_bed)
+	
+	# Parsing fusions.
+	logging.info('Get region')
+	fusions = []
+	if args.region:
+		fusion = quantification.build_region(finputs['region'])
+		fusions.append(fusion)
 	elif args.hmnfusion_json:
-		fusions = quantification.parse_hmnfusion_json(args.hmnfusion_json)
+		fusions = quantification.parse_hmnfusion_json(finputs['hmnfusion_json'])
+
+	# Process
+	logging.info('Calcul VAF fusion')
+	fusions = quantification.run(params, bed, fusions)
+
+	for ix, fusion in enumerate(fusions):
+		logging.info('%s - %s' % (ix,fusion))
+	# Write output.
+	if foutput:
+		logging.info('Write output')
+		quantification.write(foutput, finputs, params, fusions)
+	logging.info("Analysis is finished")
 
 P_quantification = AP_subparsers.add_parser('quantification', help=_cmd_quantification.__doc__)
 P_quantification_position_group = P_quantification.add_mutually_exclusive_group(required=True)
 P_quantification_position_group.add_argument('--region', 
 	help='Region format <chrom>:<postion>')
-P_extract_fusion_genefuse_group.add_argument('--hmnfusion-json',
+P_quantification_position_group.add_argument('--hmnfusion-json',
 	help='Output Json produced by command "extractfusion"')
-P_quantification.add_argument('--input-bam', 
+P_quantification_input_alignment_group = P_quantification.add_mutually_exclusive_group(required=True)
+P_quantification_input_alignment_group.add_argument('--input-bam', 
 	help='Bam file')
+P_quantification_input_alignment_group.add_argument('--input-sam', 
+	help='Sam file')
 P_quantification.add_argument('--input-bed', 
 	help='Bed file')
+P_quantification.add_argument('--baseclipped-interval', type=int, default=6, 
+	help='Interval to count hard/soft-clipped bases from fusion point (pb)')
+P_quantification.add_argument('--baseclipped-count', type=int, default=4, 
+	help='Number of base hard/soft-clipped bases to count in interval (pb)')
 P_quantification.add_argument('-o','--output',
 	help='Json file output')
 P_quantification.set_defaults(func=_cmd_quantification)
