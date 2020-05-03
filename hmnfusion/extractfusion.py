@@ -100,7 +100,7 @@ def read_lumpy(flumpy):
 	return fusions
 
 # Consensus.
-def consensus_lumpy(records, consensus_interval):
+def consensus_single(records, consensus_interval):
 	if len(records) == 0:
 		return records
 
@@ -119,10 +119,7 @@ def consensus_lumpy(records, consensus_interval):
 			fusions.append(fusion)
 	return fusions
 
-def consensus_genefuse_lumpy(data, consensus_interval):
-	lumpy = data['lumpy']['consensus']
-	genefuse = data['genefuse']
-
+def consensus_genefuse_lumpy(genefuse, lumpy, consensus_interval):
 	if len(lumpy) == 0:
 		return genefuse
 	if len(genefuse) == 0:
@@ -142,15 +139,17 @@ def consensus_genefuse_lumpy(data, consensus_interval):
 	if len(lumpy) > 0:
 		genefuse += lumpy
 
-	# Filter if fusion is on same chrom.
-	to_delete = []
-	for ix in range(len(genefuse)):
-		if genefuse[ix].is_same_chrom():
-			to_delete.append(ix)
-	genefuse = update_list(genefuse, to_delete)
-
 	genefuse.sort(reverse=True)	
 	return genefuse
+
+def filter_same_chrom(fusions):
+	# Filter if fusion is on same chrom.
+	to_delete = []
+	for ix in range(len(fusions)):
+		if fusions[ix].is_same_chrom():
+			to_delete.append(ix)
+	fusions = update_list(fusions, to_delete)
+	return fusions
 
 # Write.
 def write(filename, finputs, fusions):

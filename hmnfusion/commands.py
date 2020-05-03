@@ -40,10 +40,10 @@ def _cmd_extract_fusion(args):
 	foutput = args.output
 	# Check if all exists.
 	if not os.path.isfile(finputs['genefuse']['path']):
-		abort(AP, "File Genefuse doesn't exist : %s"%(fgenefuse['path'],))
+		abort(AP, "File Genefuse doesn't exist : %s"%(finputs['genefuse']['path'],))
 	if not os.path.isfile(finputs['lumpy']['path']):
-		abort(AP, "File Lumpy doesn't exist : %s"%(flumpy['path'],))
-	if not os.path.isdir(os.path.dirname(foutput)):
+		abort(AP, "File Lumpy doesn't exist : %s"%(finputs['lumpy']['path'],))
+	if not os.path.isdir(os.path.dirname(os.path.abspath(foutput))):
 		abort(AP, "Outdir doesn't exist : %s"%(foutput,))
 
 	# Run.
@@ -51,12 +51,14 @@ def _cmd_extract_fusion(args):
 	# Genefuse.
 	logging.info('Genefuse')
 	fgenefuse = finputs['genefuse']
+	fusions['genefuse'] = {}
 	if fgenefuse['format'] == 'json':
 		logging.info('\tExtract fusions from Json')
-		fusions['genefuse'] = extractfusion.read_genefuse_json(fgenefuse['path'])
+		fusions['genefuse']['raw'] = extractfusion.read_genefuse_json(fgenefuse['path'])
 	elif fgenefuse['format'] == 'html':
 		logging.info('\tExtract fusions from Html')
-		fusions['genefuse'] = extractfusion.read_genefuse_html(fgenefuse['path'])
+		fusions['genefuse']['raw'] = extractfusion.read_genefuse_html(fgenefuse['path'])
+	fusions['genefuse']['consensus'] = extractfusion.consensus_single(fusions['genefuse']['raw'], args.consensus_interval)
 	# Lumpy.	
 	logging.info('Lumpy')
 	flumpy = finputs['lumpy']
@@ -65,10 +67,13 @@ def _cmd_extract_fusion(args):
 		logging.info('\tExtract fusions')
 		fusions['lumpy']['raw'] = extractfusion.read_lumpy(flumpy['path'])
 		logging.info('\tBuild consensus')
-		fusions['lumpy']['consensus'] = extractfusion.consensus_lumpy(fusions['lumpy']['raw'], args.consensus_interval)
+		fusions['lumpy']['consensus'] = extractfusion.consensus_single(fusions['lumpy']['raw'], args.consensus_interval)
 	# Consensus.
 	logging.info('Build consensus with interval of %s pb'%(args.consensus_interval,))
-	fusions['consensus'] = extractfusion.consensus_genefuse_lumpy(fusions, args.consensus_interval)
+	fusions['consensus'] = extractfusion.consensus_genefuse_lumpy(fusions['genefuse']['consensus'], fusions['lumpy']['consensus'], args.consensus_interval)
+
+	# Filter same chrom.
+	fusions['consensus'] = extractfusion.filter_same_chrom(fusions['consensus'])
 
 	logging.info('Find %s fusion(s)'%(len(fusions['consensus']),))
 	for ix, fusion in enumerate(fusions['consensus']):

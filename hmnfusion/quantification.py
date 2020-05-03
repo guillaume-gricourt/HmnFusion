@@ -1,14 +1,11 @@
 import json
 import logging
 import pysam
-import re
 
 import numpy as np 
 import pandas as pd
 
 from .utils import read_json, update_list, write_json, Region, Fusion
-
-RE_REGION = re.compile(r'\D*(\d+):(\d+)')
 
 # Bed.
 def read_bed(filename):
@@ -21,15 +18,22 @@ def read_bed(filename):
 
 # Parsing regions.
 def _parse_region(region):
-	m = re.search(RE_REGION, region)
-	if m:
-		chrom = int(m.group(1))
-		pos = int(m.group(2))
+	m = region.split(':')
+	chrom, pos = '', 0
+	try:
+		chrom = m[0]
+		pos = int(m[1])
+	except:
+		pass
 	return (chrom, pos)
 
 def check_region(sregion):
+	if not ':' in sregion:
+		return False
+	if len(sregion.split(':')) != 2:
+		return False 
 	region = _parse_region(sregion)
-	if max(region) == 0:
+	if region[1] == 0:
 		return False
 	return True
 
@@ -152,10 +156,6 @@ def run(params, bed, fusions):
 				count['clipped'] += 1
 		fusion.depth = count['coverage']
 		fusion.evidence = count['split'] + count['mate'] + count['clipped']
-		print(fusion)
-	for rec in fusions:
-		print("Rec")
-		print(rec)
 	fusions = update_list(fusions, to_delete)
 	return fusions
 

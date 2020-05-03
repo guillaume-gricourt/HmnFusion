@@ -112,17 +112,16 @@ class Fusion():
 
 	def is_near(self, other, consensus_interval):
 		gaps = []
-		if self._first.is_init() and self._second.is_init():
-			if self._first.chrom == other.first.chrom:
-				gaps.append(abs(self._first.position-other.first.position))
-				if self._second.chrom == other.second.chrom:
-					gaps.append(abs(self._second.position-other.second.position))
-			elif self._first.chrom == other.second.chrom:
-				gaps.append(abs(self._first.position-other.second.position))
-				if self._second.chrom == other.first.chrom:
-					gaps.append(abs(self._second.position-other.first.position))
-			if len(gaps) == 2 and min(gaps) <= consensus_interval:
-				return True
+		if self._first.chrom == other.first.chrom:
+			gaps.append(abs(self._first.position-other.first.position))
+			if self._second.chrom == other.second.chrom:
+				gaps.append(abs(self._second.position-other.second.position))
+		elif self._first.chrom == other.second.chrom:
+			gaps.append(abs(self._first.position-other.second.position))
+			if self._second.chrom == other.first.chrom:
+				gaps.append(abs(self._second.position-other.first.position))
+		if len(gaps) == 2 and min(gaps) <= consensus_interval:
+			return True
 		return False
 
 	def is_same_chrom(self):
