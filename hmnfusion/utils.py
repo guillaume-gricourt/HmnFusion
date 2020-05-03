@@ -130,6 +130,11 @@ class Fusion():
 				return True
 		return False
 
+	def swap(self):
+		tmp = self._first
+		self._first = self._second
+		self.second = tmp
+
 	def vaf(self):
 		return self._depth / self._evidence * 100
 

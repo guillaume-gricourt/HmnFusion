@@ -118,6 +118,8 @@ def run(params, bed, fusions):
 		elif len(sub_second) == 1:
 			bed_sel = sub_second
 			region = fusion.second
+			# Swap.
+			fusion.swap()
 		else:
 			logging.warning("Fusion %s, something bad happened -> skipping"%(fusion,))
 		count = dict(coverage=0, split=0, mate=0, clipped=0)
@@ -160,11 +162,46 @@ def run(params, bed, fusions):
 	return fusions
 
 # Write.
-def write(filename, finputs, params, fusions):
+def _get_header():
+	header = []
+	header.append('##fileformat=VCFv4.2')
+	header.append('##source=HmnFusion')
+	header.append('##INFO=<ID=SVTYPE,Number=1,Type=String,Description=\"Type of structural variant\">')
+	header.append('##INFO=<ID=DP,Number=.,Type=Integer,Description=\"Approximate read depth across all samples\">')
+	header.append('##INFO=<ID=SU,Number=.,Type=Integer,Description=\"Number of pieces of evidence supporting the variant across all samples\">')
+
+	header.append('##ALT=<ID=FUS,Description=\"Fusion\">')
+
+	header.append('##FORMAT=<ID=GT,Number=1,Type=String,Description=\"Genotype\">')
+	header.append('##FORMAT=<ID=DP,Number=1,Type=Integer,Description=\"Approximate read depth\">')
+	header.append('##FORMAT=<ID=SU,Number=1,Type=Integer,Description=\"Number of pieces of evidence supporting the variant\">')
+
+	return '\n'.join(header)
+
+def write(filename, name, fusions):
 	data = {}
-	data['inputs'] = finputs
-	data['parameters'] = params
-	data['fusions'] = {}
+
+	# Header.
+	with open(filename, 'w') as fod:
+		fod.write(_get_header() + '\n')
+
+	# Fusions.
+	columns = ['#CHROM', 'POS', 'ID', 'REF', 'ALT', 'QUAL', 'FILTER', 'INFO', 'FORMAT'] + [name]
+	df = pd.DataFrame(columns=columns)
+
 	for ix, fusion in enumerate(fusions):
-		data['fusions'][str(ix)] = fusion.to_dict()
-	write_json(filename, data)
+		ix += 1
+		# First.
+		ident = '%s'%(ix,)
+		if fusion.second.is_init():
+			ident += '_1'
+		infos = ';'.join(['SVTYPE=FUS', 'DP=%s'%(fusion.depth,), 'SU=%s'%(fusion.evidence,)])
+		values = [fusion.first.chrom, fusion.first.position, ident, 'N', '<FUS>', '.', '.', infos, 'GT:DP:SU', './.:%s:%s'%(fusion.depth, fusion.evidence)]
+		df = df.append(pd.Series(values, index=columns), ignore_index=True)
+
+		if fusion.second.is_init():
+			# Second.
+			infos = ';'.join(['SVTYPE=FUS', 'DP=.', 'SU=.'])
+			values = [fusion.second.chrom, fusion.second.position, '%s_2'%(ix,), 'N', '<FUS>', '.', '.', infos, 'GT:DP:SU', './.:.:.']
+			df = df.append(pd.Series(values, index=columns), ignore_index=True)
+	df.to_csv(filename, mode='a', sep='\t', index=False)

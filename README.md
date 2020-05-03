@@ -1,68 +1,54 @@
 <h3 align=center>HmnFusion</h3>
 
 # Introduction
-A command-line toolkit to compute differents metrics about quality, identity-vigilance and coverage from high-throughput sequencing provided by targeted DNA.
+A tool to aggregate results of fusion produced by Genefuse and Lumpy and calculate allelic frequency. 
 
 # Getting Started
 
 ## Installing
 Installation is done with `pip`
 ```bash
-pip install hmngenomics
+pip install hmnfusion
 ```
 
 ## Running
 Software is available by
-<pre>HmnGenomics <i>command</i> <i>options</i><pre>
+<pre>HmnFusion <i>command</i> <i>options</i><pre>
 
-# Quality Metrics
+# Commands
 
-Quality metrics is computed with two steps : extract statistics to produce JSON file and rendering
+## Extract Fusion
 
-## Raw statistics
-Compute raw statistics from FASTQ, BAM or VCF files
+Aggregate results from Genefuse and Lumpy to produce a Json file.
+
 <pre>
-HmnGenomics quality \
-    --name <i>NAME</i> \
-    --output <i>JSON</i> \
-    --fastq-forward-before <i>FASTQ</i> \
-    --fastq-reverse-before <i>FASTQ</i> \
-    --bam <i>BAM</i> \
-    --bed <i>BED</i> \
-    --vcf <i>VCF</i>
+HmnFusion extractfusion \
+    --genefuse-json <i>file</i> | --genefuse-html <i>file</i>\
+    --lumpy-vcf <i>file</i> \
+    --output-json <i>file</i>
 </pre>
 
-## Rendering
-Render one or more JSON files produced above to build PDF or HTML file
-<pre>HmnGenomics renderer -i <i>NAME</i> -o <i>PDF</i></pre>
+## Quantification
 
-# Coverage Metrics
+Calculate allelic frequency given postion or Json file produced by `extractfusion` command.
+A fusion is defined by two breakpoints. Only one must be in bed intervals, allelic depth is computed only on this side.
+Name sample is used in vcf file.
 
-## Position not covered
-Extract position not covered under customizable cut off
-<pre>HmnGenomics depthmin -i <i>BAM</i> -b <i>BED</i> --cut-off 30 -o <i>XLXS</i></pre>
+<pre>
+HmnFusion quantification \
+    --hmnfusion-file <i>file</i> | --region <i>chromosome:position</i> \
+    --input-bam <i>file</i> | --input-sam <i>file</i> \
+    --input-bed <i>file</i> \
+    --name <i>sample_name</i> \
+    --output-vcf <i>file</i>
+</pre>
 
-## Coverage of bed file
-Compute statistics of coverage from a bed file
-<pre>HmnGenomics depthtarget -i <i>BAM</i> -b <i>BED</i> -m target -o <i>XLSX</i></pre>
-
-# Identity vigilance
-
-## Infer sexe of samples
-Infer sexe from BAM files and BED file to produce XLSX file.
-<pre>HmnGenomics infersexe -i <i>BAM</i> -b <i>BED</i> -o <i>XLSX</i></pre>
-
-## Extract SNPs
-Extract SNPs in VCF file from BAM files.
-<pre>HmnGenomics extractvcf -i <i>BAM</i> --vcf-reference <i>VCF</i> -o <i>XLSX</i></pre>
 
 # Built with these main libraries
 
-* [CNVkit](https://github.com/etal/cnvkit) - Powerful library
+* [beautifulsoup4](https://pypi.org/project/beautifulsoup4) - Parsing efficiently HTML file
 * [pysam](https://github.com/pysam-developers/pysam) - Essential library to work with BAM and VCF files
-* [biopython](https://github.com/biopython/biopython) - Essential library to work with FASTQ files
 * [Pandas](https://github.com/pandas-dev/pandas) - Essential dataframe object
-* [Django](https://github.com/django/django) - Build html/pdf reports with template
 
 # Versioning
 
@@ -74,4 +60,4 @@ Extract SNPs in VCF file from BAM files.
 
 # License
 
-See the [LICENSE.md](LICENSE.md) file for details
+See the [LICENSE.md](LICENSE) file for details

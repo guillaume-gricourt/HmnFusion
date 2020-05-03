@@ -37,7 +37,7 @@ def _cmd_extract_fusion(args):
 	finputs['lumpy'] = {}
 	finputs['lumpy']['path'] = args.lumpy_vcf
 	finputs['lumpy']['format'] = 'vcf'
-	foutput = args.output
+	foutput = args.output_json
 	# Check if all exists.
 	if not os.path.isfile(finputs['genefuse']['path']):
 		abort(AP, "File Genefuse doesn't exist : %s"%(finputs['genefuse']['path'],))
@@ -94,7 +94,7 @@ P_extract_fusion.add_argument('--lumpy-vcf', required=True,
 	help='Lumpy vcf file')
 P_extract_fusion.add_argument('--consensus-interval', type=int, default=500,
 	help='Interval, pb, for which Fusion are considered equal if their chrom are')
-P_extract_fusion.add_argument('-o','--output',
+P_extract_fusion.add_argument('--output-json',
 	help='Json file output')
 P_extract_fusion.set_defaults(func=_cmd_extract_fusion)
 
@@ -105,7 +105,7 @@ def _cmd_quantification(args):
 	# Check if all exists.
 	logging.info('Check args')
 	finputs = {}
-	foutput = args.output
+	foutput = args.output_vcf
 	finputs['output'] = foutput
 	if args.hmnfusion_json:
 		finputs['hmnfusion_json'] = args.hmnfusion_json
@@ -175,7 +175,7 @@ def _cmd_quantification(args):
 	# Write output.
 	if foutput:
 		logging.info('Write output')
-		quantification.write(foutput, finputs, params, fusions)
+		quantification.write(foutput, args.name, fusions)
 	logging.info("Analysis is finished")
 
 P_quantification = AP_subparsers.add_parser('quantification', help=_cmd_quantification.__doc__)
@@ -191,12 +191,14 @@ P_quantification_input_alignment_group.add_argument('--input-sam',
 	help='Sam file')
 P_quantification.add_argument('--input-bed', 
 	help='Bed file')
+P_quantification.add_argument('--name', required=True,
+	help='Name of sample')
 P_quantification.add_argument('--baseclipped-interval', type=int, default=6, 
 	help='Interval to count hard/soft-clipped bases from fusion point (pb)')
 P_quantification.add_argument('--baseclipped-count', type=int, default=4, 
 	help='Number of base hard/soft-clipped bases to count in interval (pb)')
-P_quantification.add_argument('-o','--output',
-	help='Json file output')
+P_quantification.add_argument('--output-vcf',
+	help='Vcf file output')
 P_quantification.set_defaults(func=_cmd_quantification)
 
 # Version.
