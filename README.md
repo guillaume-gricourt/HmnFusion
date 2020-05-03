@@ -13,7 +13,7 @@ pip install hmnfusion
 
 ## Running
 Software is available by
-<pre>HmnFusion <i>command</i> <i>options</i><pre>
+<pre>HmnFusion <i>command</i> <i>options</i></pre>
 
 # Commands
 
