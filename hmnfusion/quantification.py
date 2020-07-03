@@ -87,7 +87,9 @@ def run(params, bed, fusions):
 	to_delete = []
 	isSkip = False
 	for ix, fusion in enumerate(fusions):
-
+		print("Check fusion %s" % fusion.isConsensus)
+		if not fusion.isConsensus:
+			continue
 		# Check fusion against bed.
 		sub_first, sub_second = pd.DataFrame(columns=bed.columns), pd.DataFrame(columns=bed.columns)
 		if fusion.first.is_init():
@@ -167,6 +169,8 @@ def _get_header():
 	header.append('##fileformat=VCFv4.2')
 	header.append('##source=HmnFusion')
 	header.append('##INFO=<ID=SVTYPE,Number=1,Type=String,Description=\"Type of structural variant\">')
+	header.append('##INFO=<ID=FROM,Number=.,Type=String,Description=\"Indicated from which reference is derived\">')
+	header.append('##INFO=<ID=CONS,Number=.,Type=String,Description=\"Is a consensus\">')
 	header.append('##INFO=<ID=DP,Number=.,Type=Integer,Description=\"Approximate read depth across all samples\">')
 	header.append('##INFO=<ID=SU,Number=.,Type=Integer,Description=\"Number of pieces of evidence supporting the variant across all samples\">')
 
@@ -191,17 +195,27 @@ def write(filename, name, fusions):
 
 	for ix, fusion in enumerate(fusions):
 		ix += 1
+
+		print(fusion)
+		print(fusion.buildFrom)
 		# First.
-		ident = '%s'%(ix,)
+		ident = fusion.ident
 		if fusion.second.is_init():
-			ident += '_1'
-		infos = ';'.join(['SVTYPE=FUS', 'DP=%s'%(fusion.depth,), 'SU=%s'%(fusion.evidence,)])
-		values = [fusion.first.chrom, fusion.first.position, ident, 'N', '<FUS>', '.', '.', infos, 'GT:DP:SU', './.:%s:%s'%(fusion.depth, fusion.evidence)]
+			ident_1 = ident + '_1'
+		infos = ['SVTYPE=FUS']
+		infos += ['FROM=%s'%('-'.join(fusion.buildFrom),)]
+		infos += ['CONS=%s'%(fusion.isConsensus,)]
+		infos += ['DP=%s'%(fusion.depth,)]
+		infos += ['SU=%s'%(fusion.evidence,)]
+
+		infos = ':'.join(infos)
+		values = [fusion.first.chrom, fusion.first.position, ident_1, 'N', '<FUS>', '.', '.', infos, 'GT:DP:SU', './.:%s:%s'%(fusion.depth, fusion.evidence)]
 		df = df.append(pd.Series(values, index=columns), ignore_index=True)
 
 		if fusion.second.is_init():
+			ident_2 = ident + '_2'
 			# Second.
 			infos = ';'.join(['SVTYPE=FUS', 'DP=.', 'SU=.'])
-			values = [fusion.second.chrom, fusion.second.position, '%s_2'%(ix,), 'N', '<FUS>', '.', '.', infos, 'GT:DP:SU', './.:.:.']
+			values = [fusion.second.chrom, fusion.second.position, ident_2, 'N', '<FUS>', '.', '.', infos, 'GT:DP:SU', './.:.:.']
 			df = df.append(pd.Series(values, index=columns), ignore_index=True)
 	df.to_csv(filename, mode='a', sep='\t', index=False)

@@ -1,4 +1,5 @@
 import bs4
+import copy
 import json
 import logging
 import os
@@ -42,6 +43,8 @@ def read_genefuse_json(filename):
 		if not label.lower().startswith('fusion'):
 			continue
 		fusions.append(parse_genefuse_label(label))
+	for ix, fusion in enumerate(fusions):
+		fusion.ident = ix+1
 	return fusions
 	
 def read_genefuse_html(filename):
@@ -59,6 +62,8 @@ def read_genefuse_html(filename):
 		if not "fusion" in label.lower():
 			continue
 		fusions.append(parse_genefuse_label(label))
+	for ix, fusion in enumerate(fusions):
+		fusion.ident = ix+1
 	return fusions
 
 # Lumpy.
@@ -67,6 +72,7 @@ def read_lumpy(flumpy):
 	treats = set()
 
 	vcf_in = VariantFile(flumpy)
+	ident = 1
 	for record in vcf_in.fetch():
 		# Check if variant is already seen.
 		if 'SVTYPE' in record.info.keys() and record.info.get('SVTYPE') != 'BND':
@@ -96,6 +102,8 @@ def read_lumpy(flumpy):
 			evidence = record.info.get('SU')[0]
 		fusion.setEvidence(evidence)
 
+		fusion.ident = ident
+		ident += 1
 		fusions.append(fusion)
 	return fusions
 
@@ -105,42 +113,80 @@ def consensus_single(records, consensus_interval):
 		return records
 
 	fusions = []
-		
 	# Sort by evidence.
 	records.sort(reverse=True)
-	fusions.append(records[0])
-	del records[0]
-
+	merging = {}
 	# Merge records.
-	for fusion in records:		
-		if fusion.is_near(fusions[0], consensus_interval):
-			fusions[0].evidence += fusion.evidence
-		else:
-			fusions.append(fusion)
+	for ia in range(len(records)):
+		for ib in range(ia+1, len(records)):
+			if records[ia].is_near(records[ib], consensus_interval):
+				if not ia in merging.keys():
+					merging[ia] = set() 
+				merging[ia].add(ib)
+
+	# Merge non adjency fusions.
+	isNotConvergence = True
+	maxi = max(list(merging.keys()) + [0]) + 1
+	while isNotConvergence:
+		todel = set()
+		isFound = False
+		for ia in range(maxi):
+			for ib in range(maxi):
+				if ia == ib or not ia in merging.keys() or not ib in merging.keys():
+					continue
+				ix = set()
+				ix.add(ib)
+				for j in merging.get(ib, set()):
+					ix.add(j)
+				for i in ix:
+					if ib in merging.get(ia, set()):
+						for j in merging.get(ib, set()):
+							merging[ia].add(j)
+						del merging[ib]
+						isFound = True
+						break
+				
+		isNotConvergence = isFound
+	# Build consensus
+	for k, v in merging.items():
+		ones = []
+		for i in [k] + list(v):
+			ones.append(copy.deepcopy(records[i]))
+		ones.sort(reverse=True)
+
+		one = ones[0]
+		del ones[0]
+		one.buildFrom = one.ident
+		for fusion in ones:
+			if ('genefuse' in one.software and 'genefuse' in fusion.software) or ('lumpy' in one.software and 'lumpy' in fusion.software):
+				one.evidence += fusion.evidence
+			one.buildFrom = fusion.ident
+			one.software = fusion.software
+		one.isConsensus = True
+		fusions.append(one)
+	fusions.sort(reverse=True)
+	for ix, fusion in enumerate(fusions):
+		fusion.ident = ix + 1
 	return fusions
 
-def consensus_genefuse_lumpy(genefuse, lumpy, consensus_interval):
-	if len(lumpy) == 0:
-		return genefuse
-	if len(genefuse) == 0:
-		return lumpy
+def consensus_genefuse_lumpy(genefuse_raw, lumpy_raw, genefuse_consensus, lumpy_consensus, consensus_interval):
 
-	genefuse.sort(reverse=True)
-	to_delete = []
-	for gfusion in genefuse:
-		for ix in range(0, len(lumpy)):
-			if gfusion.is_near(lumpy[ix], consensus_interval):
-				gfusion.evidence = (gfusion.evidence + lumpy[ix].evidence) / 2
-				gfusion.software = 'consensus'
-				to_delete.append(ix)
-		# Update.
-		lumpy = update_list(lumpy, to_delete)
+	genefuse_not_shown = []
+	for fusion_consensus in genefuse_consensus:
+		for fusion_raw in genefuse_raw:
+			if not fusion_raw.ident in fusion_consensus.buildFrom:
+				genefuse_not_shown.append(fusion_raw)
 
-	if len(lumpy) > 0:
-		genefuse += lumpy
+	lumpy_not_shown = []
+	for fusion_consensus in lumpy_consensus:
+		for fusion_raw in genefuse_raw:
+			if not fusion_raw.ident in fusion_consensus.buildFrom:
+				lumpy_not_shown.append(fusion_raw)
 
-	genefuse.sort(reverse=True)	
-	return genefuse
+	#consensus_raw = consensus_single(genefuse_not_shown + lumpy_not_shown, consensus_interval, 'mean')
+	consensus = consensus_single(genefuse_not_shown + lumpy_not_shown + genefuse_consensus + lumpy_consensus, consensus_interval)
+	consensus.sort(reverse=True)
+	return consensus
 
 def filter_same_chrom(fusions):
 	# Filter if fusion is on same chrom.
@@ -156,6 +202,6 @@ def write(filename, finputs, fusions):
 	data = {}
 	data['inputs'] = finputs
 	data['fusions'] = {}
-	for ix, fusion in enumerate(fusions['consensus']):
+	for ix, fusion in enumerate(fusions['genefuse']['raw'] + fusions['lumpy']['raw'] + fusions['consensus']):
 		data['fusions'][str(ix)] = fusion.to_dict()
 	write_json(filename, data)

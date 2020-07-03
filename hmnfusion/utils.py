@@ -69,6 +69,10 @@ class Fusion():
 		self._second = Region()
 		self._evidence = 0
 		self._depth = 0
+		self._ident = ''
+		self._buildFrom = set()
+		self._isConsensus = False
+		self._software = set()
 		self.setSoftware(software)
 	
 	def getFirst(self):
@@ -95,14 +99,48 @@ class Fusion():
 	def setDepth(self, depth):
 		self._depth = int(depth)
 
+	def getIdent(self):
+		return self._ident
+	
+	def setIdent(self, ident):
+		if type(ident) == int:
+			self.removeSoftware('undefined')
+			name = ''
+			if self._isConsensus:
+				name = 'CONS' 
+			else:
+				name = '-'.join([ x[:3].upper() for x in self._software])
+			self._ident = name + str(ident)
+		else:
+			self._ident = ident
+
+	def getFrom(self):
+		return self._buildFrom
+
+	def setFrom(self, ident):
+		if type(ident) == list or type(ident) == set:
+			self._buildFrom = list2set(ident)
+		else:
+			self._buildFrom.add(ident)
+
+	def getIsConsensus(self):
+		return self._isConsensus
+	
+	def setIsConsensus(self, value):
+		self._isConsensus = value
+
 	def getSoftware(self):
 		return self._software
 
 	def setSoftware(self, software):
-		if software in ['genefuse', 'lumpy', 'consensus']:
-			self._software = software
+		if software in ['genefuse', 'lumpy']:
+			self._software.add(software)
 		else:
-			self._software = 'undefined'
+			self._software.add('undefined')
+
+	def removeSoftware(self, software):
+		if software in self._software:
+			self._software.remove(software)
 
 	def setRegion(self, region):
 		if not self._first.is_init():
@@ -139,28 +177,35 @@ class Fusion():
 		return self._depth / self._evidence * 100
 
 	def to_dict(self):
-		return dict(software=self._software, 
+		return dict(software=list(self._software), 
 				first=self._first.to_dict(), 
 				second=self._second.to_dict(), 
-				evidence=str(self._evidence), 
+				evidence=str(self._evidence),
+				ident=self._ident, 
+				buildFrom=list(self._buildFrom),
+				isConsensus=self._isConsensus,
 				depth=str(self._depth))
 
 	@classmethod
 	def from_dict(cls, data):
 		fusion = Fusion()
-		fusion.software = data['software']
+		fusion.software = set(data.get('software'))
 		fusion.first = Region.from_dict(data.get('first', {}))
 		fusion.second = Region.from_dict(data.get('second', {}))
 		fusion.evidence = data.get('evidence', 0)
 		fusion.depth = data.get('depth', 0)
+		fusion.ident = data.get('ident', '')
+		fusion.isConsensus = data.get('isConsensus', True)
+		fusion.buildFrom = list2set(data.get('buildFrom', []))
 		return fusion
 
 
 	def __repr__(self):
-		return 'From %s (%s) %s %s Evidence %s Depth %s'%(self._software, self._evidence, self._first, self._second, self._evidence, self._depth)
+		return 'From %s %s %s (%s) %s %s Evidence %s Depth %s'%(','.join(self._software), self._ident, ','.join(self._buildFrom), self._evidence, self._first, self._second, self._evidence, self._depth)
  
 	def __eq__(self, other):
-		return self._software == other.software and self._first == other.first and self._second == other.second and self._evidence == other.evidence
+		
+		return self._software.difference(other.software) == 0 and other.software.difference(self._software) == 0 and self._ident == other.ident and self._first == other.first and self._second == other.second and self._evidence == other.evidence
 
 	def __lt__(self, other):
 		return self._evidence < other.evidence
@@ -172,6 +217,9 @@ class Fusion():
 	second = property(getSecond, setSecond)
 	evidence = property(getEvidence, setEvidence)
 	depth = property(getDepth, setDepth)
+	ident = property(getIdent, setIdent)
+	buildFrom = property(getFrom, setFrom)
+	isConsensus = property(getIsConsensus, setIsConsensus)
 	software = property(getSoftware, setSoftware)	
 
 def abort(parser, msg=""):
@@ -212,3 +260,9 @@ def update_list(li, indexes):
 		del li[ix-up]
 		up += 1
 	return li
+
+def list2set(li):
+	a = set()
+	for i in li:
+		a.add(i)
+	return a
