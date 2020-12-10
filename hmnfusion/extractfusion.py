@@ -10,6 +10,7 @@ import sys
 from pysam import VariantFile
 
 from .utils import read_json, update_list, write_json, Region, Fusion
+from ._version import __app_name__
 
 RE_GENEFUSE_LABEL = re.compile(r'[+-](\w+):(\d+)')
 RE_GENEFUSE_TOTAL = re.compile(r'total:\s{1}(\d+),')
@@ -100,7 +101,7 @@ def read_lumpy(flumpy):
 		evidence = 0
 		if 'SU' in record.info.keys():
 			evidence = record.info.get('SU')[0]
-		fusion.setEvidence(evidence)
+		fusion.evidence = evidence
 
 		fusion.ident = ident
 		ident += 1
@@ -154,8 +155,7 @@ def consensus_single(records, consensus_interval):
 			ones.append(copy.deepcopy(records[i]))
 		ones.sort(reverse=True)
 
-		one = ones[0]
-		del ones[0]
+		one = ones.pop(0)
 		one.buildFrom = one.ident
 		for fusion in ones:
 			if ('genefuse' in one.software and 'genefuse' in fusion.software) or ('lumpy' in one.software and 'lumpy' in fusion.software):
@@ -163,6 +163,8 @@ def consensus_single(records, consensus_interval):
 			one.buildFrom = fusion.ident
 			one.software = fusion.software
 		one.isConsensus = True
+		one.software = __app_name__
+		one.removeBuildNameCons()
 		fusions.append(one)
 	fusions.sort(reverse=True)
 	for ix, fusion in enumerate(fusions):
