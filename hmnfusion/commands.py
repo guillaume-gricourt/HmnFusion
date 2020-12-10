@@ -29,13 +29,13 @@ def _cmd_extract_fusion(args):
 	finputs = {}
 	finputs['genefuse'] = {}
 	if args.genefuse_json:
-		finputs['genefuse']['path'] = args.genefuse_json
+		finputs['genefuse']['path'] = os.path.abspath(args.genefuse_json)
 		finputs['genefuse']['format'] = 'json'
 	elif args.genefuse_html:
-		finputs['genefuse']['path'] = args.genefuse_html
+		finputs['genefuse']['path'] = os.path.abspath(args.genefuse_html)
 		finputs['genefuse']['format'] = 'html'
 	finputs['lumpy'] = {}
-	finputs['lumpy']['path'] = args.lumpy_vcf
+	finputs['lumpy']['path'] = os.path.abspath(args.lumpy_vcf)
 	finputs['lumpy']['format'] = 'vcf'
 	foutput = args.output_json
 	# Check if all exists.
@@ -70,7 +70,7 @@ def _cmd_extract_fusion(args):
 		fusions['lumpy']['consensus'] = extractfusion.consensus_single(fusions['lumpy']['raw'], args.consensus_interval)
 	# Consensus.
 	logging.info('Build consensus with interval of %s pb'%(args.consensus_interval,))
-	fusions['consensus'] = extractfusion.consensus_genefuse_lumpy(fusions['genefuse']['consensus'], fusions['lumpy']['consensus'], args.consensus_interval)
+	fusions['consensus'] = extractfusion.consensus_genefuse_lumpy(fusions['genefuse']['raw'], fusions['lumpy']['raw'], fusions['genefuse']['consensus'], fusions['lumpy']['consensus'], args.consensus_interval)
 
 	# Filter same chrom.
 	fusions['consensus'] = extractfusion.filter_same_chrom(fusions['consensus'])
@@ -159,7 +159,7 @@ def _cmd_quantification(args):
 	
 	# Parsing fusions.
 	logging.info('Get region')
-	fusions = []
+	fusions_consensus = []
 	if args.region:
 		fusion = quantification.build_region(finputs['region'])
 		fusions.append(fusion)

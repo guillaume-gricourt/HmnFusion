@@ -64,10 +64,13 @@ class Region():
 	
 class Fusion():
 	
+	name_consensus = 'CONS'
+
 	def __init__(self, software='undefined'):
 		self._first = Region()
 		self._second = Region()
 		self._evidence = 0
+		self._evidence_details = 0
 		self._depth = 0
 		self._ident = ''
 		self._buildFrom = set()
@@ -93,6 +96,12 @@ class Fusion():
 	def setEvidence(self, evidence):
 		self._evidence = int(evidence)
 
+	def getEvidenceDetails(self):
+		return self._evidence_details
+
+	def setEvidenceDetails(self, evidence_details):
+		self._evidence_details = evidence_details
+
 	def getDepth(self):
 		return self._depth
 
@@ -107,7 +116,7 @@ class Fusion():
 			self.removeSoftware('undefined')
 			name = ''
 			if self._isConsensus:
-				name = 'CONS' 
+				name = Fusion.name_consensus
 			else:
 				name = '-'.join([ x[:3].upper() for x in self._software])
 			self._ident = name + str(ident)
@@ -129,14 +138,18 @@ class Fusion():
 	def setIsConsensus(self, value):
 		self._isConsensus = value
 
+	def removeFomNameCons(self):
+		self._buildFrom = set([ x for x in self._buildFrom if not x.startswith(Fusion.name_consensus)])
+
 	def getSoftware(self):
 		return self._software
 
 	def setSoftware(self, software):
-		if software in ['genefuse', 'lumpy']:
+		if type(software) is str:
 			self._software.add(software)
 		else:
-			self._software.add('undefined')
+			for x in software:
+				self._software.add(x)
 
 	def removeSoftware(self, software):
 		if software in self._software:
@@ -181,6 +194,7 @@ class Fusion():
 				first=self._first.to_dict(), 
 				second=self._second.to_dict(), 
 				evidence=str(self._evidence),
+				evidence_details=self._evidence_details,
 				ident=self._ident, 
 				buildFrom=list(self._buildFrom),
 				isConsensus=self._isConsensus,
@@ -189,10 +203,14 @@ class Fusion():
 	@classmethod
 	def from_dict(cls, data):
 		fusion = Fusion()
-		fusion.software = set(data.get('software'))
+		softwares = data.get('software', [])
+		if len(softwares) > 0:		
+			fusion.setSoftware(softwares)
+			fusion.removeSoftware('undefined')
 		fusion.first = Region.from_dict(data.get('first', {}))
 		fusion.second = Region.from_dict(data.get('second', {}))
 		fusion.evidence = data.get('evidence', 0)
+		fusion.evidence_details = data.get('evidence_details', {})
 		fusion.depth = data.get('depth', 0)
 		fusion.ident = data.get('ident', '')
 		fusion.isConsensus = data.get('isConsensus', True)
@@ -216,6 +234,7 @@ class Fusion():
 	first = property(getFirst, setFirst)
 	second = property(getSecond, setSecond)
 	evidence = property(getEvidence, setEvidence)
+	evidence_details = property(getEvidenceDetails, setEvidenceDetails)
 	depth = property(getDepth, setDepth)
 	ident = property(getIdent, setIdent)
 	buildFrom = property(getFrom, setFrom)

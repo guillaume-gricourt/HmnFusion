@@ -87,7 +87,6 @@ def run(params, bed, fusions):
 	to_delete = []
 	isSkip = False
 	for ix, fusion in enumerate(fusions):
-		print("Check fusion %s" % fusion.isConsensus)
 		if not fusion.isConsensus:
 			continue
 		# Check fusion against bed.
@@ -160,6 +159,7 @@ def run(params, bed, fusions):
 				count['clipped'] += 1
 		fusion.depth = count['coverage']
 		fusion.evidence = count['split'] + count['mate'] + count['clipped']
+		fusion.evidence_details = count
 	fusions = update_list(fusions, to_delete)
 	return fusions
 
@@ -169,16 +169,23 @@ def _get_header():
 	header.append('##fileformat=VCFv4.2')
 	header.append('##source=HmnFusion')
 	header.append('##INFO=<ID=SVTYPE,Number=1,Type=String,Description=\"Type of structural variant\">')
+	header.append('##INFO=<ID=SOFT,Number=1,Type=String,Description=\"Indicated from which software is derived\">')
 	header.append('##INFO=<ID=FROM,Number=.,Type=String,Description=\"Indicated from which reference is derived\">')
 	header.append('##INFO=<ID=CONS,Number=.,Type=String,Description=\"Is a consensus\">')
 	header.append('##INFO=<ID=DP,Number=.,Type=Integer,Description=\"Approximate read depth across all samples\">')
 	header.append('##INFO=<ID=SU,Number=.,Type=Integer,Description=\"Number of pieces of evidence supporting the variant across all samples\">')
+	header.append('##INFO=<ID=PE,Number=.,Type=Integer,Description=\"Number of paired-end reads supporting the variant across all samples\">')
+	header.append('##INFO=<ID=SR,Number=.,Type=Integer,Description=\"Number of split reads supporting the variant across all samples\">')
+	header.append('##INFO=<ID=SC,Number=.,Type=Integer,Description=\"Number of soft clipped reads supporting the variant across all samples\">')
 
 	header.append('##ALT=<ID=FUS,Description=\"Fusion\">')
 
 	header.append('##FORMAT=<ID=GT,Number=1,Type=String,Description=\"Genotype\">')
 	header.append('##FORMAT=<ID=DP,Number=1,Type=Integer,Description=\"Approximate read depth\">')
 	header.append('##FORMAT=<ID=SU,Number=1,Type=Integer,Description=\"Number of pieces of evidence supporting the variant\">')
+	header.append('##FORMAT=<ID=PE,Number=1,Type=Integer,Description=\"Number of paired-end reads supporting the variant\">')
+	header.append('##FORMAT=<ID=SR,Number=1,Type=Integer,Description=\"Number of split reads supporting the variant\">')
+	header.append('##FORMAT=<ID=SC,Number=1,Type=Integer,Description=\"Number of soft clipped reads supporting the variant\">')
 
 	return '\n'.join(header)
 
@@ -196,24 +203,30 @@ def write(filename, name, fusions):
 	for ix, fusion in enumerate(fusions):
 		ix += 1
 
-		print(fusion)
-		print(fusion.buildFrom)
+		logging.debuf(repr(fusion))
 		# First.
 		ident = fusion.ident
+		ident_1 = ident
 		if fusion.second.is_init():
-			ident_1 = ident + '_1'
+			ident_1 += '_1'
 		infos = ['SVTYPE=FUS']
+		infos += ['SOFT=%s'%('-'.join(fusion.software),)]
 		infos += ['FROM=%s'%('-'.join(fusion.buildFrom),)]
 		infos += ['CONS=%s'%(fusion.isConsensus,)]
 		infos += ['DP=%s'%(fusion.depth,)]
 		infos += ['SU=%s'%(fusion.evidence,)]
-
+		ed = fusion.evidence_details
+		infos += ['SR=%s'%(ed.get('split',0),)]
+		infos += ['PE=%s'%(ed.get('mate',0),)]
+		infos += ['SC=%s'%(ed.get('clipped',0),)]
+	
 		infos = ':'.join(infos)
-		values = [fusion.first.chrom, fusion.first.position, ident_1, 'N', '<FUS>', '.', '.', infos, 'GT:DP:SU', './.:%s:%s'%(fusion.depth, fusion.evidence)]
+		values = [fusion.first.chrom, fusion.first.position, ident_1, 'N', '<FUS>', '.', '.', infos, 'GT:DP:SU', './.:%s:%s:%s:%s:%s'%(fusion.depth, fusion.evidence, ed.get('split',0), ed.get('mate',0), ed.get('clipped',0))]
 		df = df.append(pd.Series(values, index=columns), ignore_index=True)
 
+		ident_2 = ident
 		if fusion.second.is_init():
-			ident_2 = ident + '_2'
+			ident_2 += '_2'
 			# Second.
 			infos = ';'.join(['SVTYPE=FUS', 'DP=.', 'SU=.'])
 			values = [fusion.second.chrom, fusion.second.position, ident_2, 'N', '<FUS>', '.', '.', infos, 'GT:DP:SU', './.:.:.']

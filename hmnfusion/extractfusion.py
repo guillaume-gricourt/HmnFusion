@@ -101,7 +101,7 @@ def read_lumpy(flumpy):
 		evidence = 0
 		if 'SU' in record.info.keys():
 			evidence = record.info.get('SU')[0]
-		fusion.evidence = evidence
+		fusion.setEvidence(evidence)
 
 		fusion.ident = ident
 		ident += 1
@@ -164,28 +164,28 @@ def consensus_single(records, consensus_interval):
 			one.software = fusion.software
 		one.isConsensus = True
 		one.software = __app_name__
-		one.removeBuildNameCons()
+		one.removeFomNameCons()
 		fusions.append(one)
 	fusions.sort(reverse=True)
 	for ix, fusion in enumerate(fusions):
 		fusion.ident = ix + 1
 	return fusions
 
+def extract_not_consensus(raw, consensus):
+	if len(consensus) == 0:
+		return raw
+	not_shown = []	
+	for r in raw:
+		for c in consensus:
+			if not r.ident in c.buildFrom:
+				not_shown.append(r)
+	return not_shown
+
 def consensus_genefuse_lumpy(genefuse_raw, lumpy_raw, genefuse_consensus, lumpy_consensus, consensus_interval):
 
-	genefuse_not_shown = []
-	for fusion_consensus in genefuse_consensus:
-		for fusion_raw in genefuse_raw:
-			if not fusion_raw.ident in fusion_consensus.buildFrom:
-				genefuse_not_shown.append(fusion_raw)
+	genefuse_not_shown = extract_not_consensus(genefuse_raw, genefuse_consensus)
+	lumpy_not_shown = extract_not_consensus(lumpy_raw, lumpy_consensus)		
 
-	lumpy_not_shown = []
-	for fusion_consensus in lumpy_consensus:
-		for fusion_raw in genefuse_raw:
-			if not fusion_raw.ident in fusion_consensus.buildFrom:
-				lumpy_not_shown.append(fusion_raw)
-
-	#consensus_raw = consensus_single(genefuse_not_shown + lumpy_not_shown, consensus_interval, 'mean')
 	consensus = consensus_single(genefuse_not_shown + lumpy_not_shown + genefuse_consensus + lumpy_consensus, consensus_interval)
 	consensus.sort(reverse=True)
 	return consensus

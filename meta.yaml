@@ -1,0 +1,41 @@
+{% set name = "HmnFusion" %}
+{% set version = "0.5.0" %}
+
+package:
+  name: "{{ name|lower }}"
+  version: "{{ version }}"
+
+source:
+  url: https://github.com/guillaume-gricourt/HmnFusion.git
+  git_rev: "0.5.0"
+  git_depth: 1
+  folder: source
+
+build:
+  number: "{{ environ.get('GIT_DESCRIBE_NUMBER', 0) }}"
+  string: "{{ environ.get('GIT_BUILD_STR', '') }}"
+  noarch: generic
+
+requirements:
+  build:
+    - git
+  host:
+    - pip
+    - python
+  run:
+    - python
+    - beautifulsoup4 >= 4.9.0
+    - lxml >= 4.5.0
+    - pandas >= 1.0.0
+    - pysam >= 0.10.0
+
+
+test:
+  imports:
+    - click
+
+about:
+  home: https://github.com/guillaume-gricourt/HmnFusion
+  license: GPLv3+
+  license_family: GNU
+  summary: HmnFusion
