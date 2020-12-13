@@ -6,7 +6,7 @@ package:
   version: "{{ version }}"
 
 source:
-  url: https://github.com/guillaume-gricourt/HmnFusion.git
+  git_url: "git@github.com:guillaume-gricourt/HmnFusion.git"
   git_rev: "0.5.0"
   git_depth: 1
   folder: source
@@ -15,24 +15,28 @@ build:
   number: "{{ environ.get('GIT_DESCRIBE_NUMBER', 0) }}"
   string: "{{ environ.get('GIT_BUILD_STR', '') }}"
   noarch: generic
+  entry_points:
+    - hmnfusion = hmnfusion.__main__:main
 
 requirements:
   build:
     - git
-  host:
-    - pip
-    - python
-  run:
-    - python
+    - setuptools
+    - python >=3
     - beautifulsoup4 >= 4.9.0
     - lxml >= 4.5.0
+    - numpy >= 1.18.3
     - pandas >= 1.0.0
     - pysam >= 0.10.0
-
-
-test:
-  imports:
-    - click
+  host:
+    - python >=3
+  run:
+    - python >=3
+    - beautifulsoup4 >= 4.9.0
+    - lxml >= 4.5.0
+    - numpy >= 1.18.3
+    - pandas >= 1.0.0
+    - pysam >= 0.10.0
 
 about:
   home: https://github.com/guillaume-gricourt/HmnFusion

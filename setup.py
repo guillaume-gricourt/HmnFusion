@@ -10,8 +10,9 @@ setup_args = {}
 install_requires=[
 	'beautifulsoup4 >= 4.9.0',
 	'lxml >= 4.5.0',
-	'pandas >= 1.0.0',
-	'pysam >= 0.10.0'
+	'numpy >= 1.18.3',
+	'pandas >= 1.0.3',
+	'pysam >= 0.15.4'
 ]
 
 DIR = (os.path.dirname(__file__) or '.')
@@ -47,7 +48,9 @@ setup_args.update(
 		"Topic :: Scientific/Engineering :: Visualization",
 	],
 	packages=find_packages(),
-	scripts = [os.path.join(DIR, "HmnFusion")],
+	entry_points = {
+		'console_scripts' : [ 'hmnfusion=hmnfusion.__main__:main']
+	},
 	install_requires=install_requires,
 	python_requires='>=3',
 )
