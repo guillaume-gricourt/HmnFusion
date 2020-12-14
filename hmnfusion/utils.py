@@ -70,7 +70,7 @@ class Fusion():
 		self._first = Region()
 		self._second = Region()
 		self._evidence = 0
-		self._evidence_details = 0
+		self._evidence_details = {}
 		self._depth = 0
 		self._ident = ''
 		self._buildFrom = set()
@@ -100,7 +100,7 @@ class Fusion():
 		return self._evidence_details
 
 	def setEvidenceDetails(self, evidence_details):
-		self._evidence_details = evidence_details
+		self._evidence_details = evidence_details.copy()
 
 	def getDepth(self):
 		return self._depth
