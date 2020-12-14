@@ -203,7 +203,7 @@ def write(filename, name, fusions):
 	for ix, fusion in enumerate(fusions):
 		ix += 1
 
-		logging.debuf(repr(fusion))
+		logging.debug(repr(fusion))
 		# First.
 		ident = fusion.ident
 		ident_1 = ident
