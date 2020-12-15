@@ -9,7 +9,9 @@ import sys
 
 from pysam import VariantFile
 
-from .utils import read_json, update_list, write_json, Region, Fusion
+from .fusion import Fusion
+from .region import Region
+from .utils import read_json, update_list
 from ._version import __app_name__
 
 RE_GENEFUSE_LABEL = re.compile(r'[+-](\w+):(\d+)')
@@ -25,11 +27,11 @@ def parse_genefuse_label(label):
 	m = re.search(RE_GENEFUSE_LABEL, sleft)
 	if m:
 		region = Region(m.group(1), m.group(2), 'left')
-		fusion.setRegion(region)
+		fusion.set_region(region)
 	m = re.search(RE_GENEFUSE_LABEL, sright)
 	if m:
 		region = Region(m.group(1), m.group(2), 'right')
-		fusion.setRegion(region)
+		fusion.set_region(region)
 	# Evidence.
 	mev = re.search(RE_GENEFUSE_TOTAL, label)
 	if mev:
@@ -87,7 +89,7 @@ def read_lumpy(flumpy):
 		fusion = Fusion('lumpy')
 
 		region = Region(record.chrom, int(record.pos)-1)
-		fusion.setRegion(region)
+		fusion.set_region(region)
 
 		alt = record.alts[0]
 		m = re.search(RE_LUMPY_ALT, alt)
@@ -96,7 +98,7 @@ def read_lumpy(flumpy):
 			alt_chrom = m.group(1)
 			alt_pos = int(m.group(2))-1
 		region = Region(alt_chrom, alt_pos)
-		fusion.setRegion(region)
+		fusion.set_region(region)
 
 		evidence = 0
 		if 'SU' in record.info.keys():
@@ -164,7 +166,7 @@ def consensus_single(records, consensus_interval):
 			one.software = fusion.software
 		one.isConsensus = True
 		one.software = __app_name__
-		one.removeFomNameCons()
+		one.remove_fom_name_cons()
 		fusions.append(one)
 	fusions.sort(reverse=True)
 	for ix, fusion in enumerate(fusions):
@@ -206,4 +208,6 @@ def write(filename, finputs, fusions):
 	data['fusions'] = {}
 	for ix, fusion in enumerate(fusions['genefuse']['raw'] + fusions['lumpy']['raw'] + fusions['consensus']):
 		data['fusions'][str(ix)] = fusion.to_dict()
-	write_json(filename, data)
+	
+	with open(filename, 'w') as fod:
+		json.dump(data, fod)

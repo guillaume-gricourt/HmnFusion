@@ -5,7 +5,9 @@ import pysam
 import numpy as np 
 import pandas as pd
 
-from .utils import read_json, update_list, write_json, Region, Fusion
+from .fusion import Fusion
+from .region import Region
+from .utils import read_json, update_list
 
 # Bed.
 def read_bed(filename):
@@ -120,7 +122,7 @@ def run(params, bed, fusions):
 			bed_sel = sub_second
 			region = fusion.second
 			# Swap.
-			fusion.swap()
+			fusion.swap_region()
 		else:
 			logging.warning("Fusion %s, something bad happened -> skipping"%(fusion,))
 		count = dict(coverage=0, split=0, mate=0, clipped=0)
