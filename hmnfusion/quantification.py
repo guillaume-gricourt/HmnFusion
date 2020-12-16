@@ -9,8 +9,9 @@ from .fusion import Fusion
 from .region import Region
 from .utils import read_json, update_list
 
-# Bed.
+# Import
 def read_bed(filename):
+	"""Read a bed file. Return a dataframe"""
 	isHeader = 0
 	with open(filename) as fid:
 		if 'track' in fid.readline():
@@ -18,40 +19,17 @@ def read_bed(filename):
 	bed = pd.read_csv(filename, sep='\t', usecols=[0,1,2], names=["chrom", "start", "end"], dtype={"chrom":str, "start":int, "end":int}, skiprows=isHeader)
 	return bed
 
-# Parsing regions.
-def _parse_region(region):
-	m = region.split(':')
-	chrom, pos = '', 0
-	try:
-		chrom = m[0]
-		pos = int(m[1])
-	except:
-		pass
-	return (chrom, pos)
-
-def check_region(sregion):
-	if not ':' in sregion:
-		return False
-	if len(sregion.split(':')) != 2:
-		return False 
-	region = _parse_region(sregion)
-	if region[1] == 0:
-		return False
-	return True
-
-def build_region(sregion):
-	fusion = Fusion()
-	fusion.first.chrom, fusion.first.position = _parse_region(sregion)
-	return fusion
-
 def parse_hmnfusion_json(filename):
+	"""Read json file construct with exctractfusion command. Return a list of Fusion"""
 	data = read_json(filename)
 	fusions = []
 	for key in sorted(data["fusions"].keys()):
 		fusions.append(Fusion.from_dict(data["fusions"][key]))
 	return fusions
 
+# Helper functions
 def _cigar2position(cigars, start):
+	"""Construct from a cigar and a position, a position/operation"""
 	data = {}
 	if cigars[0][0] in [4, 5]:
 		for i in range(cigars[0][1]):
@@ -76,6 +54,7 @@ def _cigar2position(cigars, start):
 
 
 def _select_bed(x, region):
+	"""Select from a bed file, regions cross over an other region"""
 	if x['chrom'] == region.chrom:
 		if x['start'] <= region.position and x['end'] >= region.position:
 			return True
@@ -83,7 +62,7 @@ def _select_bed(x, region):
 		
 
 def run(params, bed, fusions):
-
+	"""Main function to quantify fusion"""
 	alignment = pysam.AlignmentFile(params['falignment']['path'], params['falignment']['mode'])
 
 	to_delete = []
@@ -167,6 +146,7 @@ def run(params, bed, fusions):
 
 # Write.
 def _get_header():
+	"""Provide header to build vcf file"""
 	header = []
 	header.append('##fileformat=VCFv4.2')
 	header.append('##source=HmnFusion')
@@ -192,6 +172,7 @@ def _get_header():
 	return '\n'.join(header)
 
 def write(filename, name, fusions):
+	"""Write a vcf file from a list of Fusion"""	
 	data = {}
 
 	# Header.

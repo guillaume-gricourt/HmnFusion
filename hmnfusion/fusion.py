@@ -1,10 +1,11 @@
 from .region import Region
 	
 class Fusion():
-	
+	"""Class Fusion. Provide attributes and methods to manipulate Fusion items"""
 	name_consensus = 'CONS'
 
 	def __init__(self, software=None):
+		"""Construct Fusion object with a software name (optional)"""
 		self._first = Region()
 		self._second = Region()
 		self._evidence = 0
@@ -34,7 +35,7 @@ class Fusion():
 		return self._evidence
 
 	def set_evidence(self, evidence):
-		self._evidence = evidence
+		self._evidence = int(evidence)
 
 	def get_evidence_details(self):
 		return self._evidence_details
@@ -46,7 +47,7 @@ class Fusion():
 		return self._depth
 
 	def set_depth(self, depth):
-		self._depth = depth
+		self._depth = int(depth)
 
 	def get_ident(self):
 		return self._ident
@@ -94,6 +95,7 @@ class Fusion():
 
 	# Others
 	def is_near(self, other, consensus_interval):
+		"""Check if fusion are near from an other with a distance parameter"""
 		gaps = []
 		if self._first.chrom == other.first.chrom:
 			gaps.append(abs(self._first.position-other.first.position))
@@ -108,27 +110,32 @@ class Fusion():
 		return False
 
 	def remove_fom_name_cons(self):
+		"""Remove consensus name in buildFrom attribute"""	
 		self._buildFrom = set([ x for x in self._buildFrom if not x.startswith(Fusion.name_consensus)])
 
 	def is_same_chrom(self):
+		"""Check if fusion have same chromosome on the two breakpoints"""
 		if self._first.is_init() and self._second.is_init():
 			if self._first.chrom == self._second.chrom:
 				return True
 		return False
 
 	def set_region(self, region):
+		"""Set fusion breakpoint automatically without kwnowledge if the first breakpoint is set"""
 		if not self._first.is_init():
 			self._first = region
 		else:
 			self._second = region
 
 	def swap_region(self):
+		"""Swap the breakpoints"""	
 		tmp = self._first
 		self._first = self._second
 		self.second = tmp
 
 	# Import Export
 	def to_dict(self):
+		"""Export Fusion as dict"""
 		return dict(software=list(self._software), 
 				first=self._first.to_dict(), 
 				second=self._second.to_dict(), 
@@ -153,6 +160,7 @@ class Fusion():
 
 	@classmethod
 	def from_dict(cls, data):
+		"""Construct a Fusion object from a dict"""	
 		fusion = Fusion()
 		fusion.first = Region.from_dict(data.get('first', {}))
 		fusion.second = Region.from_dict(data.get('second', {}))

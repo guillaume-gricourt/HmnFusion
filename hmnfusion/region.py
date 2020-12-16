@@ -1,6 +1,7 @@
 class Region():
-
+	"""Class to build Region object"""
 	def __init__(self, chrom='', position=0, orientation='undefined'):
+		"""Construct object with a chromosome, a position and an orientation"""
 		self.set_chrom(chrom)
 		self.set_position(position)
 		self.set_orientation(orientation)
@@ -29,18 +30,21 @@ class Region():
 
 	# Others
 	def is_init(self):
+		"""Chect if a Region is initialize. Only based on chromosome information"""
 		if self._chrom == '':
 			return False
 		return True
 
 	# Import Export
 	def to_dict(self):
+		"""Export object as a dict"""
 		return dict(orientation=self._orientation,
 			chrom=self._chrom,
 			position=self._position)
 
 	@classmethod
 	def from_dict(cls, data):
+		"""Build object from a dict"""
 		region = Region()
 		region.orientation = data.get('orientation', '')
 		region.chrom = data.get('chrom', '')

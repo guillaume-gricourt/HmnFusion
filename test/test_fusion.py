@@ -3,9 +3,10 @@ import unittest
 from hmnfusion.fusion import Fusion
 from hmnfusion.region import Region
 
-class TestRegion(unittest.TestCase):
-
+class TestFusion(unittest.TestCase):
+	"""Class to test Fusion"""
 	def setUp(self):
+		"""Initialize 3 Fusions object"""
 		# First
 		self.fusion_1 = Fusion()
 
@@ -60,6 +61,7 @@ class TestRegion(unittest.TestCase):
 				depth=500)
 
 	def test_init(self):
+		"""Check initialize attributes values"""
 		self.assertEqual(self.fusion_1.first, Region())
 		self.assertEqual(self.fusion_1.second, Region())
 		self.assertEqual(self.fusion_1.evidence, 0)
@@ -71,6 +73,7 @@ class TestRegion(unittest.TestCase):
 		self.assertEqual(self.fusion_1.software, set({'undefined'}))
 
 	def test_getters(self):
+		"""Test getters attributes"""
 		# Simple
 		self.assertEqual(self.fusion_2.first, Region('chr9', 50, 'left'))
 		self.assertEqual(self.fusion_2.second, Region('chr22', 100, 'right'))
@@ -90,6 +93,7 @@ class TestRegion(unittest.TestCase):
 		self.assertEqual(self.fusion_2.software, set({'lumpy'}))
 		
 	def test_setters(self):
+		"""Test setters attributes"""
 		# Simple
 		self.fusion_2.first = self.fusion_3_region_first
 		self.fusion_2.second = self.fusion_3_region_second
@@ -124,6 +128,7 @@ class TestRegion(unittest.TestCase):
 		self.assertEqual(self.fusion_2.software, set({'lumpy', 'genefuse', 'other'}))
 
 	def test_is_near(self):
+		"""Test is_near()"""
 		raf = Region('chr5', 2000, 'right')
 		ras = Region('chr6', 2000, 'left')
 		rbf = Region('chr5', 2500, 'left')
@@ -148,6 +153,7 @@ class TestRegion(unittest.TestCase):
 		self.assertTrue(self.fusion_2.is_near(self.fusion_3, 501))
 
 	def test_remove_from_name_cons(self):
+		"""Test remove_from_name_cons()"""
 		for buildfrom in ['CONS2', 'GEN5', 'LUM5']: 
 			self.fusion_2.buildFrom = buildfrom
 		self.assertEqual(self.fusion_2.buildFrom, set({'LUM0', 'CONS2', 'GEN5', 'LUM5'}))
@@ -155,11 +161,13 @@ class TestRegion(unittest.TestCase):
 		self.assertEqual(self.fusion_2.buildFrom, set({'LUM0', 'GEN5', 'LUM5'}))
 		
 	def test_is_same_chrom(self):
+		"""Test is_same_chrom()"""
 		self.assertFalse(self.fusion_2.is_same_chrom())
 		self.fusion_2.second = Region('chr9', 10, 'right')
 		self.assertTrue(self.fusion_2.is_same_chrom())
 
 	def test_set_region(self):
+		"""Test set_region()"""
 		self.assertEqual(self.fusion_1.first, Region())
 		self.assertEqual(self.fusion_1.second, Region())
 
@@ -175,7 +183,8 @@ class TestRegion(unittest.TestCase):
 		self.assertEqual(self.fusion_1.first, self.fusion_2_region_first)
 		self.assertEqual(self.fusion_1.second, self.fusion_2_region_second)
 	
-	def test_swap_region(self):	
+	def test_swap_region(self):
+		"""Test swap_region()"""
 		self.assertEqual(self.fusion_2.first, self.fusion_2_region_first)
 		self.assertEqual(self.fusion_2.second, self.fusion_2_region_second)
 
@@ -185,10 +194,12 @@ class TestRegion(unittest.TestCase):
 		self.assertEqual(self.fusion_2.second, self.fusion_2_region_first)
 
 	def test_to_dict(self):
+		"""Test to_dict()"""
 		self.assertEqual(self.fusion_2.to_dict(), self.fusion_2_dict)
 		self.assertEqual(self.fusion_3.to_dict(), self.fusion_3_dict)
 
 	def test_from_dict(self):
+		"""Test from_dict()"""
 		fusion_2 = Fusion.from_dict(self.fusion_2_dict)
 		self.assertEqual(self.fusion_2, self.fusion_2)
 
@@ -196,6 +207,7 @@ class TestRegion(unittest.TestCase):
 		self.assertEqual(self.fusion_3, self.fusion_3)
 
 	def test_greater_lether(self):
+		"""Test greather, lether metafunctions"""
 		self.assertTrue(self.fusion_2 < self.fusion_3)
 		self.assertFalse(self.fusion_2 > self.fusion_3)
 
@@ -204,6 +216,7 @@ class TestRegion(unittest.TestCase):
 		self.assertFalse(self.fusion_2 < self.fusion_3)
 
 	def test_equality(self):
+		"""Test equality metafunctions"""
 		fusion_2_copy = Fusion.from_dict(self.fusion_2_dict)
 		self.assertEqual(self.fusion_2, fusion_2_copy)
 

@@ -1,19 +1,11 @@
 import argparse
 import logging
 import os
-import re
 import sys
 
-import numpy as np
-import pandas as pd
-
-from collections import namedtuple
-from multiprocessing import Pool
 from .utils import abort
 from . import (extractfusion, quantification)
 from ._version import __version__
-
-from concurrent import futures
 
 AP = argparse.ArgumentParser(
 	description="Extraction sequence and quantification of fusions from DNA genomic analysis",
@@ -23,7 +15,7 @@ AP_subparsers = AP.add_subparsers(
 
 # Extract fusion.
 def _cmd_extract_fusion(args):
-	'''Extract fusion from Genefuse and Lumpy analysis'''
+	"""Extract fusion from Genefuse and Lumpy analysis"""
 	logging.info('Start analysis')
 	# Grep args.
 	finputs = {}
@@ -100,6 +92,7 @@ P_extract_fusion.set_defaults(func=_cmd_extract_fusion)
 
 # Quantification of fusions
 def _cmd_quantification(args):
+	"""Quantify fusion candidates with a BAM file"""
 	logging.info('Start analysis')
 
 	# Check if all exists.

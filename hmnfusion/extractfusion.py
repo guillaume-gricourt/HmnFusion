@@ -21,6 +21,7 @@ RE_LUMPY_ALT = re.compile(r'(\w+):(\d+)')
 
 # Genefuse.
 def parse_genefuse_label(label):
+	"""Parse Genefuse item. Return Fusion"""
 	fusion = Fusion('genefuse')
 	# Fusion breakpoint.
 	sleft, sright = label.split('___')
@@ -40,6 +41,7 @@ def parse_genefuse_label(label):
 	return fusion
 
 def read_genefuse_json(filename):
+	"""Read Genefuse json file. Return list of Fusion"""
 	data = read_json(filename)
 	fusions = []
 	for label in data.get('fusions', []).keys():
@@ -51,6 +53,7 @@ def read_genefuse_json(filename):
 	return fusions
 	
 def read_genefuse_html(filename):
+	"""Read Genefuse html file. Return list of Fusion"""
 	fusions = []
 	# Read.
 	bhtml = ""
@@ -71,6 +74,7 @@ def read_genefuse_html(filename):
 
 # Lumpy.
 def read_lumpy(flumpy):
+	"""Read Lumpy vcf file. Return list of Fusion"""
 	fusions = []
 	treats = set()
 
@@ -112,6 +116,7 @@ def read_lumpy(flumpy):
 
 # Consensus.
 def consensus_single(records, consensus_interval):
+	"""Create fusion consensus from a list of Fusion. Return list of Fusion"""
 	if len(records) == 0:
 		return records
 
@@ -174,6 +179,7 @@ def consensus_single(records, consensus_interval):
 	return fusions
 
 def extract_not_consensus(raw, consensus):
+	"""Extract fusion consensus from a global list of fusion. Return list of Fusion"""
 	if len(consensus) == 0:
 		return raw
 	not_shown = []	
@@ -184,7 +190,7 @@ def extract_not_consensus(raw, consensus):
 	return not_shown
 
 def consensus_genefuse_lumpy(genefuse_raw, lumpy_raw, genefuse_consensus, lumpy_consensus, consensus_interval):
-
+	"""Build a consensus of fusion from genefuse and lumpy. Return list of Fusion"""
 	genefuse_not_shown = extract_not_consensus(genefuse_raw, genefuse_consensus)
 	lumpy_not_shown = extract_not_consensus(lumpy_raw, lumpy_consensus)		
 
@@ -193,6 +199,7 @@ def consensus_genefuse_lumpy(genefuse_raw, lumpy_raw, genefuse_consensus, lumpy_
 	return consensus
 
 def filter_same_chrom(fusions):
+	"""From a list of fusion, delete fusion which have on their breakpoints the same chromosome. Return list of Fusion"""
 	# Filter if fusion is on same chrom.
 	to_delete = []
 	for ix in range(len(fusions)):
@@ -203,6 +210,7 @@ def filter_same_chrom(fusions):
 
 # Write.
 def write(filename, finputs, fusions):
+	"""Write list of fusion to a json file"""
 	data = {}
 	data['inputs'] = finputs
 	data['fusions'] = {}
