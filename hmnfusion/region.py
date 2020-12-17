@@ -17,7 +17,7 @@ class Region():
 		return self._position
 		
 	def set_position(self, position):
-		self._position = position
+		self._position = int(position)
 
 	def get_orientation(self):
 		return self._orientation

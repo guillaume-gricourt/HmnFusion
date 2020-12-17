@@ -107,7 +107,7 @@ def read_lumpy(flumpy):
 		evidence = 0
 		if 'SU' in record.info.keys():
 			evidence = record.info.get('SU')[0]
-		fusion.setEvidence(evidence)
+		fusion.evidence = evidence
 
 		fusion.ident = ident
 		ident += 1
@@ -167,7 +167,10 @@ def consensus_single(records, consensus_interval):
 		for fusion in ones:
 			if ('genefuse' in one.software and 'genefuse' in fusion.software) or ('lumpy' in one.software and 'lumpy' in fusion.software):
 				one.evidence += fusion.evidence
-			one.buildFrom = fusion.ident
+			if fusion.isConsensus:
+				one.buildFrom = fusion.buildFrom
+			else:
+				one.buildFrom = fusion.ident
 			one.software = fusion.software
 		one.isConsensus = True
 		one.software = __app_name__
@@ -193,7 +196,7 @@ def consensus_genefuse_lumpy(genefuse_raw, lumpy_raw, genefuse_consensus, lumpy_
 	"""Build a consensus of fusion from genefuse and lumpy. Return list of Fusion"""
 	genefuse_not_shown = extract_not_consensus(genefuse_raw, genefuse_consensus)
 	lumpy_not_shown = extract_not_consensus(lumpy_raw, lumpy_consensus)		
-
+	
 	consensus = consensus_single(genefuse_not_shown + lumpy_not_shown + genefuse_consensus + lumpy_consensus, consensus_interval)
 	consensus.sort(reverse=True)
 	return consensus

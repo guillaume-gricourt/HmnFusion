@@ -63,7 +63,7 @@ def _cmd_extract_fusion(args):
 	# Consensus.
 	logging.info('Build consensus with interval of %s pb'%(args.consensus_interval,))
 	fusions['consensus'] = extractfusion.consensus_genefuse_lumpy(fusions['genefuse']['raw'], fusions['lumpy']['raw'], fusions['genefuse']['consensus'], fusions['lumpy']['consensus'], args.consensus_interval)
-
+	
 	# Filter same chrom.
 	fusions['consensus'] = extractfusion.filter_same_chrom(fusions['consensus'])
 

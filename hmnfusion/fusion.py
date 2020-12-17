@@ -68,10 +68,12 @@ class Fusion():
 
 	def set_build_from(self, ident):
 		if type(ident) == list or type(ident) == set:
-			a = set()
+			#a = set()
+			#for l in ident:
+			#	a.add(l)
+			#self._buildFrom = a
 			for l in ident:
-				a.add(l)
-			self._buildFrom = a
+				self._buildFrom.add(l)
 		else:
 			self._buildFrom.add(ident)
 

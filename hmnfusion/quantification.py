@@ -66,8 +66,8 @@ def run(params, bed, fusions):
 	alignment = pysam.AlignmentFile(params['falignment']['path'], params['falignment']['mode'])
 
 	to_delete = []
-	isSkip = False
 	for ix, fusion in enumerate(fusions):
+		isSkip = False
 		if not fusion.isConsensus:
 			continue
 		# Check fusion against bed.
