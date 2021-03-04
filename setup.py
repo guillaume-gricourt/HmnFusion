@@ -8,51 +8,51 @@ from setuptools import setup, find_packages
 setup_args = {}
 
 install_requires=[
-	'beautifulsoup4 >= 4.9.0',
-	'lxml >= 4.5.0',
-	'numpy >= 1.18.3',
-	'pandas >= 1.0.3',
-	'pysam >= 0.15.4'
+    'beautifulsoup4 >= 4.9.0',
+    'lxml >= 4.5.0',
+    'numpy >= 1.18.3',
+    'pandas >= 1.0.3',
+    'pysam >= 0.15.4'
 ]
 
 DIR = (os.path.dirname(__file__) or '.')
 VERSION = ""
 with open(os.path.join(DIR, "hmnfusion", '_version.py')) as fid:
-	VERSION = fid.readline().split("=")[-1].strip().replace('"','')
+    VERSION = fid.readline().split("=")[-1].strip().replace('"','')
 
 setup_args.update(
-	name='HmnFusion',
-	version=VERSION,
-	description=__doc__,
-	author='Guillaume Gricourt',
-	author_email='guillaume.gricourt@aphp.fr',
-	#url='',
-	classifiers=[
-		"Development Status :: 4 - Beta",
-		"Environment :: Console",
-		"Intended Audience :: Science/Research",
-		"Intended Audience :: Healthcare Industry",
-		"License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
-		"Operating System :: MacOS :: MacOS X",
-		"Operating System :: POSIX",
-		"Operating System :: POSIX :: Linux",
-		"Operating System :: Unix",
-		"Programming Language :: Python",
-		"Programming Language :: Python :: 3",
-		"Programming Language :: Python :: 3.5",
-		"Programming Language :: Python :: 3.6",
-		"Programming Language :: Python :: 3.7",
-		"Topic :: Scientific/Engineering",
-		"Topic :: Scientific/Engineering :: Bio-Informatics",
-		"Topic :: Scientific/Engineering :: Medical Science Apps.",
-		"Topic :: Scientific/Engineering :: Visualization",
-	],
-	packages=find_packages(),
-	entry_points = {
-		'console_scripts' : [ 'hmnfusion=hmnfusion.__main__:main']
-	},
-	install_requires=install_requires,
-	python_requires='>=3',
+    name='HmnFusion',
+    version=VERSION,
+    description=__doc__,
+    author='Guillaume Gricourt',
+    author_email='guillaume.gricourt@aphp.fr',
+    #url='',
+    classifiers=[
+        "Development Status :: 4 - Beta",
+        "Environment :: Console",
+        "Intended Audience :: Science/Research",
+        "Intended Audience :: Healthcare Industry",
+        "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+        "Operating System :: MacOS :: MacOS X",
+        "Operating System :: POSIX",
+        "Operating System :: POSIX :: Linux",
+        "Operating System :: Unix",
+        "Programming Language :: Python",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.5",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Topic :: Scientific/Engineering",
+        "Topic :: Scientific/Engineering :: Bio-Informatics",
+        "Topic :: Scientific/Engineering :: Medical Science Apps.",
+        "Topic :: Scientific/Engineering :: Visualization",
+    ],
+    packages=find_packages(),
+    entry_points = {
+        'console_scripts' : [ 'hmnfusion=hmnfusion.__main__:main']
+    },
+    install_requires=install_requires,
+    python_requires='>=3',
 )
 setup(**setup_args)
 
