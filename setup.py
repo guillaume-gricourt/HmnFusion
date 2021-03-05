@@ -10,7 +10,9 @@ setup_args = {}
 install_requires=[
     'beautifulsoup4 >= 4.9.0',
     'lxml >= 4.5.0',
+    'natsort >= 7.0.0',
     'numpy >= 1.18.3',
+    'openpyxl >= 1.1.1',
     'pandas >= 1.0.3',
     'pysam >= 0.15.4'
 ]

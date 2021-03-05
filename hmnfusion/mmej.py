@@ -6,6 +6,10 @@ import sys
 
 import pandas as pd
 
+from natsort import natsorted
+from openpyxl.utils import get_column_letter
+from openpyxl.worksheet.dimensions import ColumnDimension, DimensionHolder
+
 def extract(finputs, event):
     """Extract event of interest from vcf input files"""
     df = pd.DataFrame()
@@ -18,13 +22,11 @@ def extract(finputs, event):
                 record.alts[0])
                 region_id = hashlib.md5(region_name.encode('utf8')).hexdigest()
                 # Check if variant is already seen.
-                if region_id in df.index:
-                    continue
-
-                df.at[region_id, 'event'] = 'deletion'
-                df.at[region_id, 'contig'] = record.contig
-                df.at[region_id, 'start'] = record.pos
-                df.at[region_id, 'deletion'] = record.ref[1:]
+                if not region_id in df.index:
+                    df.at[region_id, 'event'] = 'deletion'
+                    df.at[region_id, 'contig'] = record.contig
+                    df.at[region_id, 'start'] = record.pos + 1
+                    df.at[region_id, 'deletion'] = record.ref[1:].upper()
 
                 for sample in record.samples.keys():
                     df.at[region_id, sample] = True
@@ -39,13 +41,15 @@ def signatures(freference, df):
         start = int(x['start'])
         region = '%s:%s-%s'%(x['contig'], start, start+(2*len_deletion))
         faidx = pysam.faidx(freference, region, split_lines=True)
-        seq = faidx[1]
+        seq = ''.join(faidx[1:]).upper()
 
-        left = rec.seq[:len_deletion]
-        right = rec.seq[len_deletion:]
+        left = seq[:len_deletion]
+        right = seq[len_deletion:]
+
+        assert x['deletion'] == left
 
         mh_len, mh_seq = 0, ''
-        for i in range(len_deletion):
+        for i in range(len_deletion+1):
             motif = left[:i]
             if right.startswith(motif):
                 mh_len = i
@@ -62,10 +66,12 @@ def conclude(df):
     """Conclude about the presens of MMEJ signature"""
     def _conclude(x):
         res = ''
-        len_deletion = len(x['alt'])
+        len_deletion = len(x['deletion'])
         len_mh = len(x['mmej_sequence'])
         if len_deletion <= 1 or len_mh <= 1:
-            res = 'MH deletion'
+            res = '.'
+        elif len_deletion == len_mh:
+            res = 'alignment ambiguous'
         elif len_deletion > 1 and len_mh < 5:
             res = 'no clear signature'
         elif len_deletion > 1 and len_mh >= 5:
@@ -76,13 +82,35 @@ def conclude(df):
     return df
 
 # Write.
-def write(filename, finputs, fusions):
-    """Write list of fusion to a json file"""
-    data = {}
-    data['inputs'] = finputs
-    data['fusions'] = {}
-    for ix, fusion in enumerate(fusions['genefuse']['raw'] + fusions['lumpy']['raw'] + fusions['consensus']):
-        data['fusions'][str(ix)] = fusion.to_dict()
+def write(filename, df):
+    """Write dataframe to output"""
+    headers = ['contig', 'start', 'deletion', 'event', 'mmej_sequence',
+    'mmej_conclusion']
+    samples = [ x for x in df.columns if not x in headers ]
+    df = df[headers+samples]
+
+    # Sort values.
+    idx, *_ = zip(*natsorted(zip(df.index, df.contig, df.start, df.deletion,
+    df.event), key=lambda x: (x[1], x[2], x[3], x[4])))
+    df = df.loc[list(idx)]
+
+    # Replace values.
+    df = df.fillna('.')
+    df.replace({True:'o'}, inplace=True)
+
+    # Write output.
+    writer = pd.ExcelWriter(filename) #, engine='xlsxwriter')
+    df.to_excel(writer, index=False, sheet_name='mmej')
+    ws = writer.sheets['mmej']  # pull worksheet object
+
+    # Adjust width.
+    dim_holder = DimensionHolder(worksheet=ws)
+    for ix, col in enumerate(ws.columns):
+        col_nb = ix + 1
+        length = max(len(str(cell.value)) for cell in col if not cell.value is None) + 6
+        dim_holder[get_column_letter(col_nb)] = ColumnDimension(ws, min=col_nb, max=col_nb, width=length)
+    ws.column_dimensions = dim_holder
+
     
-    with open(filename, 'w') as fod:
-        json.dump(data, fod)
+    writer.save()
+    #df.to_excel(filename, index=False)
