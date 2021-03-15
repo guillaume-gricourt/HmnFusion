@@ -1,2 +1,2 @@
-__app_name__ = "HmnFusion"
+__app_name__ = "hmnfusion"
 __version__ = "0.6.0"

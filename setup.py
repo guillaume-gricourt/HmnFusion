@@ -8,22 +8,29 @@ from setuptools import setup, find_packages
 setup_args = {}
 
 install_requires=[
-    'beautifulsoup4 >= 4.9.0',
-    'lxml >= 4.5.0',
-    'natsort >= 7.0.0',
-    'numpy >= 1.18.3',
-    'openpyxl >= 1.1.1',
-    'pandas >= 1.0.3',
-    'pysam >= 0.15.4'
+    'beautifulsoup4>=4.9.0',
+    'natsort>=7.0.0',
+    'numpy>=1.18.3',
+    'pandas>=1.0.3',
+    'pysam>=0.15.4'
 ]
 
+#script: "{{ PYTHON }} -m pip install . --no-deps --ignore-installed --no-cache-dir -vvv"
+#lxml>=4.5.0',
+#- openpyxl>=1.1.1
+#test:
+#  commands:
+#    - HmnFusion --help
+    
 DIR = (os.path.dirname(__file__) or '.')
-VERSION = ""
-with open(os.path.join(DIR, "hmnfusion", '_version.py')) as fid:
-    VERSION = fid.readline().split("=")[-1].strip().replace('"','')
+NAME, VERSION = '', ''
+with open(os.path.join(DIR, 'hmnfusion', '_version.py')) as fid:
+    lines = fid.read().splitlines()
+    NAME = lines[0].split("=")[-1].strip().replace('"','')
+    VERSION = lines[1].split("=")[-1].strip().replace('"','')
 
 setup_args.update(
-    name='HmnFusion',
+    name=NAME,
     version=VERSION,
     description=__doc__,
     author='Guillaume Gricourt',
@@ -49,11 +56,12 @@ setup_args.update(
         "Topic :: Scientific/Engineering :: Medical Science Apps.",
         "Topic :: Scientific/Engineering :: Visualization",
     ],
-    packages=find_packages(),
+    packages=['hmnfusion'],
     entry_points = {
         'console_scripts' : [ 'hmnfusion=hmnfusion.__main__:main']
     },
     install_requires=install_requires,
+    #setup_requires=install_requires,
     python_requires='>=3',
 )
 setup(**setup_args)
