@@ -12,11 +12,10 @@ build:
   number: 0
   noarch: python
   entry_points:
-    - hmnfusion=hmnfusion.__main__:main
+    - {{name}}=hmnfusion.__main__:main
 
 requirements:
   build:
-    - git
     - pip
     - python>=3
     - setuptools
@@ -25,6 +24,8 @@ requirements:
     - numpy>=1.18.3
     - pandas>=1.0.3
     - pysam>=0.15.4
+    - et-xmlfile
+    - openpyxl
   run:
     - python>=3
     - beautifulsoup4>=4.9.0
@@ -32,10 +33,14 @@ requirements:
     - numpy>=1.18.3
     - pandas>=1.0.3
     - pysam>=0.15.4
+    - et-xmlfile
+    - openpyxl
 
 test:
   imports:
     - hmnfusion
+  commands:
+    - {{name}} version
 
 about:
   home: https://github.com/guillaume-gricourt/HmnFusion

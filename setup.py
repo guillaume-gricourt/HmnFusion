@@ -12,15 +12,13 @@ install_requires=[
     'natsort>=7.0.0',
     'numpy>=1.18.3',
     'pandas>=1.0.3',
-    'pysam>=0.15.4'
+    'pysam>=0.15.4',
+    'et-xmlfile',
+    'openpyxl'
 ]
 
+# Cmd in meta.yml
 #script: "{{ PYTHON }} -m pip install . --no-deps --ignore-installed --no-cache-dir -vvv"
-#lxml>=4.5.0',
-#- openpyxl>=1.1.1
-#test:
-#  commands:
-#    - HmnFusion --help
     
 DIR = (os.path.dirname(__file__) or '.')
 NAME, VERSION = '', ''
@@ -61,7 +59,6 @@ setup_args.update(
         'console_scripts' : [ 'hmnfusion=hmnfusion.__main__:main']
     },
     install_requires=install_requires,
-    #setup_requires=install_requires,
     python_requires='>=3',
 )
 setup(**setup_args)
