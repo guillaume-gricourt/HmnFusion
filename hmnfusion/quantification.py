@@ -212,6 +212,6 @@ def write(filename, name, fusions):
             ident_2 += '_2'
             # Second.
             infos = ';'.join(['SVTYPE=FUS', 'DP=.', 'SU=.'])
-            values = [fusion.second.chrom, fusion.second.position, ident_2, 'N', '<FUS>', '.', '.', infos, 'GT:DP:SU', './.:.:.']
+            values = [fusion.second.chrom, fusion.second.position, ident_2, 'N', '<FUS>', '.', '.', infos, 'GT:DP:SU:SR:PE:SC', './.:.:.']
             df = df.append(pd.Series(values, index=columns), ignore_index=True)
     df.to_csv(filename, mode='a', sep='\t', index=False)
