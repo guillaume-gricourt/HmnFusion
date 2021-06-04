@@ -154,6 +154,7 @@ def _get_header():
     header.append('##INFO=<ID=SOFT,Number=1,Type=String,Description=\"Indicated from which software is derived\">')
     header.append('##INFO=<ID=FROM,Number=.,Type=String,Description=\"Indicated from which reference is derived\">')
     header.append('##INFO=<ID=CONS,Number=.,Type=String,Description=\"Is a consensus\">')
+    header.append('##INFO=<ID=VAF,Number=.,Type=Float,Description=\"Allelic frequence observed\">')
     header.append('##INFO=<ID=DP,Number=.,Type=Integer,Description=\"Approximate read depth across all samples\">')
     header.append('##INFO=<ID=SU,Number=.,Type=Integer,Description=\"Number of pieces of evidence supporting the variant across all samples\">')
     header.append('##INFO=<ID=PE,Number=.,Type=Integer,Description=\"Number of paired-end reads supporting the variant across all samples\">')
@@ -163,6 +164,7 @@ def _get_header():
     header.append('##ALT=<ID=FUS,Description=\"Fusion\">')
 
     header.append('##FORMAT=<ID=GT,Number=1,Type=String,Description=\"Genotype\">')
+    header.append('##FORMAT=<ID=VAF,Number=1,Type=Float,Description=\"Allelic frequence observed\">')
     header.append('##FORMAT=<ID=DP,Number=1,Type=Integer,Description=\"Approximate read depth\">')
     header.append('##FORMAT=<ID=SU,Number=1,Type=Integer,Description=\"Number of pieces of evidence supporting the variant\">')
     header.append('##FORMAT=<ID=PE,Number=1,Type=Integer,Description=\"Number of paired-end reads supporting the variant\">')
@@ -196,6 +198,7 @@ def write(filename, name, fusions):
         infos += ['SOFT=%s'%('-'.join(fusion.software),)]
         infos += ['FROM=%s'%('-'.join(fusion.buildFrom),)]
         infos += ['CONS=%s'%(fusion.isConsensus,)]
+        infos += ['VAF=%s'%(fusion.get_vaf(),)]
         infos += ['DP=%s'%(fusion.depth,)]
         infos += ['SU=%s'%(fusion.evidence,)]
         ed = fusion.evidence_details
@@ -204,7 +207,7 @@ def write(filename, name, fusions):
         infos += ['SC=%s'%(ed.get('clipped',0),)]
     
         infos = ':'.join(infos)
-        values = [fusion.first.chrom, fusion.first.position, ident_1, 'N', '<FUS>', '.', '.', infos, 'GT:DP:SU', './.:%s:%s:%s:%s:%s'%(fusion.depth, fusion.evidence, ed.get('split',0), ed.get('mate',0), ed.get('clipped',0))]
+        values = [fusion.first.chrom, fusion.first.position, ident_1, 'N', '<FUS>', '.', '.', infos, 'GT:VAF:DP:SU:SR:PE:SC', './.:%s:%s:%s:%s:%s'%(fusion.depth, fusion.get_vaf(), fusion.evidence, ed.get('split',0), ed.get('mate',0), ed.get('clipped',0))]
         df = df.append(pd.Series(values, index=columns), ignore_index=True)
 
         ident_2 = ident
@@ -212,6 +215,6 @@ def write(filename, name, fusions):
             ident_2 += '_2'
             # Second.
             infos = ';'.join(['SVTYPE=FUS', 'DP=.', 'SU=.'])
-            values = [fusion.second.chrom, fusion.second.position, ident_2, 'N', '<FUS>', '.', '.', infos, 'GT:DP:SU:SR:PE:SC', './.:.:.']
+            values = [fusion.second.chrom, fusion.second.position, ident_2, 'N', '<FUS>', '.', '.', infos, 'GT:VAF:DP:SU:SR:PE:SC', './.:.:.']
             df = df.append(pd.Series(values, index=columns), ignore_index=True)
     df.to_csv(filename, mode='a', sep='\t', index=False)

@@ -13,6 +13,7 @@ class Fusion():
         self._depth = 0
         self._ident = ''
         self._isConsensus = False
+        self._isInterest = False
         self._buildFrom = set()
         self._software = set()
         if software:
@@ -83,6 +84,12 @@ class Fusion():
     def set_is_consensus(self, value):
         self._isConsensus = value
 
+    def get_is_interest(self):
+        return self._isInterest
+    
+    def set_is_interest(self, value):
+        self._isInterest = value
+
     def get_software(self):
         if len(self._software) == 0:
             return set({'undefined'})
@@ -122,6 +129,12 @@ class Fusion():
                 return True
         return False
 
+    def get_vaf(self):
+        res = 0
+        if self.depth > 0:
+            res = self.evidence / self.depth
+        return '{0:.2f}'.format(res)
+
     def set_region(self, region):
         """Set fusion breakpoint automatically without kwnowledge if the first breakpoint is set"""
         if not self._first.is_init():
@@ -146,19 +159,8 @@ class Fusion():
                 ident=self._ident, 
                 buildFrom=list(self._buildFrom),
                 isConsensus=self._isConsensus,
+                isInterest=self._isInterest,
                 depth=self._depth)
-
-        self._first = Region()
-        self._second = Region()
-        self._evidence = 0
-        self._evidence_details = {}
-        self._depth = 0
-        self._ident = ''
-        self._isConsensus = False
-        self._buildFrom = set()
-        self._software = set()
-        if software:
-            self.set_software(software)
 
     @classmethod
     def from_dict(cls, data):
@@ -171,13 +173,14 @@ class Fusion():
         fusion.depth = data.get('depth', 0)
         fusion.ident = data.get('ident', '')
         fusion.isConsensus = data.get('isConsensus', False)
+        fusion.isInterest = data.get('isInterest', False)
         fusion.buildFrom = set(data.get('buildFrom', []))
         fusion.software = set(data.get('software', []))
         return fusion
 
     # Meta functions
     def __repr__(self):
-        return 'From %s %s %s (%s) %s %s Evidence %s Depth %s'%(','.join(self._software), self._ident, ','.join(self._buildFrom), self._evidence, self._first, self._second, self._evidence, self._depth)
+        return 'From %s %s %s (%s) %s %s Evidence %s Depth %s - Interest %s'%(','.join(self._software), self._ident, ','.join(self._buildFrom), self._evidence, self._first, self._second, self._evidence, self._depth, self._isInterest)
  
     def __eq__(self, other):
         return self._first == other.first and \
@@ -186,6 +189,7 @@ class Fusion():
             self._evidence_details == other.evidence_details and \
             self._depth == other.depth and \
             self._isConsensus == other.isConsensus and \
+            self._isInterest == other.isInterest and \
             self._ident == other.ident and \
             len(self._buildFrom.union(other.buildFrom)) == len(self._buildFrom) and \
             len(self._buildFrom.union(other.buildFrom)) == len(other.buildFrom) and \
@@ -207,4 +211,5 @@ class Fusion():
     ident = property(get_ident, set_ident)
     buildFrom = property(get_build_from, set_build_from)
     isConsensus = property(get_is_consensus, set_is_consensus)
+    isInterest = property(get_is_interest, set_is_interest)
     software = property(get_software, set_software)
