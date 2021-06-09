@@ -57,7 +57,7 @@ def read_genefuse_html(filename):
     fusions = []
     # Read.
     bhtml = ""
-    with open(filename) as fid:
+    with open(filename, encoding='utf-8') as fid:
         bhtml = fid.read()
     soup = bs4.BeautifulSoup(bhtml, features="lxml")
 

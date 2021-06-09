@@ -204,8 +204,8 @@ def _cmd_mmej(args):
             abort(AP, "Vcf file doesn't exist : %s"%(finput,))
     if not os.path.isfile(args.reference):
         abort(AP, "Reference file doesn't exist : %s"%(args.reference,))
-    if not os.path.isdir(os.path.dirname(os.path.abspath(args.output_csv))):
-        abort(AP, "Outdir doesn't exist : %s"%(args.output_csv,))
+    if not os.path.isdir(os.path.dirname(os.path.abspath(args.output_xlsx))):
+        abort(AP, "Outdir doesn't exist : %s"%(args.output_xlsx,))
 
     # Run.
     logging.info('Extract events from files')
@@ -218,7 +218,7 @@ def _cmd_mmej(args):
     df = mmej.conclude(df)
 
     logging.info('Write output')
-    mmej.write(args.output_csv, df)
+    mmej.write(args.output_xlsx, df)
 
     logging.info("Analysis is finished")
 
@@ -229,7 +229,7 @@ P_mmej.add_argument('-r', '--reference', required=True,
     help='Genome of reference')
 P_mmej.add_argument('-e', '--event', default='deletion', choices=['deletion', 'fusion', 'all'], 
     help='Event from which to detect MMEJ')
-P_mmej.add_argument('--output-csv',
+P_mmej.add_argument('--output-xlsx',
     help='Output file')
 P_mmej.set_defaults(func=_cmd_mmej)
 

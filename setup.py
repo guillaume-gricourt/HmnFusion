@@ -59,7 +59,7 @@ setup_args.update(
         'console_scripts' : [ 'hmnfusion=hmnfusion.__main__:main']
     },
     install_requires=install_requires,
-    python_requires='>=3',
+    python_requires='>=3.5,<=3.6.13',
 )
 setup(**setup_args)
 
