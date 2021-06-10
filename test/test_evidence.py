@@ -3,84 +3,109 @@ import unittest
 from hmnfusion.evidence import Evidence
 
 class TestEvidence(unittest.TestCase):
-	"""Test Evidence object"""
-	def test_init(self):
-		"""Test init()"""
-		e = Evidence()
-		self.assertEqual(e.raw, 0)
-		self.assertEqual(e.coverage, 0)
-		self.assertEqual(e.split, 0)
-        self.assertEqual(e.split, 0)
-        self.assertEqual(e.
+    """Test Evidence object"""
+    @classmethod
+    def setUpClass(cls):
+        """Setup objects used in test"""
+        cls._e1a = Evidence()
+        cls._e1a.raw = 10
+        cls._e1a.split = 10        
+        cls._e1a.mate = 10
+        cls._e1a.clipped = 10
+        cls._e1a.depth = 10
 
+        cls._e1b = Evidence()
+        cls._e1b.raw = 10
+        cls._e1b.split = 10        
+        cls._e1b.mate = 10
+        cls._e1b.clipped = 10
+        cls._e1b.depth = 10
+
+        cls._e2 = Evidence(15)
+        cls._e2.split = 40        
+        cls._e2.mate = 0
+        cls._e2.clipped = -100
+        cls._e2.depth = -150
+        cls._e2d = dict(raw=15, split=40, mate=0, clipped=100, depth=150)     
+
+        cls._e3 = Evidence()
+        cls._e4 = Evidence(20)
+                    
+	def test_init_empty(self):
+		"""Test init() empty"""
+		self.assertEqual(self._e3.raw,0)
+		self.assertEqual(self._e3.split,0)
+        self.assertEqual(self._e3.mate,0)
+        self.assertEqual(self._e3.clipped,0)
+        self.assertEqual(self._e3.depth,0)
+        
+	def test_init_filled(self):
+		"""Test init() filled"""
+		self.assertEqual(self._e4.raw,20)
+		self.assertEqual(self._e4.split,0)
+        self.assertEqual(self._e4.mate,0)
+        self.assertEqual(self._e4.clipped,0)
+        self.assertEqual(self._e4.depth,0)
+        
 	def test_getters(self):
-		"""Test getters attributes"""
-		region = Region('chr7', 100, 'left')
-		self.assertEqual(region.chrom, 'chr7')
-		self.assertEqual(region.position, 100)
-		self.assertEqual(region.orientation, 'left')
-
+		"""Test getters attributes"""        
+		self.assertEqual(self._e1b.raw, 10)
+		self.assertEqual(self._e1b.split, 10)
+		self.assertEqual(self._e1b.mate, 10)
+		self.assertEqual(self._e1b.clipped, 10)
+		self.assertEqual(self._e1b.depth, 10)
+		
+		self.assertEqual(self._e2.raw, 15)
+		self.assertEqual(self._e2.split, 40)
+		self.assertEqual(self._e2.mate, 0)
+		self.assertEqual(self._e2.clipped, 100)										
+		self.assertEqual(self._e2.depth, 150)
+		
 	def test_setters(self):
 		"""Test setters attributes"""
-		region = Region()
-		region.chrom = 'chr8'
-		region.position = 10
-		region.orientation = 'right'
+        cls._e3.raw = 0
+        cls._e3.split = 1      
+        cls._e3.mate = 2
+        cls._e3.clipped = 3
+        cls._e3.depth = 4
 
-		self.assertEqual(region.chrom, 'chr8')
-		self.assertEqual(region.position, 10)
-		self.assertEqual(region.orientation, 'right')
+		self.assertEqual(self._e3.raw, 0)
+		self.assertEqual(self._e3.split, 1)
+		self.assertEqual(self._e3.mate, 2)
+		self.assertEqual(self._e3.clipped, 3)
+		self.assertEqual(self._e3.depth, 4)												
 
-	def test_is_init(self):
-		"""Test is_init()"""
-		region = Region()
-		self.assertFalse(region.is_init())
-
-		region = Region('chr7', 100, 'left')
-		self.assertTrue(region.is_init())
-
-		region.position = 0
-		self.assertTrue(region.is_init())
-		region.orientation = ''
-		self.assertTrue(region.is_init())
-		region.chrom = ''
-		self.assertFalse(region.is_init())
-
-	def test_orientation(self):
-		"""Test orientation attribute management"""
-		region = Region()
-		self.assertEqual(region.orientation, 'undefined')
-		region.orientation = 'left'
-		self.assertEqual(region.orientation, 'left')
-		region.orientation = 'right'
-		self.assertEqual(region.orientation, 'right')
-		region.orientation = 'other'
-		self.assertEqual(region.orientation, 'undefined')
-
+	def test_set_number(self):
+		"""Test set_number"""
+		self.assertEqual(Evidence.set_number("10"), 10)
+		self.assertEqual(Evidence.set_number("-10"), 10)
+		self.assertEqual(Evidence.set_number(15), 15)
+		self.assertEqual(Evidence.set_number(-300), -300)
+		self.assertEqual(Evidence.set_number("0.02"), 0)
+		self.assertEqual(Evidence.set_number("1.5"), 1)
+												
 	def test_equal(self):
-		"""Test equal metafunction"""
-		a = Region()
-		b = Region('chr7', 100, 'left')
+	    """Test equal"""
+		self.assertEqual(self._e1a, self._e1b)
+		self.assertNotEqual(self._e1a, self._e2)
 
-		self.assertNotEqual(a, b)
-		a.chrom = 'chr7'
-		a.position = 100
-		a.orientation = 'left'
-
-		self.assertEqual(a, b)
-
+    def test_get_vaf(self):
+        """Test vaf fuction"""
+        self.assertEqual(self._e1a.get_vaf(), '3.00')
+        self.assertEqual(self._e1a.get_vaf(float), 3)
+        self.assertEqual(self._e1a.get_vaf(int), 3)
+        
+        self.assertEqual(self._e2.get_vaf(), '0.93')
+        self.assertEqual(self._e2.get_vaf(float), 0.93)
+        self.assertEqual(self._e2.get_vaf(int), 0.93)
+                        
 	def test_to_dict(self):
-		"""Test to_dict()"""
-		region = Region('chr7', 100, 'left')
-		data = dict(chrom='chr7', orientation='left', position=100)
-		self.assertEqual(region.to_dict(), data)
+		"""Test to_dict()"""     
+		self.assertEqual(self._e2.to_dict(), self._e2d)
 
 	def test_from_dict(self):
 		"""Test from_dict()"""
-		a = Region('chr7', 100, 'left')
-		data = dict(chrom='chr7', orientation='left', position=100)
-		b = Region.from_dict(data)
-		self.assertEqual(a,b)
+		self.assertEqual(self._e2, Evidence.from_dict(self._e2d))
 
 if __name__ == '__main__':
 	unittest.main()
