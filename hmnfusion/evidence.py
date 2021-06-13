@@ -1,4 +1,4 @@
-class Evidence():
+class Evidence(object):
     """Class to build Region object"""
     def __init__(self, raw=0):
         """Construct object to reprensent evidences details"""
@@ -9,48 +9,55 @@ class Evidence():
         self._depth = Evidence.set_number()
 
     # Getters Setters
-    def get_raw(self):
+    @property
+    def raw(self):
         return self._raw
-        
-    def set_raw(self, n):
+    @raw.setter    
+    def raw(self, n):
         self._raw = Evidence.set_number(n)
-
-    def get_split(self):
+    @property
+    def split(self):
         return self._split
-        
-    def set_split(self, n):
+    @split.setter
+    def split(self, n):
         self._split = Evidence.set_number(n)
-
-    def get_mate(self):
+    @property
+    def mate(self):
         return self._mate
-        
-    def set_mate(self, n):
+    @mate.setter    
+    def mate(self, n):
         self._mate = Evidence.set_number(n)
-
-    def get_clipped(self):
+    @property
+    def clipped(self):
         return self._clipped
-        
-    def set_clipped(self, n):
+    @clipped.setter
+    def clipped(self, n):
         self._clipped = Evidence.set_number(n)
-
-    def get_depth(self):
+    @property
+    def depth(self):
         return self._depth
-        
-    def set_depth(self, n):
+    @depth.setter    
+    def depth(self, n):
         self._depth = Evidence.set_number(n)
+
+    # Others
+    @classmethod
+    def set_number(self, n=0):
+        return abs(int(float(n)))
+
+    def get_sum(self):
+        return self._split + self._mate + self._clipped
 
     def get_vaf(self, form=str):
         vaf = 0
         if self._depth > 0:
-            vaf = (self._split + self._mate + self._clipped) / self._depth
+            vaf = self.get_sum() / self._depth
         if form is str:
             return '{:.2f}'.format(vaf)
         return round(vaf, 2)
-        
-    # Others
-    @classmethod
-    def set_number(self, n=0):
-        return abs(int(n))
+
+    def get_max_count(self):
+        return max([self._raw, self.get_sum()])
 
     # Import Export
     def to_dict(self):
@@ -73,19 +80,22 @@ class Evidence():
         return e
     
     # Meta functions
+    def __key(self):
+        return (self._raw, self._split, self._mate, self._clipped, self._depth)
+
     def __repr__(self):
-        return self.to_dict()
+        return 'Ev ' + ' '.join(str(x) for x in self.__key())
+
+    def __hash__(self):
+        return hash(self.__key())
 
     def __eq__(self, other):
-        return self._raw == other.raw and \
-            self._split == other.split and \
-            self._mate == other.mate and \
-            self.clipped == other.clipped and \
-            self.depth == other.depth            
+        if isinstance(other, Evidence):
+            return self.__key() == other.__key()
+        return NotImplemented
 
-    # Properties
-    raw = property(get_raw, set_raw)
-    split = property(get_split, set_split)
-    mate = property(get_mate, set_mate)
-    clipped = property(get_clipped, set_clipped)
-    depth = property(get_depth, set_depth)    
+    def __lt__(self, other):
+        return self.get_max_count() < other.get_max_count()
+
+    def __gt__(self, other):
+        return self.get_max_count() > other.get_max_count()

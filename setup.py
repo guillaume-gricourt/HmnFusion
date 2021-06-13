@@ -9,12 +9,15 @@ setup_args = {}
 
 install_requires=[
     'beautifulsoup4>=4.9.0',
+    'et-xmlfile',
+    'lxml>=4.5.0',
+    'matplotlib>=3.0.0',
     'natsort>=7.0.0',
+    'networkx>=2.4.0',
     'numpy>=1.18.3',
+    'openpyxl',
     'pandas>=1.0.3',
     'pysam>=0.15.4',
-    'et-xmlfile',
-    'openpyxl'
 ]
 
 # Cmd in meta.yml

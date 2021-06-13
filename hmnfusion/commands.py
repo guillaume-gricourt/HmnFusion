@@ -4,7 +4,7 @@ import os
 import sys
 
 from .utils import abort
-from . import (extractfusion, quantification, mmej)
+from . import (extractfusion, quantification, mmej, graph)
 from ._version import __version__
 
 AP = argparse.ArgumentParser(
@@ -39,41 +39,32 @@ def _cmd_extract_fusion(args):
         abort(AP, "Outdir doesn't exist : %s"%(foutput,))
 
     # Run.
-    fusions = {}
+    g = graph.Graph(args.consensus_interval)
     # Genefuse.
-    logging.info('Genefuse')
-    fgenefuse = finputs['genefuse']
-    fusions['genefuse'] = {}
-    if fgenefuse['format'] == 'json':
-        logging.info('\tExtract fusions from Json')
-        fusions['genefuse']['raw'] = extractfusion.read_genefuse_json(fgenefuse['path'])
-    elif fgenefuse['format'] == 'html':
-        logging.info('\tExtract fusions from Html')
-        fusions['genefuse']['raw'] = extractfusion.read_genefuse_html(fgenefuse['path'])
-    fusions['genefuse']['consensus'] = extractfusion.consensus_single(fusions['genefuse']['raw'], args.consensus_interval)
-    # Lumpy.    
-    logging.info('Lumpy')
-    flumpy = finputs['lumpy']
-    if flumpy['format'] == 'vcf':
-        fusions['lumpy'] = {}
-        logging.info('\tExtract fusions')
-        fusions['lumpy']['raw'] = extractfusion.read_lumpy(flumpy['path'])
-        logging.info('\tBuild consensus')
-        fusions['lumpy']['consensus'] = extractfusion.consensus_single(fusions['lumpy']['raw'], args.consensus_interval)
-    # Consensus.
-    logging.info('Build consensus with interval of %s pb'%(args.consensus_interval,))
-    fusions['consensus'] = extractfusion.consensus_genefuse_lumpy(fusions['genefuse']['raw'], fusions['lumpy']['raw'], fusions['genefuse']['consensus'], fusions['lumpy']['consensus'], args.consensus_interval)
-    
-    # Filter same chrom.
-    fusions['consensus'] = extractfusion.filter_same_chrom(fusions['consensus'])
+    logging.info('Parse Genefuse')
+    extractfusion.read_genefuse(g, finputs['genefuse']['path'], finputs['genefuse']['format'])
 
-    logging.info('Find %s fusion(s)'%(len(fusions['consensus']),))
-    for ix, fusion in enumerate(fusions['consensus']):
-        logging.info('%s - %s' % (ix,fusion))
+    # Lumpy.    
+    logging.info('Parse Lumpy')
+    extractfusion.read_lumpy(g, finputs['lumpy']['path'], finputs['lumpy']['format'])
+
+    # Consensus.
+    logging.info('Build consensus with interval of %s pb'%(g.graph.graph['consensus_interval'],))
+    g.consensus_single()
+    g.consensus_genefuse_lumpy()
+   
+    # Define nodes of interest.
+    logging.info('Define nodes of interest')
+    g.define_node_interest()
+
+    # Filter same chrom.
+    logging.info('Filter nodes')
+    g.trim_node()
+
     # Write output.
     if foutput:
         logging.info('Write output')
-        extractfusion.write(foutput, finputs, fusions)
+        extractfusion.write_hmnfusion_json(foutput, finputs, g)
     logging.info("Analysis is finished")
 
 P_extract_fusion = AP_subparsers.add_parser('extractfusion', help=_cmd_extract_fusion.__doc__)
@@ -152,23 +143,26 @@ def _cmd_quantification(args):
     
     # Parsing fusions.
     logging.info('Get region')
-    fusions_consensus = []
+    g = graph.Graph()
     if args.region:
-        fusion = quantification.build_region(finputs['region'])
-        fusions.append(fusion)
+        fusion = Fusion()
+        region = Region(finputs['region'].split(':')[0], finputs['region'].split(':')[1].split('-')[0])
+        fusion.set_region(region)
+        fusion.evidence.raw = 0
+        g.add_node(fusion, 0, False, True)
     elif args.hmnfusion_json:
-        fusions = quantification.parse_hmnfusion_json(finputs['hmnfusion_json'])
+        g = extractfusion.read_hmnfusion_json(finputs['hmnfusion_json'])
 
     # Process
     logging.info('Calcul VAF fusion')
-    fusions = quantification.run(params, bed, fusions)
+    fusions = quantification.run(params, bed, g)
 
     for ix, fusion in enumerate(fusions):
         logging.info('%s - %s' % (ix,fusion))
     # Write output.
     if foutput:
         logging.info('Write output')
-        quantification.write(foutput, args.name, fusions)
+        quantification.write(foutput, args.name, g)
     logging.info("Analysis is finished")
 
 P_quantification = AP_subparsers.add_parser('quantification', help=_cmd_quantification.__doc__)

@@ -27,67 +27,68 @@ class TestEvidence(unittest.TestCase):
         cls._e2.clipped = -100
         cls._e2.depth = -150
         cls._e2d = dict(raw=15, split=40, mate=0, clipped=100, depth=150)     
-
+        cls._e2t = (15, 40, 0, 100, 150)
+    
         cls._e3 = Evidence()
         cls._e4 = Evidence(20)
                     
-	def test_init_empty(self):
-		"""Test init() empty"""
-		self.assertEqual(self._e3.raw,0)
-		self.assertEqual(self._e3.split,0)
+    def test_init_empty(self):
+        """Test init() empty"""
+        self.assertEqual(self._e3.raw,0)
+        self.assertEqual(self._e3.split,0)
         self.assertEqual(self._e3.mate,0)
         self.assertEqual(self._e3.clipped,0)
         self.assertEqual(self._e3.depth,0)
         
-	def test_init_filled(self):
-		"""Test init() filled"""
-		self.assertEqual(self._e4.raw,20)
-		self.assertEqual(self._e4.split,0)
+    def test_init_filled(self):
+        """Test init() filled"""
+        self.assertEqual(self._e4.raw,20)
+        self.assertEqual(self._e4.split,0)
         self.assertEqual(self._e4.mate,0)
         self.assertEqual(self._e4.clipped,0)
         self.assertEqual(self._e4.depth,0)
         
-	def test_getters(self):
-		"""Test getters attributes"""        
-		self.assertEqual(self._e1b.raw, 10)
-		self.assertEqual(self._e1b.split, 10)
-		self.assertEqual(self._e1b.mate, 10)
-		self.assertEqual(self._e1b.clipped, 10)
-		self.assertEqual(self._e1b.depth, 10)
-		
-		self.assertEqual(self._e2.raw, 15)
-		self.assertEqual(self._e2.split, 40)
-		self.assertEqual(self._e2.mate, 0)
-		self.assertEqual(self._e2.clipped, 100)										
-		self.assertEqual(self._e2.depth, 150)
-		
-	def test_setters(self):
-		"""Test setters attributes"""
-        cls._e3.raw = 0
-        cls._e3.split = 1      
-        cls._e3.mate = 2
-        cls._e3.clipped = 3
-        cls._e3.depth = 4
+    def test_getters(self):
+        """Test getters attributes"""        
+        self.assertEqual(self._e1b.raw, 10)
+        self.assertEqual(self._e1b.split, 10)
+        self.assertEqual(self._e1b.mate, 10)
+        self.assertEqual(self._e1b.clipped, 10)
+        self.assertEqual(self._e1b.depth, 10)
+        
+        self.assertEqual(self._e2.raw, 15)
+        self.assertEqual(self._e2.split, 40)
+        self.assertEqual(self._e2.mate, 0)
+        self.assertEqual(self._e2.clipped, 100)                                        
+        self.assertEqual(self._e2.depth, 150)
+        
+    def test_setters(self):
+        """Test setters attributes"""
+        self._e3.raw = 0
+        self._e3.split = 1      
+        self._e3.mate = 2
+        self._e3.clipped = 3
+        self._e3.depth = 4
 
-		self.assertEqual(self._e3.raw, 0)
-		self.assertEqual(self._e3.split, 1)
-		self.assertEqual(self._e3.mate, 2)
-		self.assertEqual(self._e3.clipped, 3)
-		self.assertEqual(self._e3.depth, 4)												
+        self.assertEqual(self._e3.raw, 0)
+        self.assertEqual(self._e3.split, 1)
+        self.assertEqual(self._e3.mate, 2)
+        self.assertEqual(self._e3.clipped, 3)
+        self.assertEqual(self._e3.depth, 4)                                                
 
-	def test_set_number(self):
-		"""Test set_number"""
-		self.assertEqual(Evidence.set_number("10"), 10)
-		self.assertEqual(Evidence.set_number("-10"), 10)
-		self.assertEqual(Evidence.set_number(15), 15)
-		self.assertEqual(Evidence.set_number(-300), -300)
-		self.assertEqual(Evidence.set_number("0.02"), 0)
-		self.assertEqual(Evidence.set_number("1.5"), 1)
-												
-	def test_equal(self):
-	    """Test equal"""
-		self.assertEqual(self._e1a, self._e1b)
-		self.assertNotEqual(self._e1a, self._e2)
+    def test_set_number(self):
+        """Test set_number"""
+        self.assertEqual(Evidence.set_number("10"), 10)
+        self.assertEqual(Evidence.set_number("-10"), 10)
+        self.assertEqual(Evidence.set_number(15), 15)
+        self.assertEqual(Evidence.set_number(-300), 300)
+        self.assertEqual(Evidence.set_number("0.02"), 0)
+        self.assertEqual(Evidence.set_number("1.5"), 1)
+                                                
+    def test_equal(self):
+        """Test equal"""
+        self.assertEqual(self._e1a, self._e1b)
+        self.assertNotEqual(self._e1a, self._e2)
 
     def test_get_vaf(self):
         """Test vaf fuction"""
@@ -98,14 +99,30 @@ class TestEvidence(unittest.TestCase):
         self.assertEqual(self._e2.get_vaf(), '0.93')
         self.assertEqual(self._e2.get_vaf(float), 0.93)
         self.assertEqual(self._e2.get_vaf(int), 0.93)
-                        
-	def test_to_dict(self):
-		"""Test to_dict()"""     
-		self.assertEqual(self._e2.to_dict(), self._e2d)
+    
+    def test_get_max_count(self):
+        """Test max count"""
+        self.assertEqual(self._e1a.get_max_count(), 30)
+        self.assertEqual(self._e2.get_max_count(), 140)
 
-	def test_from_dict(self):
-		"""Test from_dict()"""
-		self.assertEqual(self._e2, Evidence.from_dict(self._e2d))
+    def test_to_dict(self):
+        """Test to_dict()"""     
+        self.assertEqual(self._e2.to_dict(), self._e2d)
+
+    def test_from_dict(self):
+        """Test from_dict()"""
+        self.assertEqual(self._e2, Evidence.from_dict(self._e2d))
+
+    def test_key(self):
+        """Test key()"""
+        self.assertEqual(self._e2._Evidence__key(), self._e2t)
+
+    def test_compare(self):
+        """Test lt() and gt()"""
+        self.assertTrue(self._e1a == self._e1b)
+        self.assertTrue(self._e1a < self._e2)
+        self.assertTrue(self._e3 < self._e4)
+        self.assertTrue(self._e4 > self._e3)
 
 if __name__ == '__main__':
-	unittest.main()
+    unittest.main()

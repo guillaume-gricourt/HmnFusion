@@ -20,21 +20,27 @@ requirements:
     - python>=3,<=3.6.13
     - setuptools
     - beautifulsoup4>=4.9.0
+    - et-xmlfile
+    - matplotlib>=3.0.0
+    - lxml>=4.5.0
     - natsort>=7.0.0
+    - networkx>=2.4.0
     - numpy>=1.18.3
+    - openpyxl
     - pandas>=1.0.3
     - pysam>=0.15.4
-    - et-xmlfile
-    - openpyxl
   run:
     - python>=3,<=3.6.13
     - beautifulsoup4>=4.9.0
+    - et-xmlfile
+    - matplotlib>=3.0.0
+    - lxml>=4.5.0
     - natsort>=7.0.0
+    - networkx>=2.4.0
     - numpy>=1.18.3
+    - openpyxl
     - pandas>=1.0.3
     - pysam>=0.15.4
-    - et-xmlfile
-    - openpyxl
 
 test:
   imports:

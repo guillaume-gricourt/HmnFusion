@@ -2,27 +2,28 @@ class Region():
     """Class to build Region object"""
     def __init__(self, chrom='', position=0, orientation='undefined'):
         """Construct object with a chromosome, a position and an orientation"""
-        self.set_chrom(chrom)
-        self.set_position(position)
-        self.set_orientation(orientation)
+        self.chrom = chrom
+        self.position = position
+        self.orientation = orientation
 
     # Getters Setters
-    def get_chrom(self):
+    @property
+    def chrom(self):
         return self._chrom
-        
-    def set_chrom(self, chrom):
+    @chrom.setter
+    def chrom(self, chrom):
         self._chrom = chrom
-        
-    def get_position(self):
+    @property    
+    def position(self):
         return self._position
-        
-    def set_position(self, position):
+    @position.setter    
+    def position(self, position):
         self._position = int(position)
-
-    def get_orientation(self):
+    @property
+    def orientation(self):
         return self._orientation
-    
-    def set_orientation(self, orientation):
+    @orientation.setter
+    def orientation(self, orientation):
         if orientation in ['left', 'right']:
             self._orientation = orientation
         else:
@@ -52,15 +53,16 @@ class Region():
         return region
     
     # Meta functions
+    def __key(self):
+        return (self._orientation, self._chrom, self._position)
+
     def __repr__(self):
-        return '%s %s:%s'%(self._orientation, self._chrom, self._position)
+        return '%s %s:%s' %(self._orientation, self._chrom, self._position)
+
+    def __hash__(self):
+        return hash(self.__key())
 
     def __eq__(self, other):
-        return self._chrom == other.chrom and \
-            self._position == other.position and \
-            self._orientation == other.orientation
-
-    # Properties
-    chrom = property(get_chrom, set_chrom)
-    position = property(get_position, set_position)
-    orientation = property(get_orientation, set_orientation)
+        if isinstance(other, Region):
+            return self.__key() == other.__key()
+        return NotImplemented
