@@ -181,7 +181,7 @@ def write(filename, name, g):
         if g.graph.nodes[n]['fusion'].second.is_init():
             ident_1 += '-1'
         infos = ['SVTYPE=FUS']
-        infos += ['SOFT=%s'%(g.graph.nodes[n]['fusion'].software,)]
+        infos += ['SOFT=%s'%(g.graph.nodes[n]['fusion'].get_software(),)]
         infos += ['FROM=%s'%('-'.join(g.label_build_from(n)),)]
         infos += ['CONS=%s'%(g.graph.nodes[n]['is_consensus'],)]
         infos += ['VAF=%s'%(g.graph.nodes[n]['fusion'].evidence.get_vaf(),)]
