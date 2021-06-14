@@ -414,5 +414,26 @@ class TestGraph(unittest.TestCase):
         self.assertEqual(self.g4cgl.label_build_from(11), ['HMN_10', 'HMN_9'])
         self.assertEqual(self.g4cgl.label_build_from(12), ['GEN_1', 'LUM_5'])
 
+    def test_get_name_fusion(self):
+        """Test get_name(self) from fusion"""
+        self.helper_build_consensus_single()
+        self.helper_build_consensus_genefuse_lumpy()
+        # self.f6g (1) self.f2g (2) self.f3g (3) self.f4g (4) self.f6l (5) self.f2l (6) self.f3l (7) self.f4l (8)
+        # lev 1 : cons_genefuse (9) cons_lumpy (10)
+        # lev 2 : cons (11) cons alone (12)
+
+        self.assertEqual(self.g4cgl.graph.nodes[1]['fusion'].get_name(), 'GEN_1')
+        self.assertEqual(self.g4cgl.graph.nodes[2]['fusion'].get_name(), 'GEN_2')
+        self.assertEqual(self.g4cgl.graph.nodes[3]['fusion'].get_name(), 'GEN_3')
+        self.assertEqual(self.g4cgl.graph.nodes[4]['fusion'].get_name(), 'GEN_4')
+        self.assertEqual(self.g4cgl.graph.nodes[5]['fusion'].get_name(), 'LUM_5')
+        self.assertEqual(self.g4cgl.graph.nodes[6]['fusion'].get_name(), 'LUM_6')
+        self.assertEqual(self.g4cgl.graph.nodes[7]['fusion'].get_name(), 'LUM_7')
+        self.assertEqual(self.g4cgl.graph.nodes[8]['fusion'].get_name(), 'LUM_8')
+        self.assertEqual(self.g4cgl.graph.nodes[9]['fusion'].get_name(), 'HMN_9')
+        self.assertEqual(self.g4cgl.graph.nodes[10]['fusion'].get_name(), 'HMN_10')
+        self.assertEqual(self.g4cgl.graph.nodes[11]['fusion'].get_name(), 'HMN_11')
+        self.assertEqual(self.g4cgl.graph.nodes[12]['fusion'].get_name(), 'HMN_12')
+
 if __name__ == '__main__':
     unittest.main()
