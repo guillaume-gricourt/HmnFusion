@@ -155,10 +155,8 @@ def _cmd_quantification(args):
 
     # Process
     logging.info('Calcul VAF fusion')
-    fusions = quantification.run(params, bed, g)
+    quantification.run(params, bed, g)
 
-    for ix, fusion in enumerate(fusions):
-        logging.info('%s - %s' % (ix,fusion))
     # Write output.
     if foutput:
         logging.info('Write output')
