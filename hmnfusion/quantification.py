@@ -179,7 +179,7 @@ def write(filename, name, g):
             ident_1 += '-1'
         infos = ['SVTYPE=FUS']
         infos += ['SOFT=%s'%(g.graph.nodes[n]['fusion'].software,)]
-        infos += ['FROM=%s'%('-'.join(g.graph.label_build_from(n)),)]
+        infos += ['FROM=%s'%('-'.join(g.label_build_from(n)),)]
         infos += ['CONS=%s'%(g.graph.nodes[n]['is_consensus'],)]
         infos += ['VAF=%s'%(g.graph.nodes[n]['fusion'].evidence.get_vaf(),)]
         infos += ['DP=%s'%(g.graph.nodes[n]['fusion'].evidence.depth,)]
