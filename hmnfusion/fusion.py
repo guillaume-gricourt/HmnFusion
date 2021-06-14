@@ -108,6 +108,7 @@ class Fusion():
                 second=self._second.to_dict(), 
                 evidence=self._evidence.to_dict(),
                 number=self._number,
+                is_consensus=self._is_consensus,
                 software=self._software)
 
     @classmethod
@@ -118,6 +119,7 @@ class Fusion():
         f.second = region.Region.from_dict(data.get('second', {}))
         f.evidence = evidence.Evidence.from_dict(data.get('evidence', {}))
         f.number = data.get('number', 0)
+        f.is_consensus = data.get('is_consensus', False)
         f.software = data.get('software', '')
         return f
 

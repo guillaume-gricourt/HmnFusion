@@ -25,11 +25,13 @@ class TestFusion(unittest.TestCase):
         self.fusion_2.second = self.fusion_2_region_second
         self.fusion_2.evidence = self.evidence_2
         self.fusion_2.number = 1
+        self.fusion_2.is_consensus = False
 
         self.fusion_2_dict = dict(first=self.fusion_2_region_first.to_dict(), 
                 second=self.fusion_2_region_second.to_dict(), 
                 evidence=self.evidence_2.to_dict(),
                 number= 1,
+                is_consensus = False,
                 software='genefuse')
 
         # Three3
@@ -44,12 +46,14 @@ class TestFusion(unittest.TestCase):
         self.fusion_3.second = self.fusion_3_region_second
         self.fusion_3.evidence = self.evidence_3
         self.fusion_3.number = 2
+        self.fusion_3.is_consensus = True
         self.fusion_3.software = 'lumpy'
 
         self.fusion_3_dict = dict(first=self.fusion_3_region_first.to_dict(), 
                 second=self.fusion_3_region_second.to_dict(), 
                 evidence=self.evidence_3.to_dict(),
                 number = 2,
+                is_consensus = True,
                 software='lumpy')
 
     def test_init(self):
@@ -107,7 +111,7 @@ class TestFusion(unittest.TestCase):
         """Test get_name(self)"""
         self.assertEqual(self.fusion_1.get_name(), __app_name__[:3].upper()+'_0')
         self.assertEqual(self.fusion_2.get_name(), 'GEN_1')
-        self.assertEqual(self.fusion_3.get_name(), 'LUM_2')
+        self.assertEqual(self.fusion_3.get_name(), 'HMN_2')
 
     def get_is_consensus(self):
         """Test get_is_consensus(self)"""
