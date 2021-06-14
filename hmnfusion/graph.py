@@ -3,6 +3,8 @@ import itertools
 
 import networkx as nx
 
+from . import fusion
+
 from networkx.readwrite import json_graph
 
 class Graph():
@@ -161,6 +163,9 @@ class Graph():
         """Construct a Fusion object from a dict"""
         g = Graph()
         g.graph = nx.readwrite.json_graph.cytoscape_graph(data)
+        nodes = g.graph.nodes
+        for n in nodes:
+            g.graph.nodes[n]['fusion'] = fusion.Fusion.from_dict(g.graph.nodes[n]['fusion'])
         return g
 
     # Meta functions
