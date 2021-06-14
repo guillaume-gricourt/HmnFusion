@@ -43,10 +43,10 @@ def _cigar2position(cigars, start):
     return data
 
 
-def _select_bed(x, region):
+def _select_bed(x, r):
     """Select from a bed file, regions cross over an other region"""
-    if x['chrom'] == region.chrom:
-        if x['start'] <= region.position and x['end'] >= region.position:
+    if x['chrom'] == r.chrom:
+        if x['start'] <= r.position and x['end'] >= r.position:
             return True
     return False
 
@@ -82,13 +82,13 @@ def run(params, bed, g):
             continue
         # Init.
         bed_sel = pd.DataFrame(columns=bed.columns)
-        region = region.Region()
+        r = region.Region()
         if len(sub_first) == 1:
             bed_sel = sub_first
-            region = g.graph.nodes[n]['fusion'].first
+            r = g.graph.nodes[n]['fusion'].first
         elif len(sub_second) == 1:
             bed_sel = sub_second
-            region = g.graph.nodes[n]['fusion'].second
+            r = g.graph.nodes[n]['fusion'].second
             # Swap.
             g.graph.nodes[n]['fusion'].swap_region()
         else:
@@ -101,7 +101,7 @@ def run(params, bed, g):
                 continue
 
             cigar2pos = _cigar2position(aligned_segment.cigartuples, aligned_segment.reference_start)                
-            if not region.position in cigar2pos.keys(): 
+            if not r.position in cigar2pos.keys(): 
                 continue
 
             g.graph.nodes[n]['fusion'].evidence.depth += 1
@@ -120,9 +120,9 @@ def run(params, bed, g):
             # Count reads clipped.
             count_clipped = np.zeros((2, params['clipped']['interval']))
             for i in range(params['clipped']['interval']):
-                if cigar2pos.get(region.position-i-1,0) in [4, 5]:
+                if cigar2pos.get(r.position-i-1,0) in [4, 5]:
                     count_clipped[0][i] = 1
-                if cigar2pos.get(region.position+i+1,0) in [4, 5]:
+                if cigar2pos.get(r.position+i+1,0) in [4, 5]:
                     count_clipped[1][i] = 1
             
             if np.max(np.sum(count_clipped, axis=1)) >= params['clipped']['count']:
