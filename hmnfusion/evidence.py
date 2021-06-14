@@ -48,13 +48,11 @@ class Evidence(object):
     def get_sum(self):
         return self._split + self._mate + self._clipped
 
-    def get_vaf(self, form=str):
+    def get_vaf(self):
         vaf = 0
         if self._depth > 0:
-            vaf = self.get_sum() / self._depth
-        if form is str:
-            return '{:.2f}'.format(vaf)
-        return round(vaf, 2)
+            vaf = (self.get_sum() / self._depth) * 100
+        return '{:.2f}'.format(vaf)
 
     def get_max_count(self):
         return max([self._raw, self.get_sum()])
