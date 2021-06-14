@@ -173,9 +173,6 @@ def write(filename, name, g):
     for n in nodes:
         logging.debug(g.graph.nodes[n]['fusion'])
         # First.
-        print(g.graph.nodes[n])
-        print(g.graph.nodes[n]['fusion'].is_consensus)
-
         ident = g.graph.nodes[n]['fusion'].get_name()
         ident_1 = ident
         if g.graph.nodes[n]['fusion'].second.is_init():
