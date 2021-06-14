@@ -92,8 +92,8 @@ class TestEvidence(unittest.TestCase):
 
     def test_get_vaf(self):
         """Test vaf fuction"""
-        self.assertEqual(self._e1a.get_vaf(), '300.00')        
-        self.assertEqual(self._e2.get_vaf(), '93.33')
+        self.assertEqual(self._e1a.get_vaf(), '300,00')        
+        self.assertEqual(self._e2.get_vaf(), '93,33')
     
     def test_get_max_count(self):
         """Test max count"""

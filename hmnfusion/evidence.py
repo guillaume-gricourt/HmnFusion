@@ -52,7 +52,7 @@ class Evidence(object):
         vaf = 0
         if self._depth > 0:
             vaf = (self.get_sum() / self._depth) * 100
-        return '{:.2f}'.format(vaf)
+        return '{:.2f}'.format(vaf).replace('.', ',')
 
     def get_max_count(self):
         return max([self._raw, self.get_sum()])
