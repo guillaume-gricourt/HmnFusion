@@ -58,7 +58,7 @@ def run(params, bed, g):
     for n in nodes:
         g.graph.nodes[n]['is_skip'] = False
 
-        if not g.graph.nodes[n]['is_consensus']:
+        if not g.graph.nodes[n]['is_interest']:
             continue
         # Check fusion against bed.
         sub_first, sub_second = pd.DataFrame(columns=bed.columns), pd.DataFrame(columns=bed.columns)
