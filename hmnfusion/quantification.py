@@ -62,11 +62,11 @@ def run(params, bed, g):
             continue
         # Check fusion against bed.
         sub_first, sub_second = pd.DataFrame(columns=bed.columns), pd.DataFrame(columns=bed.columns)
-        if fusion.first.is_init():
-            sel = bed.apply(_select_bed, axis=1, args=(fusion.first,))
+        if g.graph.nodes[n]['fusion'].first.is_init():
+            sel = bed.apply(_select_bed, axis=1, args=(g.graph.nodes[n]['fusion'].first,))
             sub_first = bed[sel]
-        if fusion.second.is_init():
-            sel = bed.apply(_select_bed, axis=1, args=(fusion.second,))
+        if g.graph.nodes[n]['fusion'].second.is_init():
+            sel = bed.apply(_select_bed, axis=1, args=(g.graph.nodes[n]['fusion'].second,))
             sub_second = bed[sel]
         if len(sub_first) > 1 or len(sub_second) > 1:
             logging.warning('Fusion %s is found multiple times in bed -> skipping'%(g.graph.nodes[n]['fusion'],))
