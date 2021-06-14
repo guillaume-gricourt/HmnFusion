@@ -50,15 +50,15 @@ def _select_bed(x, region):
             return True
     return False
 
-def run(params, bed, graph):
+def run(params, bed, g):
     """Main function to quantify fusion"""
     alignment = pysam.AlignmentFile(params['falignment']['path'], params['falignment']['mode'])
 
-    nodes = graph.nodes
+    nodes = g.graph.nodes
     for n in nodes:
-        graph.nodes[n]['is_skip'] = False
+        g.graph.nodes[n]['is_skip'] = False
 
-        if not graph.nodes[n]['is_consensus']:
+        if not g.graph.nodes[n]['is_consensus']:
             continue
         # Check fusion against bed.
         sub_first, sub_second = pd.DataFrame(columns=bed.columns), pd.DataFrame(columns=bed.columns)
@@ -69,30 +69,30 @@ def run(params, bed, graph):
             sel = bed.apply(_select_bed, axis=1, args=(fusion.second,))
             sub_second = bed[sel]
         if len(sub_first) > 1 or len(sub_second) > 1:
-            logging.warning('Fusion %s is found multiple times in bed -> skipping'%(graph.nodes[n]['fusion'],))
-            graph.nodes[n]['is_skip'] = True
+            logging.warning('Fusion %s is found multiple times in bed -> skipping'%(g.graph.nodes[n]['fusion'],))
+            g.graph.nodes[n]['is_skip'] = True
         if len(sub_first) + len(sub_second) == 2 :
-            logging.warning('Fusion %s is found on left and right of breakpoint in the bed -> skipping'%(graph.nodes[n]['fusion'],))
-            graph.nodes[n]['is_skip'] = True
+            logging.warning('Fusion %s is found on left and right of breakpoint in the bed -> skipping'%(g.graph.nodes[n]['fusion'],))
+            g.graph.nodes[n]['is_skip'] = True
         if len(sub_first) + len(sub_second) == 0 :
-            logging.warning("Fusion %s isn't found on left or right of breakpoint in the bed -> skipping"%(graph.nodes[n]['fusion'],))
-            graph.nodes[n]['is_skip'] = True
+            logging.warning("Fusion %s isn't found on left or right of breakpoint in the bed -> skipping"%(g.graph.nodes[n]['fusion'],))
+            g.graph.nodes[n]['is_skip'] = True
 
-        if graph.nodes[n]['is_skip']:
+        if g.graph.nodes[n]['is_skip']:
             continue
         # Init.
         bed_sel = pd.DataFrame(columns=bed.columns)
         region = region.Region()
         if len(sub_first) == 1:
             bed_sel = sub_first
-            region = graph.nodes[n]['fusion'].first
+            region = g.graph.nodes[n]['fusion'].first
         elif len(sub_second) == 1:
             bed_sel = sub_second
-            region = graph.nodes[n]['fusion'].second
+            region = g.graph.nodes[n]['fusion'].second
             # Swap.
-            graph.nodes[n]['fusion'].swap_region()
+            g.graph.nodes[n]['fusion'].swap_region()
         else:
-            logging.warning("Fusion %s, something bad happened -> skipping"%(graph.nodes[n]['fusion'],))
+            logging.warning("Fusion %s, something bad happened -> skipping"%(g.graph.nodes[n]['fusion'],))
         count = dict(coverage=0, split=0, mate=0, clipped=0)
         # Run. 
         for aligned_segment in alignment.fetch(bed_sel.iloc[0, 0], bed_sel.iloc[0, 1], bed_sel.iloc[0, 2]):
@@ -104,17 +104,17 @@ def run(params, bed, graph):
             if not region.position in cigar2pos.keys(): 
                 continue
 
-            graph.nodes[n]['fusion'].evidence.depth += 1
+            g.graph.nodes[n]['fusion'].evidence.depth += 1
             # Count split reads.
             if aligned_segment.has_tag("SA"):
-                graph.nodes[n]['fusion'].evidence.split += 1
+                g.graph.nodes[n]['fusion'].evidence.split += 1
                 continue
             
             # Count other Chrom.
             if aligned_segment.is_paired:    
                 if not aligned_segment.mate_is_unmapped and not aligned_segment.is_unmapped:
                     if aligned_segment.next_reference_id != aligned_segment.reference_id:
-                        graph.nodes[n]['fusion'].evidence.mate += 1
+                        g.graph.nodes[n]['fusion'].evidence.mate += 1
                         continue
         
             # Count reads clipped.
@@ -126,7 +126,7 @@ def run(params, bed, graph):
                     count_clipped[1][i] = 1
             
             if np.max(np.sum(count_clipped, axis=1)) >= params['clipped']['count']:
-                graph.nodes[n]['fusion'].evidence.clipped += 1
+                g.graph.nodes[n]['fusion'].evidence.clipped += 1
 
 # Write.
 def _get_header():
@@ -157,7 +157,7 @@ def _get_header():
 
     return '\n'.join(header)
 
-def write(filename, name, graph):
+def write(filename, name, g):
     """Write a vcf file from a list of Fusion"""    
     data = {}
 
@@ -169,36 +169,36 @@ def write(filename, name, graph):
     columns = ['#CHROM', 'POS', 'ID', 'REF', 'ALT', 'QUAL', 'FILTER', 'INFO', 'FORMAT'] + [name]
     df = pd.DataFrame(columns=columns)
 
-    nodes = graph.nodes
+    nodes = g.graph.nodes
     for n in nodes:
-        logging.debug(graph.nodes[n]['fusion'])
+        logging.debug(g.graph.nodes[n]['fusion'])
         # First.
-        ident = graph.nodes[n]['fusion'].get_name()
+        ident = g.graph.nodes[n]['fusion'].get_name()
         ident_1 = ident
-        if graph.nodes[n]['fusion'].second.is_init():
+        if g.graph.nodes[n]['fusion'].second.is_init():
             ident_1 += '-1'
         infos = ['SVTYPE=FUS']
-        infos += ['SOFT=%s'%(graph.nodes[n]['fusion'].software,)]
-        infos += ['FROM=%s'%('-'.join(graph.label_build_from(n)),)]
-        infos += ['CONS=%s'%(graph.nodes[n]['is_consensus'],)]
-        infos += ['VAF=%s'%(graph.nodes[n]['fusion'].evidence.get_vaf(),)]
-        infos += ['DP=%s'%(graph.nodes[n]['fusion'].evidence.depth,)]
-        infos += ['SU=%s'%(graph.nodes[n]['fusion'].evidence.get_sum(),)]
-        infos += ['SR=%s'%(graph.nodes[n]['fusion'].evidence.split,)]
-        infos += ['PE=%s'%(graph.nodes[n]['fusion'].evidence.mate,)]
-        infos += ['SC=%s'%(graph.nodes[n]['fusion'].evidence.clipped,)]
+        infos += ['SOFT=%s'%(g.graph.nodes[n]['fusion'].software,)]
+        infos += ['FROM=%s'%('-'.join(g.graph.label_build_from(n)),)]
+        infos += ['CONS=%s'%(g.graph.nodes[n]['is_consensus'],)]
+        infos += ['VAF=%s'%(g.graph.nodes[n]['fusion'].evidence.get_vaf(),)]
+        infos += ['DP=%s'%(g.graph.nodes[n]['fusion'].evidence.depth,)]
+        infos += ['SU=%s'%(g.graph.nodes[n]['fusion'].evidence.get_sum(),)]
+        infos += ['SR=%s'%(g.graph.nodes[n]['fusion'].evidence.split,)]
+        infos += ['PE=%s'%(g.graph.nodes[n]['fusion'].evidence.mate,)]
+        infos += ['SC=%s'%(g.graph.nodes[n]['fusion'].evidence.clipped,)]
     
         infos = ':'.join(infos)
-        values = [graph.nodes[n]['fusion'].first.chrom, graph.nodes[n]['fusion'].first.position]
+        values = [g.graph.nodes[n]['fusion'].first.chrom, g.graph.nodes[n]['fusion'].first.position]
         values += [ident_1, 'N', '<FUS>', '.', '.', infos]
-        values += ['GT:VAF:DP:SU:SR:PE:SC', './.:%s:%s:%s:%s:%s'%(graph.nodes[n]['fusion'].evidence.depth, graph.nodes[n]['fusion'].evidence.get_vaf(), graph.nodes[n]['fusion'].evidence.get_sum(), graph.nodes[n]['fusion'].evidence.split, graph.nodes[n]['fusion'].evidence.mate, graph.nodes[n]['fusion'].evidence.clipped)]
+        values += ['GT:VAF:DP:SU:SR:PE:SC', './.:%s:%s:%s:%s:%s'%(g.graph.nodes[n]['fusion'].evidence.depth, g.graph.nodes[n]['fusion'].evidence.get_vaf(), g.graph.nodes[n]['fusion'].evidence.get_sum(), g.graph.nodes[n]['fusion'].evidence.split, g.graph.nodes[n]['fusion'].evidence.mate, g.graph.nodes[n]['fusion'].evidence.clipped)]
         df = df.append(pd.Series(values, index=columns), ignore_index=True)
 
         ident_2 = ident
-        if graph.nodes[n]['fusion'].second.is_init():
+        if g.graph.nodes[n]['fusion'].second.is_init():
             ident_2 += '-2'
             # Second.
             infos = ';'.join(['SVTYPE=FUS', 'DP=.', 'SU=.'])
-            values = [graph.nodes[n]['fusion'].second.chrom, graph.nodes[n]['fusion'].second.position, ident_2, 'N', '<FUS>', '.', '.', infos, 'GT:VAF:DP:SU:SR:PE:SC', './.:.:.']
+            values = [g.graph.nodes[n]['fusion'].second.chrom, g.graph.nodes[n]['fusion'].second.position, ident_2, 'N', '<FUS>', '.', '.', infos, 'GT:VAF:DP:SU:SR:PE:SC', './.:.:.']
             df = df.append(pd.Series(values, index=columns), ignore_index=True)
     df.to_csv(filename, mode='a', sep='\t', index=False)
