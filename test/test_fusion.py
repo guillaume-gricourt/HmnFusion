@@ -113,6 +113,12 @@ class TestFusion(unittest.TestCase):
         self.assertEqual(self.fusion_2.get_name(), 'GEN_1')
         self.assertEqual(self.fusion_3.get_name(), 'HMN_2')
 
+    def test_get_software(self):
+        """Test get_software(self)"""
+        self.assertEqual(self.fusion_1.get_software(), __app_name__)
+        self.assertEqual(self.fusion_2.get_software(), 'genefuse')
+        self.assertEqual(self.fusion_3.get_software(), __app_name__)
+
     def get_is_consensus(self):
         """Test get_is_consensus(self)"""
         self.assertTrue(self.fusion_1.get_is_consensus())

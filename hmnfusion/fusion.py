@@ -66,6 +66,11 @@ class Fusion():
             n = _version.__app_name__[:3].upper()
         return '%s_%s'%(n ,self._number)
 
+    def get_software(self):
+        if self.is_consensus:
+            return _version.__app_name__
+        return self.software
+
     def is_near(self, other, consensus_interval):
         """Check if fusion are near from an other with a distance parameter"""
         gaps = []
@@ -105,11 +110,11 @@ class Fusion():
     def to_dict(self):
         """Export Fusion as dict"""
         return dict(first=self._first.to_dict(), 
-                second=self._second.to_dict(), 
-                evidence=self._evidence.to_dict(),
-                number=self._number,
-                is_consensus=self._is_consensus,
-                software=self._software)
+                second=self.second.to_dict(), 
+                evidence=self.evidence.to_dict(),
+                number=self.number,
+                is_consensus=self.is_consensus,
+                software=self.software)
 
     @classmethod
     def from_dict(cls, data):
