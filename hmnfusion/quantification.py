@@ -191,7 +191,7 @@ def write(filename, name, g):
         infos = ':'.join(infos)
         values = [g.graph.nodes[n]['fusion'].first.chrom, g.graph.nodes[n]['fusion'].first.position]
         values += [ident_1, 'N', '<FUS>', '.', '.', infos]
-        values += ['GT:VAF:DP:SU:SR:PE:SC', './.:%s:%s:%s:%s:%s'%(g.graph.nodes[n]['fusion'].evidence.depth, g.graph.nodes[n]['fusion'].evidence.get_vaf(), g.graph.nodes[n]['fusion'].evidence.get_sum(), g.graph.nodes[n]['fusion'].evidence.split, g.graph.nodes[n]['fusion'].evidence.mate, g.graph.nodes[n]['fusion'].evidence.clipped)]
+        values += ['GT:VAF:DP:SU:SR:PE:SC', './.:%s:%s:%s:%s:%s:%s'%(g.graph.nodes[n]['fusion'].evidence.depth, g.graph.nodes[n]['fusion'].evidence.get_vaf(), g.graph.nodes[n]['fusion'].evidence.get_sum(), g.graph.nodes[n]['fusion'].evidence.split, g.graph.nodes[n]['fusion'].evidence.mate, g.graph.nodes[n]['fusion'].evidence.clipped)]
         df = df.append(pd.Series(values, index=columns), ignore_index=True)
 
         ident_2 = ident
@@ -199,6 +199,6 @@ def write(filename, name, g):
             ident_2 += '-2'
             # Second.
             infos = ';'.join(['SVTYPE=FUS', 'DP=.', 'SU=.'])
-            values = [g.graph.nodes[n]['fusion'].second.chrom, g.graph.nodes[n]['fusion'].second.position, ident_2, 'N', '<FUS>', '.', '.', infos, 'GT:VAF:DP:SU:SR:PE:SC', './.:.:.']
+            values = [g.graph.nodes[n]['fusion'].second.chrom, g.graph.nodes[n]['fusion'].second.position, ident_2, 'N', '<FUS>', '.', '.', infos, 'GT:VAF:DP:SU:SR:PE:SC', './.:.:.:.:.:.:.']
             df = df.append(pd.Series(values, index=columns), ignore_index=True)
     df.to_csv(filename, mode='a', sep='\t', index=False)
