@@ -112,7 +112,7 @@ def read_lumpy(graph, filename, form='vcf'):
 def read_hmnfusion_json(filename):
     """Read json file construct with exctractfusion command. Return a list of Fusion"""
     data = utils.read_json(filename)
-    return graph.Graph.graph.from_dict(data)
+    return graph.Graph.from_dict(data)
 
 def write_hmnfusion_json(filename, finputs, graph):
     """Write list of fusion to a json file"""
