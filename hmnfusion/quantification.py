@@ -192,7 +192,8 @@ def write(filename, name, g):
         values = [g.graph.nodes[n]['fusion'].first.chrom, g.graph.nodes[n]['fusion'].first.position]
         values += [ident_1, 'N', '<FUS>', '.', '.', infos]
         values += ['GT:VAF:DP:SU:SR:PE:SC']
-        values +=  ':'.join([str(x) for x in ['./.', g.graph.nodes[n]['fusion'].evidence.depth, g.graph.nodes[n]['fusion'].evidence.get_vaf(), g.graph.nodes[n]['fusion'].evidence.get_sum(), g.graph.nodes[n]['fusion'].evidence.split, g.graph.nodes[n]['fusion'].evidence.mate, g.graph.nodes[n]['fusion'].evidence.clipped]])
+        values += [':'.join([str(x) for x in ['./.', g.graph.nodes[n]['fusion'].evidence.depth, g.graph.nodes[n]['fusion'].evidence.get_vaf(), g.graph.nodes[n]['fusion'].evidence.get_sum(), g.graph.nodes[n]['fusion'].evidence.split, g.graph.nodes[n]['fusion'].evidence.mate, g.graph.nodes[n]['fusion'].evidence.clipped]])]
+
         df = df.append(pd.Series(values, index=columns), ignore_index=True)
 
         ident_2 = ident
