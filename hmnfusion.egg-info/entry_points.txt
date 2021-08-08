@@ -1,3 +1,0 @@
-[console_scripts]
-hmnfusion = hmnfusion.__main__:main
-
