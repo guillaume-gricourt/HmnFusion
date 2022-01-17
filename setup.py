@@ -6,8 +6,6 @@ import yaml
 from setuptools import setup
 
 
-setup_args = {}
-
 # Version
 version = ''
 fversion = glob.glob('**/_version.py')[0]
@@ -22,7 +20,7 @@ with open('environment.yml') as fid:
 name = env['name']
 install_requires = env['dependencies']
 
-setup_args.update(
+setup_args = dict(
     name=name,
     version=version,
     author='Guillaume Gricourt',
