@@ -105,8 +105,8 @@ jobs:
       - name: 'Badge version'
         uses: schneegans/dynamic-badges-action@v1.1.0
         with:
-          auth: ${{ secrets.GIST_SECRET }}
-          gistID: bf9621a9bd72420fdccbb65aaddcec66
+          auth: ${{ secrets.GIST }}
+          gistID: 5b62753442bc7c44ae2995299575af0a
           filename: version.json
           label: Version
           message: ${{ needs.Tag.outputs.tag }}
@@ -155,7 +155,10 @@ jobs:
 
   Build:
     needs: Commit
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}-latest
+    strategy:
+      matrix:
+        os: [ubuntu]
     env:
       CONDA_BLD_PATH: /tmp/conda-bld
     outputs:
@@ -174,7 +177,7 @@ jobs:
         uses: conda-incubator/setup-miniconda@v2
         with:
           miniconda-version: "latest"
-          environment-file: conda.recipe/conda_build_env.yaml
+          environment-file: conda.recipes/conda_build_env.yaml
           activate-environment: build
       - name: 'Set up output folder'
         run: |
