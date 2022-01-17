@@ -4,7 +4,13 @@ import re
 
 from pysam import VariantFile
 
-from . import (fusion, graph, region, utils, _version)
+from hmnfusion import (
+    _version,
+    fusion,
+    graph,
+    region,
+    utils
+)
 
 
 RE_GENEFUSE_LABEL = re.compile(r'[+-](\w+):(\d+)')

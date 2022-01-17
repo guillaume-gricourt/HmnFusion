@@ -3,9 +3,10 @@ import unittest
 import matplotlib.pyplot as plt
 import networkx as nx
 
-from hmnfusion.fusion import Fusion
-from hmnfusion.graph import Graph
-from hmnfusion.region import Region
+from hmnfusion import (
+    fusion,
+    graph
+)
 
 
 class TestGraph(unittest.TestCase):
@@ -115,9 +116,9 @@ class TestGraph(unittest.TestCase):
         self.r20 = dict(chrom='chr10', orientation='right', position=6000)
 
         # Fusion.
-        self.f1 = Fusion()
+        self.f1 = fusion.Fusion()
         # Same chr
-        self.f10g = Fusion.from_dict(
+        self.f10g = fusion.Fusion.from_dict(
             dict(
                 first=self.r19,
                 second=self.r20,
@@ -125,7 +126,7 @@ class TestGraph(unittest.TestCase):
                 software='genefuse'
             )
         )
-        self.f10l = Fusion.from_dict(
+        self.f10l = fusion.Fusion.from_dict(
             dict(
                 first=self.r20,
                 second=self.r19,
@@ -134,7 +135,7 @@ class TestGraph(unittest.TestCase):
             )
         )
         # Cons
-        self.f1g = Fusion.from_dict(
+        self.f1g = fusion.Fusion.from_dict(
             dict(
                 first=self.r1,
                 second=self.r2,
@@ -142,7 +143,7 @@ class TestGraph(unittest.TestCase):
                 software='genefuse'
             )
         )
-        self.f2g = Fusion.from_dict(
+        self.f2g = fusion.Fusion.from_dict(
             dict(
                 first=self.r3,
                 second=self.r4,
@@ -150,7 +151,7 @@ class TestGraph(unittest.TestCase):
                 software='genefuse'
             )
         )
-        self.f3g = Fusion.from_dict(
+        self.f3g = fusion.Fusion.from_dict(
             dict(
                 first=self.r6,
                 second=self.r5,
@@ -158,7 +159,7 @@ class TestGraph(unittest.TestCase):
                 software='genefuse'
             )
         )
-        self.f4g = Fusion.from_dict(
+        self.f4g = fusion.Fusion.from_dict(
             dict(
                 first=self.r7,
                 second=self.r8,
@@ -166,7 +167,7 @@ class TestGraph(unittest.TestCase):
                 software='genefuse'
             )
         )
-        self.f5g = Fusion.from_dict(
+        self.f5g = fusion.Fusion.from_dict(
             dict(
                 first=self.r9,
                 second=self.r10,
@@ -175,7 +176,7 @@ class TestGraph(unittest.TestCase):
             )
         )
         # Alone
-        self.f6g = Fusion.from_dict(
+        self.f6g = fusion.Fusion.from_dict(
             dict(
                 first=self.r12,
                 second=self.r11,
@@ -183,7 +184,7 @@ class TestGraph(unittest.TestCase):
                 software='genefuse'
             )
         )
-        self.f7g = Fusion.from_dict(
+        self.f7g = fusion.Fusion.from_dict(
             dict(
                 first=self.r13,
                 second=self.r14,
@@ -191,7 +192,7 @@ class TestGraph(unittest.TestCase):
                 software='genefuse'
             )
         )
-        self.f8g = Fusion.from_dict(
+        self.f8g = fusion.Fusion.from_dict(
             dict(
                 first=self.r15,
                 second=self.r16,
@@ -199,7 +200,7 @@ class TestGraph(unittest.TestCase):
                 software='genefuse'
             )
         )
-        self.f9g = Fusion.from_dict(
+        self.f9g = fusion.Fusion.from_dict(
             dict(
                 first=self.r18,
                 second=self.r17,
@@ -208,7 +209,7 @@ class TestGraph(unittest.TestCase):
             )
         )
         # Cons
-        self.f1l = Fusion.from_dict(
+        self.f1l = fusion.Fusion.from_dict(
             dict(
                 first=self.r1,
                 second=self.r2,
@@ -216,7 +217,7 @@ class TestGraph(unittest.TestCase):
                 software='lumpy'
             )
         )
-        self.f2l = Fusion.from_dict(
+        self.f2l = fusion.Fusion.from_dict(
             dict(
                 first=self.r3,
                 second=self.r4,
@@ -224,7 +225,7 @@ class TestGraph(unittest.TestCase):
                 software='lumpy'
             )
         )
-        self.f3l = Fusion.from_dict(
+        self.f3l = fusion.Fusion.from_dict(
             dict(
                 first=self.r6,
                 second=self.r5,
@@ -232,7 +233,7 @@ class TestGraph(unittest.TestCase):
                 software='lumpy'
             )
         )
-        self.f4l = Fusion.from_dict(
+        self.f4l = fusion.Fusion.from_dict(
             dict(
                 first=self.r7,
                 second=self.r8,
@@ -240,7 +241,7 @@ class TestGraph(unittest.TestCase):
                 software='lumpy'
             )
         )
-        self.f5l = Fusion.from_dict(
+        self.f5l = fusion.Fusion.from_dict(
             dict(
                 first=self.r9,
                 second=self.r10,
@@ -249,7 +250,7 @@ class TestGraph(unittest.TestCase):
             )
         )
         # Alone
-        self.f6l = Fusion.from_dict(
+        self.f6l = fusion.Fusion.from_dict(
             dict(
                 first=self.r12,
                 second=self.r11,
@@ -257,7 +258,7 @@ class TestGraph(unittest.TestCase):
                 software='lumpy'
             )
         )
-        self.f7l = Fusion.from_dict(
+        self.f7l = fusion.Fusion.from_dict(
             dict(
                 first=self.r13,
                 second=self.r14,
@@ -265,7 +266,7 @@ class TestGraph(unittest.TestCase):
                 software='lumpy'
             )
         )
-        self.f8l = Fusion.from_dict(
+        self.f8l = fusion.Fusion.from_dict(
             dict(
                 first=self.r15,
                 second=self.r16,
@@ -273,7 +274,7 @@ class TestGraph(unittest.TestCase):
                 software='lumpy'
             )
         )
-        self.f9l = Fusion.from_dict(
+        self.f9l = fusion.Fusion.from_dict(
             dict(
                 first=self.r18,
                 second=self.r17,
@@ -306,23 +307,30 @@ class TestGraph(unittest.TestCase):
         '''
 
         # Graph.
-        self.g1 = Graph()
-        self.g2 = Graph(0)
+        self.g1 = graph.Graph()
+        self.g2 = graph.Graph(0)
         self.nx1 = nx.Graph([(1, 2)])
         self.nx2 = nx.Graph([(4, 'a')])
 
         # Build graph genefuse.
-        self.g1ag = Graph()
+        self.g1ag = graph.Graph()
+        self.g2ag = graph.Graph()
+        self.g2bg = graph.Graph()
+        self.g3ag = graph.Graph()
+        self.g3bg = graph.Graph()
+        self.g3cg = graph.Graph()
+        self.g4ag = graph.Graph()
+        self.g4bg = graph.Graph()
+        self.g4cg = graph.Graph()
+        self.g4dg = graph.Graph()
+        self.g4eg = graph.Graph()
+
         self.g1ag.add_node(self.f1g)
-        self.g2ag, self.g2bg = Graph(), Graph()
         self.g2ag.add_nodes([self.f1g, self.f5g])
         self.g2bg.add_nodes([self.f1g, self.f2g])
-        self.g3ag, self.g3bg, self.g3cg = Graph(), Graph(), Graph()
         self.g3ag.add_nodes([self.f1g, self.f7g, self.f8g])
         self.g3bg.add_nodes([self.f7g, self.f3g, self.f4g])
         self.g3cg.add_nodes([self.f2g, self.f3g, self.f4g])
-        self.g4ag, self.g4bg, self.g4cg, self.g4dg, self.g4eg = \
-            Graph(), Graph(), Graph(), Graph(), Graph()
         self.g4ag.add_nodes([self.f3g, self.f4g, self.f7g, self.f8g])
         self.g4bg.add_nodes([self.f1g, self.f6g, self.f4g, self.f5g])
         self.g4cg.add_nodes([self.f6g, self.f2g, self.f3g, self.f4g])
@@ -333,17 +341,24 @@ class TestGraph(unittest.TestCase):
         self.gg += [self.g4eg]
 
         # Build graph lumpy.
-        self.g1al = Graph()
+        self.g1al = graph.Graph()
+        self.g2al = graph.Graph()
+        self.g2bl = graph.Graph()
+        self.g3al = graph.Graph()
+        self.g3bl = graph.Graph()
+        self.g3cl = graph.Graph()
+        self.g4al = graph.Graph()
+        self.g4bl = graph.Graph()
+        self.g4cl = graph.Graph()
+        self.g4dl = graph.Graph()
+        self.g4el = graph.Graph()
+
         self.g1al.add_node(self.f1l)
-        self.g2al, self.g2bl = Graph(), Graph()
         self.g2al.add_nodes([self.f1l, self.f5l])
         self.g2bl.add_nodes([self.f1l, self.f2l])
-        self.g3al, self.g3bl, self.g3cl = Graph(), Graph(), Graph()
         self.g3al.add_nodes([self.f1l, self.f7l, self.f8l])
         self.g3bl.add_nodes([self.f7l, self.f3l, self.f4l])
         self.g3cl.add_nodes([self.f2l, self.f3l, self.f4l])
-        self.g4al, self.g4bl, self.g4cl, self.g4dl, self.g4el = \
-            Graph(), Graph(), Graph(), Graph(), Graph()
         self.g4al.add_nodes([self.f3l, self.f4l, self.f7l, self.f8l])
         self.g4bl.add_nodes([self.f1l, self.f6l, self.f4l, self.f5l])
         self.g4cl.add_nodes([self.f6l, self.f2l, self.f3l, self.f4l])
@@ -364,12 +379,21 @@ class TestGraph(unittest.TestCase):
         ]
 
         # Build graph genefuse-lumpy.
-        self.g1agl = Graph()
+        self.g1agl = graph.Graph()
+        self.g2agl = graph.Graph()
+        self.g2bgl = graph.Graph()
+        self.g3agl = graph.Graph()
+        self.g3bgl = graph.Graph()
+        self.g3cgl = graph.Graph()
+        self.g4agl = graph.Graph()
+        self.g4bgl = graph.Graph()
+        self.g4cgl = graph.Graph()
+        self.g4dgl = graph.Graph()
+        self.g4egl = graph.Graph()
+
         self.g1agl.add_nodes([self.f1g, self.f1l])
-        self.g2agl, self.g2bgl = Graph(), Graph()
         self.g2agl.add_nodes([self.f1g, self.f5g, self.f1l, self.f5l])
         self.g2bgl.add_nodes([self.f1g, self.f2g, self.f1l, self.f2l])
-        self.g3agl, self.g3bgl, self.g3cgl = Graph(), Graph(), Graph()
         self.g3agl.add_nodes(
             [self.f1g, self.f7g, self.f8g, self.f1l, self.f7l, self.f8l]
         )
@@ -379,8 +403,6 @@ class TestGraph(unittest.TestCase):
         self.g3cgl.add_nodes(
             [self.f2g, self.f3g, self.f4g, self.f2l, self.f3l, self.f4l]
         )
-        self.g4agl, self.g4bgl, self.g4cgl, self.g4dgl, self.g4egl = \
-            Graph(), Graph(), Graph(), Graph(), Graph()
         self.g4agl.add_nodes(
             [
                 self.f3g,
@@ -456,7 +478,7 @@ class TestGraph(unittest.TestCase):
         ]
 
         # Build graph genefuse-lumpy.
-        self.g1at = Graph()
+        self.g1at = graph.Graph()
         self.g1at.add_nodes(
             [
                 self.f6g,

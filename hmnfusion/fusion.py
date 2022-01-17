@@ -2,7 +2,11 @@ import copy
 
 from json import JSONEncoder
 
-from . import (evidence, region, _version)
+from hmnfusion import (
+    _version,
+    evidence,
+    region
+)
 
 
 class Fusion():

@@ -2,14 +2,16 @@ import argparse
 import logging
 import os
 
-from .utils import abort
-from . import (
+from hmnfusion import (
+    _version,
     extractfusion,
-    quantification,
+    fusion,
+    graph,
     mmej,
-    graph
+    quantification,
+    region,
+    utils
 )
-from ._version import __version__
 
 
 AP = argparse.ArgumentParser(
@@ -41,17 +43,17 @@ def _cmd_extract_fusion(args):
     foutput = args.output_json
     # Check if all exists.
     if not os.path.isfile(finputs['genefuse']['path']):
-        abort(
+        utils.abort(
             AP,
             "File Genefuse doesn't exist : %s" % (finputs['genefuse']['path'],)
         )
     if not os.path.isfile(finputs['lumpy']['path']):
-        abort(
+        utils.abort(
             AP,
             "File Lumpy doesn't exist : %s" % (finputs['lumpy']['path'],)
         )
     if not os.path.isdir(os.path.dirname(os.path.abspath(foutput))):
-        abort(
+        utils.abort(
             AP,
             "Outdir doesn't exist : %s" % (foutput,)
         )
@@ -149,7 +151,7 @@ def _cmd_quantification(args):
     if args.hmnfusion_json:
         finputs['hmnfusion_json'] = args.hmnfusion_json
         if not os.path.isfile(finputs['hmnfusion_json']):
-            abort(
+            utils.abort(
                 AP,
                 "HmnFusion Json file doesn't exist : %s" % (
                     finputs['hmnfusion_json'],
@@ -157,7 +159,7 @@ def _cmd_quantification(args):
             )
     if args.region:
         if not quantification.check_region(args.region):
-            abort(
+            utils.abort(
                 AP,
                 "Region format is not well formated. \
                 Required <chrom>:<position>"
@@ -176,19 +178,19 @@ def _cmd_quantification(args):
     finputs['alignment']['path'] = falignment_path
     finputs['alignment']['mode'] = falignment_mode
     if not os.path.isfile(finputs['alignment']['path']):
-        abort(
+        utils.abort(
             AP,
             "Input alignment file doesn't exist : %s" % (
                 finputs['alignment']['path'],)
             )
     finputs['bed'] = args.input_bed
     if not os.path.isfile(args.input_bed):
-        abort(
+        utils.abort(
             AP,
             "Bed file doesn't exist : %s" % (args.input_bed,)
         )
     if not os.path.isdir(os.path.dirname(os.path.abspath(finputs['output']))):
-        abort(
+        utils.abort(
             AP,
             "Outdir doesn't exist : %s" % (finputs['output'],)
         )
@@ -243,14 +245,19 @@ def _cmd_quantification(args):
     logging.info('Get region')
     g = graph.Graph()
     if args.region:
-        fusion = Fusion()
-        region = Region(
+        fus = fusion.Fusion()
+        reg = region.Region(
             finputs['region'].split(':')[0],
             finputs['region'].split(':')[1].split('-')[0]
         )
-        fusion.set_region(region)
-        fusion.evidence.raw = 0
-        g.add_node(fusion, 0, False, True)
+        fus.set_region(reg)
+        fus.evidence.raw = 0
+        g.add_node(
+            fus,
+            0,
+            False,
+            True
+        )
     elif args.hmnfusion_json:
         g = extractfusion.read_hmnfusion_json(finputs['hmnfusion_json'])
 
@@ -322,17 +329,17 @@ def _cmd_mmej(args):
     # Grep args.
     for finput in args.input_vcf:
         if not os.path.isfile(finput):
-            abort(
+            utils.abort(
                 AP,
                 "Vcf file doesn't exist : %s" % (finput,)
             )
     if not os.path.isfile(args.reference):
-        abort(
+        utils.abort(
             AP,
             "Reference file doesn't exist : %s" % (args.reference,)
         )
     if not os.path.isdir(os.path.dirname(os.path.abspath(args.output_xlsx))):
-        abort(
+        utils.abort(
             AP,
             "Outdir doesn't exist : %s" % (args.output_xlsx,)
         )
@@ -395,7 +402,7 @@ P_mmej.set_defaults(func=_cmd_mmej)
 # Version.
 def print_version(_args):
     """Display this program's version"""
-    print(__version__)
+    print(_version.__version__)
 
 
 P_version = AP_subparsers.add_parser(

@@ -4,10 +4,7 @@ import pysam
 import numpy as np
 import pandas as pd
 
-from . import (
-    evidence,
-    fusion,
-    graph,
+from hmnfusion import (
     region
 )
 
