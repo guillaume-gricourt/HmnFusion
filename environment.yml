@@ -15,5 +15,6 @@ dependencies:
   - openpyxl
   - pandas
   - pysam
+  - pytest
   - python
   - pyyaml

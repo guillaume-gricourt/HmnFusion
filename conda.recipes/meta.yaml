@@ -17,6 +17,7 @@ build:
 requirements:
   build:
     - pip
+    - pytest
     - python
     - pyyaml
     - setuptools
@@ -31,6 +32,7 @@ requirements:
     - openpyxl
     - pandas
     - pysam
+    - pytest
     - python
     - pyyaml
 
