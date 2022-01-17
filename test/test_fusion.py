@@ -5,8 +5,10 @@ from hmnfusion.fusion import Fusion
 from hmnfusion.region import Region
 from hmnfusion._version import __app_name__
 
+
 class TestFusion(unittest.TestCase):
     """Class to test Fusion"""
+
     @classmethod
     def setUp(self):
         """Initialize 3 Fusions object"""
@@ -14,7 +16,13 @@ class TestFusion(unittest.TestCase):
         self.fusion_1 = Fusion()
 
         # Second
-        self.evidence_2_d = dict(raw=50, split=50, mate=0, clipped=10, depth=100)   
+        self.evidence_2_d = dict(
+            raw=50,
+            split=50,
+            mate=0,
+            clipped=10,
+            depth=100
+        )
         self.evidence_2 = Evidence.from_dict(self.evidence_2_d)
 
         self.fusion_2 = Fusion('genefuse')
@@ -27,15 +35,23 @@ class TestFusion(unittest.TestCase):
         self.fusion_2.number = 1
         self.fusion_2.is_consensus = False
 
-        self.fusion_2_dict = dict(first=self.fusion_2_region_first.to_dict(), 
-                second=self.fusion_2_region_second.to_dict(), 
-                evidence=self.evidence_2.to_dict(),
-                number= 1,
-                is_consensus = False,
-                software='genefuse')
+        self.fusion_2_dict = dict(
+            first=self.fusion_2_region_first.to_dict(),
+            second=self.fusion_2_region_second.to_dict(),
+            evidence=self.evidence_2.to_dict(),
+            number=1,
+            is_consensus=False,
+            software='genefuse'
+        )
 
         # Three3
-        self.evidence_3_d = dict(raw=50, split=100, mate=0, clipped=500, depth=500)   
+        self.evidence_3_d = dict(
+            raw=50,
+            split=100,
+            mate=0,
+            clipped=500,
+            depth=500
+        )
         self.evidence_3 = Evidence.from_dict(self.evidence_3_d)
 
         self.fusion_3 = Fusion()
@@ -49,12 +65,14 @@ class TestFusion(unittest.TestCase):
         self.fusion_3.is_consensus = True
         self.fusion_3.software = 'lumpy'
 
-        self.fusion_3_dict = dict(first=self.fusion_3_region_first.to_dict(), 
-                second=self.fusion_3_region_second.to_dict(), 
-                evidence=self.evidence_3.to_dict(),
-                number = 2,
-                is_consensus = True,
-                software='lumpy')
+        self.fusion_3_dict = dict(
+            first=self.fusion_3_region_first.to_dict(),
+            second=self.fusion_3_region_second.to_dict(),
+            evidence=self.evidence_3.to_dict(),
+            number=2,
+            is_consensus=True,
+            software='lumpy'
+        )
 
     def test_init(self):
         """Check initialize attributes values"""
@@ -69,9 +87,18 @@ class TestFusion(unittest.TestCase):
 
     def test_getters(self):
         """Test getters attributes"""
-        self.assertEqual(self.fusion_2.first, Region('chr9', 50, 'left'))
-        self.assertEqual(self.fusion_2.second, Region('chr22', 100, 'right'))
-        self.assertNotEqual(self.fusion_2.first, Region('chr22', 100, 'right'))
+        self.assertEqual(
+            self.fusion_2.first,
+            Region('chr9', 50, 'left')
+        )
+        self.assertEqual(
+            self.fusion_2.second,
+            Region('chr22', 100, 'right')
+        )
+        self.assertNotEqual(
+            self.fusion_2.first,
+            Region('chr22', 100, 'right')
+        )
 
         self.assertEqual(self.fusion_2.evidence, self.evidence_2)
         self.assertEqual(self.fusion_2.number, 1)
@@ -109,7 +136,10 @@ class TestFusion(unittest.TestCase):
 
     def test_get_name(self):
         """Test get_name(self)"""
-        self.assertEqual(self.fusion_1.get_name(), __app_name__[:3].upper()+'_0')
+        self.assertEqual(
+            self.fusion_1.get_name(),
+            __app_name__[:3].upper()+'_0'
+        )
         self.assertEqual(self.fusion_2.get_name(), 'GEN_1')
         self.assertEqual(self.fusion_3.get_name(), 'HMN_2')
 
@@ -160,7 +190,7 @@ class TestFusion(unittest.TestCase):
         self.assertTrue(self.fusion_2.is_near(self.fusion_3, 250))
         # Check chrom equal but two breakpoints are in the target
         self.assertTrue(self.fusion_2.is_near(self.fusion_3, 501))
-        
+
     def test_is_same_chrom(self):
         """Test is_same_chrom()"""
         self.assertFalse(self.fusion_2.is_same_chrom())
@@ -182,7 +212,7 @@ class TestFusion(unittest.TestCase):
         self.fusion_1.set_region(self.fusion_2_region_second)
         self.assertEqual(self.fusion_1.first, self.fusion_2_region_first)
         self.assertEqual(self.fusion_1.second, self.fusion_2_region_second)
-    
+
     def test_swap_region(self):
         """Test swap_region()"""
         self.assertEqual(self.fusion_2.first, self.fusion_2_region_first)
@@ -201,10 +231,10 @@ class TestFusion(unittest.TestCase):
     def test_from_dict(self):
         """Test from_dict()"""
         fusion_2 = Fusion.from_dict(self.fusion_2_dict)
-        self.assertEqual(self.fusion_2, self.fusion_2)
+        self.assertEqual(fusion_2, self.fusion_2)
 
         fusion_3 = Fusion.from_dict(self.fusion_3_dict)
-        self.assertEqual(self.fusion_3, self.fusion_3)
+        self.assertEqual(fusion_3, self.fusion_3)
 
     def test_greater_lether(self):
         """Test greather, lether metafunctions"""
@@ -220,6 +250,7 @@ class TestFusion(unittest.TestCase):
         fusion_1b = Fusion()
         self.assertEqual(self.fusion_1, fusion_1b)
         self.assertNotEqual(self.fusion_1, self.fusion_2)
+
 
 if __name__ == '__main__':
     unittest.main()
