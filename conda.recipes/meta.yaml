@@ -2,53 +2,47 @@
 {% set data = load_setup_py_data() %}
 
 package:
-  name: {{name}}
-  version: {{data.version}}
+  name: {{ name }}
+  version: {{ data.version }}
 
 source:
   path: ..
 
 build:
   number: 0
-  noarch: python
+  script: {{ PYTHON }} -m pip install --no-deps --ignore-installed -vvv .
   entry_points:
-    - {{name}}=hmnfusion.__main__:main
+    - {{ name }}=hmnfusion.__main__:main
 
 requirements:
   build:
     - pip
-    - python>=3,<=3.6.13
+    - pytest
+    - python
+    - pyyaml
     - setuptools
-    - beautifulsoup4>=4.9.0
-    - et-xmlfile
-    - matplotlib>=3.0.0
-    - lxml>=4.5.0
-    - natsort>=7.0.0
-    - networkx>=2.4.0
-    - numpy>=1.18.3
-    - openpyxl
-    - pandas>=1.0.3
-    - pysam>=0.15.4
   run:
-    - python>=3,<=3.6.13
-    - beautifulsoup4>=4.9.0
+    - beautifulsoup4
     - et-xmlfile
-    - matplotlib>=3.0.0
-    - lxml>=4.5.0
-    - natsort>=7.0.0
-    - networkx>=2.4.0
-    - numpy>=1.18.3
+    - matplotlib
+    - lxml
+    - natsort
+    - networkx
+    - numpy
     - openpyxl
-    - pandas>=1.0.3
-    - pysam>=0.15.4
+    - pandas
+    - pysam
+    - pytest
+    - python
+    - pyyaml
 
 test:
   imports:
     - hmnfusion
   commands:
-    - {{name}} version
+    - {{ name }} version
 
 about:
   home: https://github.com/guillaume-gricourt/HmnFusion
-  license: GPLv3+
+  license: Other
   license_file: LICENSE.md

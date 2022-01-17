@@ -1,0 +1,231 @@
+name: Build
+
+on:
+  push:
+    branches: [feat-cicd, stable]
+  pull_request:
+    branches: [stable]
+
+jobs:
+
+  Tag:
+    runs-on: ubuntu-latest
+    outputs:
+     tag: ${{ steps.tag.outputs.tag }}
+     changelog: ${{ steps.tag.outputs.changelog }}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: 'Bump version and push tag - dry run'
+        id: tag_raw
+        uses: mathieudutour/github-tag-action@v6.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          release_branches: stable
+          tag_prefix:
+          dry_run: true
+      - name: 'Format tag'
+        id: tag_label
+        env:
+          TAG: ${{ steps.tag_raw.outputs.new_tag }}
+        run: |
+          TAG=$(echo "$TAG" | cut -f1 -d "-")
+          echo "::set-output name=tag::$TAG"
+      - name: 'Bump version and push tag'
+        id: tag
+        uses: mathieudutour/github-tag-action@v6.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          release_branches: stable
+          custom_tag: ${{ steps.tag_label.outputs.tag }}
+
+  Changelog:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: 'Check file present'
+        run: |
+          [[ -f CHANGELOG.md ]] || touch CHANGELOG.md
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3 # Not needed with a .ruby-version file
+          bundler-cache: true # runs 'bundle install' and caches installed gems automatically
+      - name: 'Generate CHANGELOG'
+        env:
+          CHANGELOG_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gem install github_changelog_generator
+          AUTH=$(echo $GITHUB_REPOSITORY | sed -e 's/\// /g' | awk '{print "--user " $1 " --project " $2}')
+          echo $AUTH
+          github_changelog_generator $AUTH --no-unreleased
+      - name: 'Upload Artifact Changelog'
+        uses: actions/upload-artifact@v2
+        with:
+          name: changelog-artifact
+          path: CHANGELOG.md
+          retention-days: 1
+
+  Version:
+    needs: Tag
+    runs-on: ubuntu-latest
+    outputs:
+      version_dir: ${{ steps.update_version.outputs.version_dir }}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: stable
+      - name: 'Update _version.py'
+        id: update_version
+        env:
+          TAG: ${{ needs.Tag.outputs.tag }}
+        run: |
+          VERSION_PATH=$(find . -name _version.py | head -n 1)
+          sed -i "2s/.*/__version__ = \"$TAG\"/" "$VERSION_PATH"
+          echo "version_path=${VERSION_PATH}" >> $GITHUB_ENV
+          VERSION_DIR=$(dirname $VERSION_PATH)
+          echo "::set-output name=version_dir::${VERSION_DIR}"
+          echo "Version path: $VERSION_PATH"
+          echo "Version dir: $VERSION_DIR"
+      - name: 'Upload Artifact Version'
+        uses: actions/upload-artifact@v2
+        with:
+          name: version-artifact
+          path: ${{ env.version_path }}
+          retention-days: 1
+
+  Badge:
+    needs: Tag
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Badge version'
+        uses: schneegans/dynamic-badges-action@v1.1.0
+        with:
+          auth: ${{ secrets.GIST }}
+          gistID: 5b62753442bc7c44ae2995299575af0a
+          filename: version.json
+          label: Version
+          message: ${{ needs.Tag.outputs.tag }}
+          color: green
+
+  Commit:
+    needs: [ Tag, Changelog, Version ]
+    runs-on: ubuntu-latest
+    steps:
+      # Get Data
+      - name: 'Checkout'
+        uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: 'Download Artifact Version'
+        uses: actions/download-artifact@v2
+        with:
+          name: version-artifact
+          path: ${{ needs.Version.outputs.version_dir }}
+      - name: 'Download Artifact Changelog'
+        uses: actions/download-artifact@v2
+        with:
+          name: changelog-artifact
+      # Commit
+      - name: 'Commit files'
+        run: |
+          git config --local user.email "$GITHUB_EMAIL"
+          git config --local user.name "$GITHUB_USERNAME"
+          git add .
+          git commit -m "doc(changelog): update"
+        env:
+          GITHUB_USERNAME: guillaume-gricourt
+          GITHUB_EMAIL: guipagui@gmail.com
+
+      - name: 'Push changes'
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}
+      - name: 'Update main branch'
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: main
+
+  Build:
+    needs: Commit
+    runs-on: ${{ matrix.os }}-latest
+    strategy:
+      matrix:
+        os: [ubuntu]
+    env:
+      CONDA_BLD_PATH: /tmp/conda-bld
+    outputs:
+      package_path: ${{ steps.name_package.outputs.package_path }}
+      package_name: ${{ steps.name_package.outputs.package_name }}
+      package_label: ${{ steps.name_package.outputs.package_label }}
+    defaults:
+      run:
+        shell: bash -l {0} # activate env conda
+    steps:
+      - name: 'Checkout'
+        uses: actions/checkout@v2
+        with:
+          ref: stable
+      - name: 'Deploying miniconda'
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          miniconda-version: "latest"
+          environment-file: conda.recipes/conda_build_env.yaml
+          activate-environment: build
+      - name: 'Set up output folder'
+        run: |
+          mkdir -p ${CONDA_BLD_PATH}
+      - name: 'Build conda package'
+        run: |
+          conda build --output-folder ${CONDA_BLD_PATH} .
+      - name: 'Grep conda name package'
+        id: name_package
+        run: |
+          echo "Copy env variables"
+          PACKAGE_PATH=$(conda build --output --output-folder ${CONDA_BLD_PATH} .)
+          echo "::set-output name=package_path::${PACKAGE_PATH}"
+          PACKAGE_NAME=$(basename "${PACKAGE_PATH}")
+          echo "::set-output name=package_name::${PACKAGE_NAME}"
+          PACKAGE_LABEL=$(basename "${PACKAGE_NAME}" | sed 's/.tar.bz2//g')
+          echo "::set-output name=package_label::${PACKAGE_LABEL}"
+      - name: 'Upload Artifact Package'
+        uses: actions/upload-artifact@v2
+        with:
+          name: package-artifact
+          path: ${{ steps.name_package.outputs.package_path }}
+          retention-days: 1
+
+  Release:
+    needs: [ Tag, Build ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Download Artifact Package'
+        uses: actions/download-artifact@v2
+        with:
+          name: package-artifact
+      - name: 'Create Release'
+        uses: actions/create-release@v1
+        id: create_release
+        with:
+          tag_name: ${{ needs.Tag.outputs.tag }}
+          release_name: Release ${{ needs.Tag.outputs.tag }}
+          body: ${{ needs.Tag.outputs.changelog }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: 'Upload Release Asset'
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{ needs.Build.outputs.package_name }}
+          asset_name: ${{ needs.Build.outputs.package_label }}
+          asset_content_type: application/x-bzip2
