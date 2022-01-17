@@ -12,31 +12,40 @@ class Evidence(object):
     @property
     def raw(self):
         return self._raw
-    @raw.setter    
+
+    @raw.setter
     def raw(self, n):
         self._raw = Evidence.set_number(n)
+
     @property
     def split(self):
         return self._split
+
     @split.setter
     def split(self, n):
         self._split = Evidence.set_number(n)
+
     @property
     def mate(self):
         return self._mate
-    @mate.setter    
+
+    @mate.setter
     def mate(self, n):
         self._mate = Evidence.set_number(n)
+
     @property
     def clipped(self):
         return self._clipped
+
     @clipped.setter
     def clipped(self, n):
         self._clipped = Evidence.set_number(n)
+
     @property
     def depth(self):
         return self._depth
-    @depth.setter    
+
+    @depth.setter
     def depth(self, n):
         self._depth = Evidence.set_number(n)
 
@@ -60,11 +69,13 @@ class Evidence(object):
     # Import Export
     def to_dict(self):
         """Export object as a dict"""
-        return dict(raw=self._raw,
+        return dict(
+            raw=self._raw,
             split=self._split,
             mate=self._mate,
             clipped=self._clipped,
-            depth=self._depth)
+            depth=self._depth
+        )
 
     @classmethod
     def from_dict(cls, data):
@@ -74,12 +85,18 @@ class Evidence(object):
         e.split = Evidence.set_number(data.get('split', 0))
         e.mate = Evidence.set_number(data.get('mate', 0))
         e.clipped = Evidence.set_number(data.get('clipped', 0))
-        e.depth = Evidence.set_number(data.get('depth', 0))        
+        e.depth = Evidence.set_number(data.get('depth', 0))
         return e
-    
+
     # Meta functions
     def __key(self):
-        return (self._raw, self._split, self._mate, self._clipped, self._depth)
+        return (
+            self._raw,
+            self._split,
+            self._mate,
+            self._clipped,
+            self._depth
+        )
 
     def __repr__(self):
         return 'Ev ' + ' '.join(str(x) for x in self.__key())
