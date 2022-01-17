@@ -85,7 +85,7 @@ jobs:
           TAG: ${{ needs.Tag.outputs.tag }}
         run: |
           VERSION_PATH=$(find . -name _version.py | head -n 1)
-          echo "__version__ = \"$TAG\"" > "$VERSION_PATH"
+          sed -i "2s/.*/__version__ = \"$TAG\"/" "$VERSION_PATH"
           echo "version_path=${VERSION_PATH}" >> $GITHUB_ENV
           VERSION_DIR=$(dirname $VERSION_PATH)
           echo "::set-output name=version_dir::${VERSION_DIR}"
