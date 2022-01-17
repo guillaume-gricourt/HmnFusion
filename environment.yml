@@ -1,0 +1,19 @@
+name: hmnfusion
+channels:
+  - defaults
+  - conda-forge
+  - r
+  - bioconda
+dependencies:
+  - beautifulsoup4
+  - et-xmlfile
+  - matplotlib
+  - lxml
+  - natsort
+  - networkx
+  - numpy
+  - openpyxl
+  - pandas
+  - pysam
+  - python
+  - pyyaml
