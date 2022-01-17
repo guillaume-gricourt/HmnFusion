@@ -4,6 +4,7 @@ channels:
   - bioconda
   - defaults
 dependencies:
+  - anaconda-client
   - conda-build
   - pytest
   - python

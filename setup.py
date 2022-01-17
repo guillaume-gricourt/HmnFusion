@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-"""Analysis fusion from DNA genomics"""
 import glob
 import yaml
 
@@ -20,11 +18,17 @@ with open('environment.yml') as fid:
 name = env['name']
 install_requires = env['dependencies']
 
-setup_args = dict(
+setup(
     name=name,
     version=version,
-    author='Guillaume Gricourt',
-    author_email='guipagui@gmail.com',
+    description='Analysis fusion from DNA genomics',
+    author=['guillaume-gricourt'],
+    author_email=['guipagui@gmail.com'],
+    packages=[name],
+    include_package_data=True,
+    entry_points=[{
+        'console_scripts': ['hmnfusion=hmnfusion.__main__:main']
+    }],
     classifiers=[
         "Environment :: Console",
         "Intended Audience :: Science/Research",
@@ -38,10 +42,5 @@ setup_args = dict(
         "Topic :: Scientific/Engineering :: Bio-Informatics",
         "Topic :: Scientific/Engineering :: Medical Science Apps.",
     ],
-    packages=['hmnfusion'],
-    entry_points={
-        'console_scripts': ['hmnfusion=hmnfusion.__main__:main']
-    },
-    install_requires=install_requires,
+    install_requires=install_requires
 )
-setup(**setup_args)

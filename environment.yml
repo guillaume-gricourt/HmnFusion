@@ -1,9 +1,8 @@
 name: hmnfusion
 channels:
-  - defaults
   - conda-forge
-  - r
   - bioconda
+  - defaults
 dependencies:
   - beautifulsoup4
   - et-xmlfile
