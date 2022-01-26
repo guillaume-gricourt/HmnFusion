@@ -255,11 +255,11 @@ class Graph():
 
     # Meta functions
     def __key(self):
-        return (self._graph, self.graph.graph["consensus_interval"])
+        return (self.graph, self.graph.graph["consensus_interval"])
 
     def __repr__(self):
         return "Graph %s %s" % (
-            self._graph,
+            self.graph,
             self.graph.graph["consensus_interval"]
         )
 

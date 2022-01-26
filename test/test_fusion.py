@@ -150,21 +150,21 @@ class TestFusion(unittest.TestCase):
         self.assertEqual(self.fusion_3.get_software(), __app_name__)
 
     def get_is_consensus(self):
-        """Test get_is_consensus(self)"""
-        self.assertTrue(self.fusion_1.get_is_consensus())
-        self.assertFalse(self.fusion_2.get_is_consensus())
-        self.assertFalse(self.fusion_3.get_is_consensus())
+        """Test get is_consensus(self)"""
+        self.assertTrue(self.fusion_1.is_consensus)
+        self.assertFalse(self.fusion_2.is_consensus)
+        self.assertFalse(self.fusion_3.is_consensus)
 
     def set_is_consensus(self):
-        """Test get_is_consensus(self)"""
-        self.assertTrue(self.fusion_1.get_is_consensus())
-        self.fusion_1.set_is_consensus()
-        self.assertTrue(self.fusion_1.get_is_consensus())
+        """Test set is_consensus(self)"""
+        self.assertTrue(self.fusion_1.is_consensus)
+        self.fusion_1.is_consensus = True
+        self.assertTrue(self.fusion_1.is_consensus)
         self.assertEqual(self.fusion_1.software, __app_name__)
 
-        self.assertFalse(self.fusion_2.get_is_consensus())
-        self.fusion_2.set_is_consensus()
-        self.assertTrue(self.fusion_2.get_is_consensus())
+        self.assertFalse(self.fusion_2.is_consensus)
+        self.fusion_2.is_consensus = True
+        self.assertTrue(self.fusion_2.is_consensus)
         self.assertEqual(self.fusion_2.software, __app_name__)
 
     def test_is_near(self):

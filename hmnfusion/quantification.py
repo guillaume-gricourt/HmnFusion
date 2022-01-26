@@ -12,6 +12,7 @@ def check_region(region):
         return True
     return False
 
+
 def read_bed(filename):
     """Read a bed file. Return a dataframe"""
     isHeader = 0
