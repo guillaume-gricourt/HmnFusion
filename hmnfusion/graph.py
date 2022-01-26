@@ -2,10 +2,7 @@ import copy
 import itertools
 
 import networkx as nx
-
-from hmnfusion import (
-    fusion as hmn_fusion
-)
+from hmnfusion import fusion as hmn_fusion
 
 
 class Graph():
@@ -18,7 +15,7 @@ class Graph():
         """Construct Fusion object with a software name (optional)"""
         self._g = nx.Graph()
         self.update_graph_metadata(
-            {'consensus_interval': consensus_interval}
+            {"consensus_interval": consensus_interval}
         )
 
     # Getters Setters
@@ -69,12 +66,12 @@ class Graph():
     ):
         fusion = None
         if level == 1:
-            if self.graph.nodes[nl]['fusion'] > self.graph.nodes[nr]['fusion']:
-                fusion = copy.deepcopy(self.graph.nodes[nl]['fusion'])
+            if self.graph.nodes[nl]["fusion"] > self.graph.nodes[nr]["fusion"]:
+                fusion = copy.deepcopy(self.graph.nodes[nl]["fusion"])
             else:
-                fusion = copy.deepcopy(self.graph.nodes[nr]['fusion'])
+                fusion = copy.deepcopy(self.graph.nodes[nr]["fusion"])
         else:
-            fusion = copy.deepcopy(self.graph.nodes[nl]['fusion'])
+            fusion = copy.deepcopy(self.graph.nodes[nl]["fusion"])
         fusion.is_consensus = True
         node_fusion = self.add_node(fusion, level, True)
         self.graph.add_edge(nl, node_fusion)
@@ -82,32 +79,32 @@ class Graph():
 
     def _grapp_subgraph(
         self,
-        software=''
+        software=""
     ):
         g = nx.subgraph(
             self.graph,
             [
                 x for x in self.graph.nodes
-                if self.graph.nodes[x]['fusion'].software == software
+                if self.graph.nodes[x]["fusion"].software == software
             ]
         )
-        cons = [x for x in g.nodes if g.nodes[x]['is_consensus']]
+        cons = [x for x in g.nodes if g.nodes[x]["is_consensus"]]
         alone = [x for x in g.nodes if self.graph.degree[x] == 0]
         return (g, cons, alone)
 
     def consensus_single(self):
         """Create fusion consensus for each software"""
         softwares = set(
-            [self.graph.nodes[x]['fusion'].software for x in self.graph.nodes]
+            [self.graph.nodes[x]["fusion"].software for x in self.graph.nodes]
         )
         softwares = sorted(list(softwares))
         for software in softwares:
             g, cons, alone = self._grapp_subgraph(software)
             nodes = g.nodes
             for fl, fr in itertools.combinations(nodes, 2):
-                if self.graph.nodes[fl]['fusion'].is_near(
-                    self.graph.nodes[fr]['fusion'],
-                    self.graph.graph['consensus_interval']
+                if self.graph.nodes[fl]["fusion"].is_near(
+                    self.graph.nodes[fr]["fusion"],
+                    self.graph.graph["consensus_interval"]
                 ):
                     if self.graph.degree[fl] > 0 or self.graph.degree[fr] > 0:
                         neighbors = list(nx.neighbors(self.graph, fl))
@@ -117,18 +114,18 @@ class Graph():
                             self.graph.add_edge(nc, fr)
                             # Update.
                             if (
-                                self.graph.nodes[fl]['fusion'] >
-                                self.graph.nodes[nc]['fusion']
+                                self.graph.nodes[fl]["fusion"] >
+                                self.graph.nodes[nc]["fusion"]
                             ):
-                                self.graph.nodes[nc]['fusion'].update(
-                                    self.graph.nodes[fl]['fusion']
+                                self.graph.nodes[nc]["fusion"].update(
+                                    self.graph.nodes[fl]["fusion"]
                                 )
                             if (
-                                self.graph.nodes[fr]['fusion'] >
-                                self.graph.nodes[nc]['fusion']
+                                self.graph.nodes[fr]["fusion"] >
+                                self.graph.nodes[nc]["fusion"]
                             ):
-                                self.graph.nodes[nc]['fusion'].update(
-                                    self.graph.nodes[fr]['fusion']
+                                self.graph.nodes[nc]["fusion"].update(
+                                    self.graph.nodes[fr]["fusion"]
                                 )
                     else:
                         self._add_node_consensus(fl, fr)
@@ -136,76 +133,76 @@ class Graph():
     def consensus_genefuse_lumpy(self):
         """ """
         g_genefuse, n_genefuse_consensus, n_genefuse_alone = \
-            self._grapp_subgraph('genefuse')
+            self._grapp_subgraph("genefuse")
         # Link lumpy to genefuse consensus.
         for n_genefuse in n_genefuse_consensus:
             g_lumpy, n_lumpy_consensus, n_lumpy_alone = \
-                self._grapp_subgraph('lumpy')
+                self._grapp_subgraph("lumpy")
             for n_lumpy in n_lumpy_consensus + n_lumpy_alone:
-                if self.graph.nodes[n_genefuse]['fusion'].is_near(
-                    self.graph.nodes[n_lumpy]['fusion'],
-                    self.graph.graph['consensus_interval']
+                if self.graph.nodes[n_genefuse]["fusion"].is_near(
+                    self.graph.nodes[n_lumpy]["fusion"],
+                    self.graph.graph["consensus_interval"]
                 ):
                     self._add_node_consensus(n_genefuse, n_lumpy, 2)
         # Link lumpy to genefuse alone.
         for n_genefuse in n_genefuse_alone:
             g_lumpy, n_lumpy_consensus, n_lumpy_alone = \
-                self._grapp_subgraph('lumpy')
+                self._grapp_subgraph("lumpy")
             for n_lumpy in n_lumpy_consensus + n_lumpy_alone:
-                if self.graph.nodes[n_genefuse]['fusion'].is_near(
-                    self.graph.nodes[n_lumpy]['fusion'],
-                    self.graph.graph['consensus_interval']
+                if self.graph.nodes[n_genefuse]["fusion"].is_near(
+                    self.graph.nodes[n_lumpy]["fusion"],
+                    self.graph.graph["consensus_interval"]
                 ):
                     self._add_node_consensus(n_genefuse, n_lumpy, 2)
 
     def select_node_interest(self):
-        return [x for x in self.graph.nodes if self.graph[x]['is_interest']]
+        return [x for x in self.graph.nodes if self.graph[x]["is_interest"]]
 
     def define_node_interest(self):
         """ """
         g_lumpy, n_lumpy_consensus, n_lumpy_alone = \
-            self._grapp_subgraph('lumpy')
+            self._grapp_subgraph("lumpy")
         n_lumpy_consensus = sorted(
             n_lumpy_consensus,
             reverse=True,
-            key=lambda x: self.graph.nodes[x]['fusion']
+            key=lambda x: self.graph.nodes[x]["fusion"]
         )
         n_lumpy_alone = sorted(
             n_lumpy_alone,
             reverse=True,
-            key=lambda x: self.graph.nodes[x]['fusion']
+            key=lambda x: self.graph.nodes[x]["fusion"]
         )
         nodes = list(self.graph.nodes)
 
         interest = 0
         for n in nodes:
-            if self.graph.nodes[n]['level'] == 2:
-                self.graph.nodes[n]['is_interest'] = True
+            if self.graph.nodes[n]["level"] == 2:
+                self.graph.nodes[n]["is_interest"] = True
                 interest += 1
         if interest == 0:
             for n in nodes:
                 if (
-                    self.graph.nodes[n]['level'] == 1 and
-                    self.graph.nodes[n]['is_consensus'] and
-                    self.graph.nodes[n]['fusion'].software == 'genefuse'
+                    self.graph.nodes[n]["level"] == 1 and
+                    self.graph.nodes[n]["is_consensus"] and
+                    self.graph.nodes[n]["fusion"].software == "genefuse"
                 ):
-                    self.graph.nodes[n]['is_interest'] = True
+                    self.graph.nodes[n]["is_interest"] = True
                     interest += 1
         if interest == 0:
             for n in nodes:
                 if (
-                    self.graph.nodes[n]['level'] == 0 and
-                    self.graph.nodes[n]['fusion'].software == 'genefuse'
+                    self.graph.nodes[n]["level"] == 0 and
+                    self.graph.nodes[n]["fusion"].software == "genefuse"
                 ):
-                    self.graph.nodes[n]['is_interest'] = True
+                    self.graph.nodes[n]["is_interest"] = True
                     interest += 1
         if interest == 0:
             if len(n_lumpy_consensus) > 0:
-                self.graph.nodes[n_lumpy_consensus[0]]['is_interest'] = True
+                self.graph.nodes[n_lumpy_consensus[0]]["is_interest"] = True
                 interest += 1
         if interest == 0:
             if len(n_lumpy_alone) > 0:
-                self.graph.nodes[n_lumpy_alone[0]]['is_interest'] = True
+                self.graph.nodes[n_lumpy_alone[0]]["is_interest"] = True
                 interest += 1
         return interest
 
@@ -215,26 +212,26 @@ class Graph():
         """
         nodes = list(self.graph.nodes)
         for n in nodes:
-            if self.graph.nodes[n]['fusion'].is_same_chrom():
+            if self.graph.nodes[n]["fusion"].is_same_chrom():
                 self.graph.remove_node(n)
         nodes = list(self.graph.nodes)
         for n in nodes:
             if (
-                self.graph.nodes[n]['is_consensus'] and
+                self.graph.nodes[n]["is_consensus"] and
                 self.graph.degree[n] == 0
             ):
                 self.graph.remove_node(n)
 
     def label_build_from(self, n):
         labels = []
-        if self.graph.nodes[n]['level'] > 0:
+        if self.graph.nodes[n]["level"] > 0:
             candidates = nx.neighbors(self.graph, n)
             candidates = [
                 x for x in candidates
-                if self.graph.nodes[x]['level'] < self.graph.nodes[n]['level']
+                if self.graph.nodes[x]["level"] < self.graph.nodes[n]["level"]
             ]
             labels = [
-                self.graph.nodes[x]['fusion'].get_name() for x in candidates
+                self.graph.nodes[x]["fusion"].get_name() for x in candidates
             ]
         labels.sort()
         return labels
@@ -251,19 +248,19 @@ class Graph():
         g.graph = nx.readwrite.json_graph.cytoscape_graph(data)
         nodes = g.graph.nodes
         for n in nodes:
-            g.graph.nodes[n]['fusion'] = hmn_fusion.Fusion.from_dict(
-                g.graph.nodes[n]['fusion']
+            g.graph.nodes[n]["fusion"] = hmn_fusion.Fusion.from_dict(
+                g.graph.nodes[n]["fusion"]
             )
         return g
 
     # Meta functions
     def __key(self):
-        return (self._graph, self.graph.graph['consensus_interval'])
+        return (self._graph, self.graph.graph["consensus_interval"])
 
     def __repr__(self):
-        return 'Graph %s %s' % (
+        return "Graph %s %s" % (
             self._graph,
-            self.graph.graph['consensus_interval']
+            self.graph.graph["consensus_interval"]
         )
 
     def __hash__(self):

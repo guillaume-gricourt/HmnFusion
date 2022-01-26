@@ -1,12 +1,7 @@
 import copy
-
 from json import JSONEncoder
 
-from hmnfusion import (
-    _version,
-    evidence,
-    region
-)
+from hmnfusion import _version, evidence, region
 
 
 class Fusion():
@@ -82,7 +77,7 @@ class Fusion():
         n = self.software[:3].upper()
         if self.is_consensus:
             n = _version.__app_name__[:3].upper()
-        return '%s_%s' % (n, self._number)
+        return "%s_%s" % (n, self._number)
 
     def get_software(self):
         if self.is_consensus:
@@ -149,12 +144,12 @@ class Fusion():
     def from_dict(cls, data):
         """Construct a Fusion object from a dict"""
         f = Fusion()
-        f.first = region.Region.from_dict(data.get('first', {}))
-        f.second = region.Region.from_dict(data.get('second', {}))
-        f.evidence = evidence.Evidence.from_dict(data.get('evidence', {}))
-        f.number = data.get('number', 0)
-        f.is_consensus = data.get('is_consensus', False)
-        f.software = data.get('software', '')
+        f.first = region.Region.from_dict(data.get("first", {}))
+        f.second = region.Region.from_dict(data.get("second", {}))
+        f.evidence = evidence.Evidence.from_dict(data.get("evidence", {}))
+        f.number = data.get("number", 0)
+        f.is_consensus = data.get("is_consensus", False)
+        f.software = data.get("software", "")
         return f
 
     # Meta functions
@@ -167,7 +162,7 @@ class Fusion():
         )
 
     def __repr__(self):
-        return '%s: %s' % (
+        return "%s: %s" % (
             self.get_name(),
             str(self.evidence)
         )

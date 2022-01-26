@@ -1,17 +1,9 @@
-import bs4
 import json
 import re
 
+import bs4
+from hmnfusion import _version, fusion, graph, region, utils
 from pysam import VariantFile
-
-from hmnfusion import (
-    _version,
-    fusion,
-    graph,
-    region,
-    utils
-)
-
 
 RE_GENEFUSE_LABEL = re.compile(r'[+-](\w+):(\d+)')
 RE_GENEFUSE_TOTAL = re.compile(r'total:\s{1}(\d+),')
@@ -22,15 +14,15 @@ RE_LUMPY_ALT = re.compile(r'(\w+):(\d+)')
 # Genefuse.
 def parse_genefuse_label(label):
     """Parse Genefuse item. Return Fusion"""
-    f = fusion.Fusion('genefuse')
+    f = fusion.Fusion("genefuse")
     # Fusion breakpoint.
-    sleft, sright = label.split('___')
+    sleft, sright = label.split("___")
     m = re.search(RE_GENEFUSE_LABEL, sleft)
     if m:
         r = region.Region(
             m.group(1),
             m.group(2),
-            'left'
+            "left"
         )
         f.set_region(r)
     m = re.search(RE_GENEFUSE_LABEL, sright)
@@ -38,7 +30,7 @@ def parse_genefuse_label(label):
         r = region.Region(
             m.group(1),
             m.group(2),
-            'right'
+            "right"
         )
         f.set_region(r)
     # Evidence.
@@ -52,8 +44,8 @@ def parse_genefuse_label(label):
 def read_genefuse_json(graph, filename):
     """Read Genefuse json file. Return list of Fusion"""
     data = utils.read_json(filename)
-    for label in data.get('fusions', []).keys():
-        if not label.lower().startswith('fusion'):
+    for label in data.get("fusions", []).keys():
+        if not label.lower().startswith("fusion"):
             continue
         graph.add_node(parse_genefuse_label(label))
 
@@ -62,7 +54,7 @@ def read_genefuse_html(graph, filename):
     """Read Genefuse html file. Return list of Fusion"""
     # Read.
     bhtml = ""
-    with open(filename, encoding='utf-8') as fid:
+    with open(filename, encoding="utf-8") as fid:
         bhtml = fid.read()
     soup = bs4.BeautifulSoup(bhtml, features="lxml")
 
@@ -75,11 +67,11 @@ def read_genefuse_html(graph, filename):
         graph.add_node(parse_genefuse_label(label))
 
 
-def read_genefuse(graph, filename, form='json'):
+def read_genefuse(graph, filename, form="json"):
     """Choose good function to read genefuse file"""
-    if form == 'json':
+    if form == "json":
         read_genefuse_json(graph, filename)
-    elif form == 'html':
+    elif form == "html":
         read_genefuse_html(graph, filename)
 
 
@@ -91,17 +83,17 @@ def read_lumpy_vcf(graph, flumpy):
     for record in vcf_in.fetch():
         # Check if variant is already seen.
         if (
-            'SVTYPE' in record.info.keys() and
-            record.info.get('SVTYPE') != 'BND'
+            "SVTYPE" in record.info.keys() and
+            record.info.get("SVTYPE") != "BND"
         ):
             continue
-        ident_number, ident_paired = record.id.split('_')
+        ident_number, ident_paired = record.id.split("_")
         if ident_number in treats:
             continue
         treats.add(ident_number)
 
         # Build fusion.
-        f = fusion.Fusion('lumpy')
+        f = fusion.Fusion("lumpy")
         r = region.Region(
             record.chrom,
             int(record.pos)-1
@@ -121,16 +113,16 @@ def read_lumpy_vcf(graph, flumpy):
         f.set_region(r)
 
         evidence = 0
-        if 'SU' in record.info.keys():
-            evidence = record.info.get('SU')[0]
+        if "SU" in record.info.keys():
+            evidence = record.info.get("SU")[0]
         f.evidence.raw = evidence
 
         graph.add_node(f)
 
 
-def read_lumpy(graph, filename, form='vcf'):
+def read_lumpy(graph, filename, form="vcf"):
     """Choose good function to read genefuse file"""
-    if form == 'vcf':
+    if form == "vcf":
         read_lumpy_vcf(graph, filename)
 
 
@@ -150,13 +142,13 @@ def write_hmnfusion_json(
 ):
     """Write list of fusion to a json file"""
     data = {}
-    data['inputs'] = finputs
-    data['software'] = dict(
+    data["inputs"] = finputs
+    data["software"] = dict(
         name=_version.__app_name__,
         version=_version.__version__
     )
     graph.update_graph_metadata(data)
     data = graph.to_dict()
 
-    with open(filename, 'w') as fod:
+    with open(filename, "w") as fod:
         json.dump(data, fod, cls=fusion.FusionEncoder)

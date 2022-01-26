@@ -1,12 +1,9 @@
 import logging
-import pysam
 
 import numpy as np
 import pandas as pd
-
-from hmnfusion import (
-    region
-)
+import pysam
+from hmnfusion import region
 
 
 # Import

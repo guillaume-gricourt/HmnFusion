@@ -1,9 +1,9 @@
 import unittest
 
+from hmnfusion._version import __app_name__
 from hmnfusion.evidence import Evidence
 from hmnfusion.fusion import Fusion
 from hmnfusion.region import Region
-from hmnfusion._version import __app_name__
 
 
 class TestFusion(unittest.TestCase):
@@ -25,9 +25,9 @@ class TestFusion(unittest.TestCase):
         )
         self.evidence_2 = Evidence.from_dict(self.evidence_2_d)
 
-        self.fusion_2 = Fusion('genefuse')
-        self.fusion_2_region_first = Region('chr9', 50, 'left')
-        self.fusion_2_region_second = Region('chr22', 100, 'right')
+        self.fusion_2 = Fusion("genefuse")
+        self.fusion_2_region_first = Region("chr9", 50, "left")
+        self.fusion_2_region_second = Region("chr22", 100, "right")
 
         self.fusion_2.first = self.fusion_2_region_first
         self.fusion_2.second = self.fusion_2_region_second
@@ -41,7 +41,7 @@ class TestFusion(unittest.TestCase):
             evidence=self.evidence_2.to_dict(),
             number=1,
             is_consensus=False,
-            software='genefuse'
+            software="genefuse"
         )
 
         # Three3
@@ -55,15 +55,15 @@ class TestFusion(unittest.TestCase):
         self.evidence_3 = Evidence.from_dict(self.evidence_3_d)
 
         self.fusion_3 = Fusion()
-        self.fusion_3_region_first = Region('chr2', 500, 'left')
-        self.fusion_3_region_second = Region('chr5', 2000, 'right')
+        self.fusion_3_region_first = Region("chr2", 500, "left")
+        self.fusion_3_region_second = Region("chr5", 2000, "right")
 
         self.fusion_3.first = self.fusion_3_region_first
         self.fusion_3.second = self.fusion_3_region_second
         self.fusion_3.evidence = self.evidence_3
         self.fusion_3.number = 2
         self.fusion_3.is_consensus = True
-        self.fusion_3.software = 'lumpy'
+        self.fusion_3.software = "lumpy"
 
         self.fusion_3_dict = dict(
             first=self.fusion_3_region_first.to_dict(),
@@ -71,7 +71,7 @@ class TestFusion(unittest.TestCase):
             evidence=self.evidence_3.to_dict(),
             number=2,
             is_consensus=True,
-            software='lumpy'
+            software="lumpy"
         )
 
     def test_init(self):
@@ -83,27 +83,27 @@ class TestFusion(unittest.TestCase):
         self.assertEqual(self.fusion_1.number, 0)
         self.assertEqual(self.fusion_1.software, __app_name__)
         # With args.
-        self.assertEqual(self.fusion_2.software, 'genefuse')
+        self.assertEqual(self.fusion_2.software, "genefuse")
 
     def test_getters(self):
         """Test getters attributes"""
         self.assertEqual(
             self.fusion_2.first,
-            Region('chr9', 50, 'left')
+            Region("chr9", 50, "left")
         )
         self.assertEqual(
             self.fusion_2.second,
-            Region('chr22', 100, 'right')
+            Region("chr22", 100, "right")
         )
         self.assertNotEqual(
             self.fusion_2.first,
-            Region('chr22', 100, 'right')
+            Region("chr22", 100, "right")
         )
 
         self.assertEqual(self.fusion_2.evidence, self.evidence_2)
         self.assertEqual(self.fusion_2.number, 1)
         self.assertFalse(self.fusion_2.is_consensus)
-        self.assertEqual(self.fusion_2.software, 'genefuse')
+        self.assertEqual(self.fusion_2.software, "genefuse")
 
     def test_setters(self):
         """Test setters attributes"""
@@ -138,15 +138,15 @@ class TestFusion(unittest.TestCase):
         """Test get_name(self)"""
         self.assertEqual(
             self.fusion_1.get_name(),
-            __app_name__[:3].upper()+'_0'
+            __app_name__[:3].upper()+"_0"
         )
-        self.assertEqual(self.fusion_2.get_name(), 'GEN_1')
-        self.assertEqual(self.fusion_3.get_name(), 'HMN_2')
+        self.assertEqual(self.fusion_2.get_name(), "GEN_1")
+        self.assertEqual(self.fusion_3.get_name(), "HMN_2")
 
     def test_get_software(self):
         """Test get_software(self)"""
         self.assertEqual(self.fusion_1.get_software(), __app_name__)
-        self.assertEqual(self.fusion_2.get_software(), 'genefuse')
+        self.assertEqual(self.fusion_2.get_software(), "genefuse")
         self.assertEqual(self.fusion_3.get_software(), __app_name__)
 
     def get_is_consensus(self):
@@ -169,11 +169,11 @@ class TestFusion(unittest.TestCase):
 
     def test_is_near(self):
         """Test is_near()"""
-        raf = Region('chr5', 2000, 'right')
-        ras = Region('chr6', 2000, 'left')
-        rbf = Region('chr5', 2500, 'left')
-        rbs = Region('chr10', 20, 'right')
-        rbs2 = Region('chr6', 2200, 'left')
+        raf = Region("chr5", 2000, "right")
+        ras = Region("chr6", 2000, "left")
+        rbf = Region("chr5", 2500, "left")
+        rbs = Region("chr10", 20, "right")
+        rbs2 = Region("chr6", 2200, "left")
 
         # Check Chrom differents
         self.assertFalse(self.fusion_2.is_near(self.fusion_3, 10))
@@ -194,7 +194,7 @@ class TestFusion(unittest.TestCase):
     def test_is_same_chrom(self):
         """Test is_same_chrom()"""
         self.assertFalse(self.fusion_2.is_same_chrom())
-        self.fusion_2.second = Region('chr9', 10, 'right')
+        self.fusion_2.second = Region("chr9", 10, "right")
         self.assertTrue(self.fusion_2.is_same_chrom())
 
     def test_set_region(self):
@@ -252,5 +252,5 @@ class TestFusion(unittest.TestCase):
         self.assertNotEqual(self.fusion_1, self.fusion_2)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
