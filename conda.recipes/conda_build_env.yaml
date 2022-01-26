@@ -8,4 +8,5 @@ dependencies:
   - conda-build
   - pytest
   - python
+  - pytest
   - pyyaml

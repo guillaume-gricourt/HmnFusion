@@ -1,34 +1,27 @@
 import glob
+
+import setuptools
 import yaml
 
-from setuptools import setup
-
-
 # Version
-version = ''
-fversion = glob.glob('**/_version.py')[0]
+version = ""
+fversion = glob.glob("**/_version.py")[0]
 with open(fversion) as fid:
     lines = fid.read().splitlines()
-    version = lines[0].split("=")[-1].strip().replace('"', '')
+    version = lines[0].split("=")[-1].strip().replace('"', "")
 
 # App name - dependencies
 env = {}
-with open('environment.yml') as fid:
+with open("environment.yml") as fid:
     env = yaml.safe_load(fid)
-name = env['name']
-install_requires = env['dependencies']
+name = env["name"]
+install_requires = env["dependencies"]
 
-setup(
+setuptools.setup(
     name=name,
     version=version,
     description='Analysis fusion from DNA genomics',
     author=['guillaume-gricourt'],
-    author_email=['guipagui@gmail.com'],
-    packages=[name],
-    include_package_data=True,
-    entry_points=[{
-        'console_scripts': ['hmnfusion=hmnfusion.__main__:main']
-    }],
     classifiers=[
         "Environment :: Console",
         "Intended Audience :: Science/Research",
@@ -42,5 +35,9 @@ setup(
         "Topic :: Scientific/Engineering :: Bio-Informatics",
         "Topic :: Scientific/Engineering :: Medical Science Apps.",
     ],
-    install_requires=install_requires
+    packages=["hmnfusion"],
+    include_package_data=True,
+    entry_points={
+        "console_scripts": ["hmnfusion=hmnfusion.__main__:main"]
+    },
 )
