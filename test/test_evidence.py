@@ -5,6 +5,7 @@ from hmnfusion.evidence import Evidence
 
 class TestEvidence(unittest.TestCase):
     """Test Evidence object"""
+
     @classmethod
     def setUpClass(cls):
         """Setup objects used in test"""
@@ -27,13 +28,7 @@ class TestEvidence(unittest.TestCase):
         cls._e2.mate = 0
         cls._e2.clipped = -100
         cls._e2.depth = -150
-        cls._e2d = dict(
-            raw=15,
-            split=40,
-            mate=0,
-            clipped=100,
-            depth=150
-        )
+        cls._e2d = dict(raw=15, split=40, mate=0, clipped=100, depth=150)
         cls._e2t = (15, 40, 0, 100, 150)
 
         cls._e3 = Evidence()
@@ -99,8 +94,8 @@ class TestEvidence(unittest.TestCase):
 
     def test_get_vaf(self):
         """Test vaf fuction"""
-        self.assertEqual(self._e1a.get_vaf(), '300,00')
-        self.assertEqual(self._e2.get_vaf(), '93,33')
+        self.assertEqual(self._e1a.get_vaf(), "300,00")
+        self.assertEqual(self._e2.get_vaf(), "93,33")
 
     def test_get_max_count(self):
         """Test max count"""
@@ -127,5 +122,5 @@ class TestEvidence(unittest.TestCase):
         self.assertTrue(self._e4 > self._e3)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

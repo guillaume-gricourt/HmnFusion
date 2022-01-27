@@ -16,6 +16,6 @@ def update_list(li, indexes):
     """From a list of index, delete items of a list"""
     up = 0
     for ix in indexes:
-        del li[ix-up]
+        del li[ix - up]
         up += 1
     return li

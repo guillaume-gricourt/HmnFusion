@@ -16,13 +16,7 @@ class TestFusion(unittest.TestCase):
         self.fusion_1 = Fusion()
 
         # Second
-        self.evidence_2_d = dict(
-            raw=50,
-            split=50,
-            mate=0,
-            clipped=10,
-            depth=100
-        )
+        self.evidence_2_d = dict(raw=50, split=50, mate=0, clipped=10, depth=100)
         self.evidence_2 = Evidence.from_dict(self.evidence_2_d)
 
         self.fusion_2 = Fusion("genefuse")
@@ -41,17 +35,11 @@ class TestFusion(unittest.TestCase):
             evidence=self.evidence_2.to_dict(),
             number=1,
             is_consensus=False,
-            software="genefuse"
+            software="genefuse",
         )
 
         # Three3
-        self.evidence_3_d = dict(
-            raw=50,
-            split=100,
-            mate=0,
-            clipped=500,
-            depth=500
-        )
+        self.evidence_3_d = dict(raw=50, split=100, mate=0, clipped=500, depth=500)
         self.evidence_3 = Evidence.from_dict(self.evidence_3_d)
 
         self.fusion_3 = Fusion()
@@ -71,7 +59,7 @@ class TestFusion(unittest.TestCase):
             evidence=self.evidence_3.to_dict(),
             number=2,
             is_consensus=True,
-            software="lumpy"
+            software="lumpy",
         )
 
     def test_init(self):
@@ -87,18 +75,9 @@ class TestFusion(unittest.TestCase):
 
     def test_getters(self):
         """Test getters attributes"""
-        self.assertEqual(
-            self.fusion_2.first,
-            Region("chr9", 50, "left")
-        )
-        self.assertEqual(
-            self.fusion_2.second,
-            Region("chr22", 100, "right")
-        )
-        self.assertNotEqual(
-            self.fusion_2.first,
-            Region("chr22", 100, "right")
-        )
+        self.assertEqual(self.fusion_2.first, Region("chr9", 50, "left"))
+        self.assertEqual(self.fusion_2.second, Region("chr22", 100, "right"))
+        self.assertNotEqual(self.fusion_2.first, Region("chr22", 100, "right"))
 
         self.assertEqual(self.fusion_2.evidence, self.evidence_2)
         self.assertEqual(self.fusion_2.number, 1)
@@ -136,10 +115,7 @@ class TestFusion(unittest.TestCase):
 
     def test_get_name(self):
         """Test get_name(self)"""
-        self.assertEqual(
-            self.fusion_1.get_name(),
-            __app_name__[:3].upper()+"_0"
-        )
+        self.assertEqual(self.fusion_1.get_name(), __app_name__[:3].upper() + "_0")
         self.assertEqual(self.fusion_2.get_name(), "GEN_1")
         self.assertEqual(self.fusion_3.get_name(), "HMN_2")
 

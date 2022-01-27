@@ -20,8 +20,8 @@ install_requires = env["dependencies"]
 setuptools.setup(
     name=name,
     version=version,
-    description='Analysis fusion from DNA genomics',
-    author=['guillaume-gricourt'],
+    description="Analysis fusion from DNA genomics",
+    author=["guillaume-gricourt"],
     classifiers=[
         "Environment :: Console",
         "Intended Audience :: Science/Research",
@@ -37,7 +37,5 @@ setuptools.setup(
     ],
     packages=["hmnfusion"],
     include_package_data=True,
-    entry_points={
-        "console_scripts": ["hmnfusion=hmnfusion.__main__:main"]
-    },
+    entry_points={"console_scripts": ["hmnfusion=hmnfusion.__main__:main"]},
 )

@@ -14,15 +14,12 @@ def extract(finputs, event):
         vcf_in = pysam.VariantFile(finput)
         for record in vcf_in.fetch():
             # Check if variant is a deletion.
-            if (
-                event in ["all", "deletion"] and
-                len(record.ref) > len(record.alts[0])
-            ):
+            if event in ["all", "deletion"] and len(record.ref) > len(record.alts[0]):
                 region_name = "%s %s %s %s" % (
                     record.contig,
                     record.pos,
                     record.ref,
-                    record.alts[0]
+                    record.alts[0],
                 )
                 region_id = hashlib.md5(region_name.encode("utf8")).hexdigest()
                 # Check if variant is already seen.
@@ -41,19 +38,12 @@ def extract(finputs, event):
 
 def signatures(freference, df):
     """Identify MH motif from event"""
+
     def _signatures(x, freference):
         len_deletion = len(x["deletion"])
         start = int(x["start"])
-        region = "%s:%s-%s" % (
-            x["contig"],
-            start,
-            start+(2*len_deletion)
-        )
-        faidx = pysam.faidx(
-            freference,
-            region,
-            split_lines=True
-        )
+        region = "%s:%s-%s" % (x["contig"], start, start + (2 * len_deletion))
+        faidx = pysam.faidx(freference, region, split_lines=True)
         seq = "".join(faidx[1:]).upper()
 
         left = seq[:len_deletion]
@@ -62,7 +52,7 @@ def signatures(freference, df):
         assert x["deletion"] == left
 
         mh_len, mh_seq = 0, ""
-        for i in range(len_deletion+1):
+        for i in range(len_deletion + 1):
             motif = left[:i]
             if right.startswith(motif):
                 mh_len = i
@@ -72,16 +62,13 @@ def signatures(freference, df):
 
         return mh_seq
 
-    df["mmej_sequence"] = df.apply(
-        _signatures,
-        axis=1,
-        args=(freference,)
-    )
+    df["mmej_sequence"] = df.apply(_signatures, axis=1, args=(freference,))
     return df
 
 
 def conclude(df):
     """Conclude about the presens of MMEJ signature"""
+
     def _conclude(x):
         res = ""
         len_deletion = len(x["deletion"])
@@ -96,10 +83,7 @@ def conclude(df):
             res = "mmej signature"
         return res
 
-    df["mmej_conclusion"] = df.apply(
-        _conclude,
-        axis=1
-    )
+    df["mmej_conclusion"] = df.apply(_conclude, axis=1)
     return df
 
 
@@ -112,34 +96,27 @@ def write(filename, df):
         "deletion",
         "event",
         "mmej_sequence",
-        "mmej_conclusion"
+        "mmej_conclusion",
     ]
     samples = [x for x in df.columns if x not in headers]
-    df = df[headers+samples]
+    df = df[headers + samples]
 
     # Sort values.
     idx, *_ = zip(
         *natsorted(
             zip(df.index, df.contig, df.start, df.deletion, df.event),
-            key=lambda x: (x[1], x[2], x[3], x[4])
+            key=lambda x: (x[1], x[2], x[3], x[4]),
         )
     )
     df = df.loc[list(idx)]
 
     # Replace values.
     df = df.fillna(".")
-    df.replace(
-        {True: "o"},
-        inplace=True
-    )
+    df.replace({True: "o"}, inplace=True)
 
     # Write output.
     writer = pd.ExcelWriter(filename)
-    df.to_excel(
-        writer,
-        index=False,
-        sheet_name="mmej"
-    )
+    df.to_excel(writer, index=False, sheet_name="mmej")
     ws = writer.sheets["mmej"]  # pull worksheet object
 
     # Adjust width.
@@ -152,10 +129,7 @@ def write(filename, df):
                 lengths.append(len(str(cell.value)))
         length = max(lengths) + 6
         dim_holder[get_column_letter(col_nb)] = ColumnDimension(
-            ws,
-            min=col_nb,
-            max=col_nb,
-            width=length
+            ws, min=col_nb, max=col_nb, width=length
         )
     ws.column_dimensions = dim_holder
 

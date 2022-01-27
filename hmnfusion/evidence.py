@@ -1,5 +1,6 @@
 class Evidence(object):
     """Class to build Region object"""
+
     def __init__(self, raw=0):
         """Construct object to reprensent evidences details"""
         self._raw = Evidence.set_number(raw)
@@ -61,7 +62,7 @@ class Evidence(object):
         vaf = 0
         if self._depth > 0:
             vaf = (self.get_sum() / self._depth) * 100
-        return '{:.2f}'.format(vaf).replace('.', ',')
+        return "{:.2f}".format(vaf).replace(".", ",")
 
     def get_max_count(self):
         return max([self._raw, self.get_sum()])
@@ -74,32 +75,26 @@ class Evidence(object):
             split=self._split,
             mate=self._mate,
             clipped=self._clipped,
-            depth=self._depth
+            depth=self._depth,
         )
 
     @classmethod
     def from_dict(cls, data):
         """Build object from a dict"""
         e = Evidence()
-        e.raw = Evidence.set_number(data.get('raw', 0))
-        e.split = Evidence.set_number(data.get('split', 0))
-        e.mate = Evidence.set_number(data.get('mate', 0))
-        e.clipped = Evidence.set_number(data.get('clipped', 0))
-        e.depth = Evidence.set_number(data.get('depth', 0))
+        e.raw = Evidence.set_number(data.get("raw", 0))
+        e.split = Evidence.set_number(data.get("split", 0))
+        e.mate = Evidence.set_number(data.get("mate", 0))
+        e.clipped = Evidence.set_number(data.get("clipped", 0))
+        e.depth = Evidence.set_number(data.get("depth", 0))
         return e
 
     # Meta functions
     def __key(self):
-        return (
-            self._raw,
-            self._split,
-            self._mate,
-            self._clipped,
-            self._depth
-        )
+        return (self._raw, self._split, self._mate, self._clipped, self._depth)
 
     def __repr__(self):
-        return 'Ev ' + ' '.join(str(x) for x in self.__key())
+        return "Ev " + " ".join(str(x) for x in self.__key())
 
     def __hash__(self):
         return hash(self.__key())

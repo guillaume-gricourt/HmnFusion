@@ -4,10 +4,11 @@ from json import JSONEncoder
 from hmnfusion import _version, evidence, region
 
 
-class Fusion():
+class Fusion:
     """Class Fusion.
     Provide attributes and methods to manipulate Fusion items
     """
+
     def __init__(self, software=_version.__app_name__):
         """Construct Fusion object with a software name (optional)"""
         self._first = region.Region()
@@ -88,21 +89,13 @@ class Fusion():
         """Check if fusion are near from an other with a distance parameter"""
         gaps = []
         if self.first.chrom == other.first.chrom:
-            gaps.append(
-                abs(self.first.position-other.first.position)
-            )
+            gaps.append(abs(self.first.position - other.first.position))
             if self.second.chrom == other.second.chrom:
-                gaps.append(
-                    abs(self.second.position-other.second.position)
-                )
+                gaps.append(abs(self.second.position - other.second.position))
         elif self.first.chrom == other.second.chrom:
-            gaps.append(
-                abs(self.first.position-other.second.position)
-            )
+            gaps.append(abs(self.first.position - other.second.position))
             if self.second.chrom == other.first.chrom:
-                gaps.append(
-                    abs(self.second.position-other.first.position)
-                )
+                gaps.append(abs(self.second.position - other.first.position))
         if len(gaps) == 2 and min(gaps) <= consensus_interval:
             return True
         return False
@@ -137,7 +130,7 @@ class Fusion():
             evidence=self.evidence.to_dict(),
             number=self.number,
             is_consensus=self.is_consensus,
-            software=self.software
+            software=self.software,
         )
 
     @classmethod
@@ -154,18 +147,10 @@ class Fusion():
 
     # Meta functions
     def __key(self):
-        return (
-            self._first,
-            self._second,
-            self._evidence,
-            self._software
-        )
+        return (self._first, self._second, self._evidence, self._software)
 
     def __repr__(self):
-        return "%s: %s" % (
-            self.get_name(),
-            str(self.evidence)
-        )
+        return "%s: %s" % (self.get_name(), str(self.evidence))
 
     def __hash__(self):
         return hash(self.__key())

@@ -5,10 +5,10 @@ import bs4
 from hmnfusion import _version, fusion, graph, region, utils
 from pysam import VariantFile
 
-RE_GENEFUSE_LABEL = re.compile(r'[+-](\w+):(\d+)')
-RE_GENEFUSE_TOTAL = re.compile(r'total:\s{1}(\d+),')
-RE_LUMPY_CHROM = re.compile(r'\D*(\d+)')
-RE_LUMPY_ALT = re.compile(r'(\w+):(\d+)')
+RE_GENEFUSE_LABEL = re.compile(r"[+-](\w+):(\d+)")
+RE_GENEFUSE_TOTAL = re.compile(r"total:\s{1}(\d+),")
+RE_LUMPY_CHROM = re.compile(r"\D*(\d+)")
+RE_LUMPY_ALT = re.compile(r"(\w+):(\d+)")
 
 
 # Genefuse.
@@ -19,19 +19,11 @@ def parse_genefuse_label(label):
     sleft, sright = label.split("___")
     m = re.search(RE_GENEFUSE_LABEL, sleft)
     if m:
-        r = region.Region(
-            m.group(1),
-            m.group(2),
-            "left"
-        )
+        r = region.Region(m.group(1), m.group(2), "left")
         f.set_region(r)
     m = re.search(RE_GENEFUSE_LABEL, sright)
     if m:
-        r = region.Region(
-            m.group(1),
-            m.group(2),
-            "right"
-        )
+        r = region.Region(m.group(1), m.group(2), "right")
         f.set_region(r)
     # Evidence.
     mev = re.search(RE_GENEFUSE_TOTAL, label)
@@ -82,10 +74,7 @@ def read_lumpy_vcf(graph, flumpy):
     vcf_in = VariantFile(flumpy)
     for record in vcf_in.fetch():
         # Check if variant is already seen.
-        if (
-            "SVTYPE" in record.info.keys() and
-            record.info.get("SVTYPE") != "BND"
-        ):
+        if "SVTYPE" in record.info.keys() and record.info.get("SVTYPE") != "BND":
             continue
         ident_number, ident_paired = record.id.split("_")
         if ident_number in treats:
@@ -94,10 +83,7 @@ def read_lumpy_vcf(graph, flumpy):
 
         # Build fusion.
         f = fusion.Fusion("lumpy")
-        r = region.Region(
-            record.chrom,
-            int(record.pos)-1
-        )
+        r = region.Region(record.chrom, int(record.pos) - 1)
         f.set_region(r)
 
         alt = record.alts[0]
@@ -105,11 +91,8 @@ def read_lumpy_vcf(graph, flumpy):
         alt_chrom, alt_pos = 0, 0
         if m:
             alt_chrom = m.group(1)
-            alt_pos = int(m.group(2))-1
-        r = region.Region(
-            alt_chrom,
-            alt_pos
-        )
+            alt_pos = int(m.group(2)) - 1
+        r = region.Region(alt_chrom, alt_pos)
         f.set_region(r)
 
         evidence = 0
@@ -135,18 +118,11 @@ def read_hmnfusion_json(filename):
     return graph.Graph.from_dict(data)
 
 
-def write_hmnfusion_json(
-    filename,
-    finputs,
-    graph
-):
+def write_hmnfusion_json(filename, finputs, graph):
     """Write list of fusion to a json file"""
     data = {}
     data["inputs"] = finputs
-    data["software"] = dict(
-        name=_version.__app_name__,
-        version=_version.__version__
-    )
+    data["software"] = dict(name=_version.__app_name__, version=_version.__version__)
     graph.update_graph_metadata(data)
     data = graph.to_dict()
 
