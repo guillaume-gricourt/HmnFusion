@@ -1,23 +1,23 @@
-<h3 align=center>HmnFusion</h3>
+# HmnFusion
 
-# Introduction
-A tool to aggregate results of fusion produced by Genefuse and Lumpy and calculate allelic frequency. 
+## Introduction
+A tool to aggregate results of fusion produced by Genefuse and Lumpy and calculate allelic frequency.  
 
-# Getting Started
+## Getting Started
 
-## Installing
+### Installing
 Installation is done with `pip`
 ```bash
 pip install hmnfusion
 ```
 
-## Running
+### Running
 Software is available by
 <pre>HmnFusion <i>command</i> <i>options</i></pre>
 
-# Commands
+## Commands
 
-## Extract Fusion
+### Extract Fusion
 
 Aggregate results from Genefuse and Lumpy to produce a Json file.
 
@@ -28,7 +28,7 @@ HmnFusion extractfusion \
     --output-json <i>file</i>
 </pre>
 
-## Quantification
+### Quantification
 
 Calculate allelic frequency given postion or Json file produced by `extractfusion` command.
 A fusion is defined by two breakpoints. Only one must be in bed intervals, allelic depth is computed only on this side.
@@ -44,20 +44,20 @@ HmnFusion quantification \
 </pre>
 
 
-# Built with these main libraries
+## Built with these main libraries
 
 * [beautifulsoup4](https://pypi.org/project/beautifulsoup4) - Parsing efficiently HTML file
 * [pysam](https://github.com/pysam-developers/pysam) - Essential library to work with BAM and VCF files
 * [Pandas](https://github.com/pandas-dev/pandas) - Essential dataframe object
 
-# Versioning
+## Versioning
 
 [SemVer](http://semver.org/) is used for versioning.
 
-# Authors
+## Authors
 
 * **Guillaume Gricourt** - *Initial work*
 
-# License
+## License
 
-See the [LICENSE.md](LICENSE) file for details
+See the [LICENSE](LICENSE) file for details
