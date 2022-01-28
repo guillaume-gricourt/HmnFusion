@@ -48,6 +48,18 @@ HmnFusion quantification \
     --output-vcf <i>file</i>
 </pre>
 
+### Docker
+
+Run *extractfusion* with docker like:  
+<pre>
+docker run -it \
+    --rm \
+    hmnfusion:lastest \
+    extractfusion \
+    --genefuse-json <i>file</i> | --genefuse-html <i>file</i> \
+    --lumpy-vcf <i>file</i> \
+    --output-json <i>file</i>
+</pre>
 
 ## Built with these main libraries
 
