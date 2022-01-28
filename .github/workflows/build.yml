@@ -11,8 +11,8 @@ jobs:
   Tag:
     runs-on: ubuntu-latest
     outputs:
-     tag: ${{ steps.tag.outputs.tag }}
-     changelog: ${{ steps.tag.outputs.changelog }}
+     tag: ${{ steps.tag_label.outputs.tag }}
+     changelog: ${{ steps.tag_raw.outputs.changelog }}
     steps:
       - uses: actions/checkout@v2
         with:
@@ -40,6 +40,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           release_branches: stable
           custom_tag: ${{ steps.tag_label.outputs.tag }}
+          tag_prefix:
 
   Changelog:
     runs-on: ubuntu-latest
@@ -60,9 +61,9 @@ jobs:
           CHANGELOG_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gem install github_changelog_generator
-          AUTH=$(echo $GITHUB_REPOSITORY | sed -e 's/\// /g' | awk '{print "--user " $1 " --project " $2}')
-          echo $AUTH
-          github_changelog_generator $AUTH --no-unreleased
+          AUTH=$(echo "$GITHUB_REPOSITORY" | sed -e 's/\// /g' | awk '{print "--user " $1 " --project " $2}')
+          echo "$AUTH"
+          github_changelog_generator "$AUTH" --no-unreleased
       - name: 'Upload Artifact Changelog'
         uses: actions/upload-artifact@v2
         with:
@@ -74,7 +75,7 @@ jobs:
     needs: Tag
     runs-on: ubuntu-latest
     outputs:
-      version_dir: ${{ steps.update_version.outputs.version_dir }}
+      version_path: ${{ steps.update_version.outputs.version_path }}
     steps:
       - uses: actions/checkout@v2
         with:
@@ -86,16 +87,12 @@ jobs:
         run: |
           VERSION_PATH=$(find . -name _version.py | head -n 1)
           sed -i "2s/.*/__version__ = \"$TAG\"/" "$VERSION_PATH"
-          echo "version_path=${VERSION_PATH}" >> $GITHUB_ENV
-          VERSION_DIR=$(dirname $VERSION_PATH)
-          echo "::set-output name=version_dir::${VERSION_DIR}"
-          echo "Version path: $VERSION_PATH"
-          echo "Version dir: $VERSION_DIR"
+          echo "::set-output name=version_path::${VERSION_PATH}"
       - name: 'Upload Artifact Version'
         uses: actions/upload-artifact@v2
         with:
           name: version-artifact
-          path: ${{ env.version_path }}
+          path: ${{ steps.update_version.outputs.version_path }}
           retention-days: 1
 
   Badge:
@@ -126,7 +123,7 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: version-artifact
-          path: ${{ needs.Version.outputs.version_dir }}
+          path: ${{ needs.Version.outputs.version_path }}
       - name: 'Download Artifact Changelog'
         uses: actions/download-artifact@v2
         with:
@@ -141,7 +138,6 @@ jobs:
         env:
           GITHUB_USERNAME: guillaume-gricourt
           GITHUB_EMAIL: guipagui@gmail.com
-
       - name: 'Push changes'
         uses: ad-m/github-push-action@master
         with:
@@ -153,14 +149,15 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           branch: main
 
-  Build:
+  BuildPip:
     needs: Commit
     runs-on: ${{ matrix.os }}-latest
     strategy:
       matrix:
         os: [ubuntu]
     env:
-      CONDA_BLD_PATH: /tmp/conda-bld
+      bld_path: /tmp/build
+      asset: pip.zip
     outputs:
       package_path: ${{ steps.name_package.outputs.package_path }}
       package_name: ${{ steps.name_package.outputs.package_name }}
@@ -203,29 +200,16 @@ jobs:
           retention-days: 1
 
   Release:
-    needs: [ Tag, Build ]
+    needs: [Tag, BuildPip]
     runs-on: ubuntu-latest
     steps:
-      - name: 'Download Artifact Package'
+      - name: 'Download Artifact Package - Pip'
         uses: actions/download-artifact@v2
         with:
-          name: package-artifact
+          name: package-pip-artifact
       - name: 'Create Release'
-        uses: actions/create-release@v1
-        id: create_release
+        uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ needs.Tag.outputs.tag }}
-          release_name: Release ${{ needs.Tag.outputs.tag }}
           body: ${{ needs.Tag.outputs.changelog }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: 'Upload Release Asset'
-        id: upload-release-asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ${{ needs.Build.outputs.package_name }}
-          asset_name: ${{ needs.Build.outputs.package_label }}
-          asset_content_type: application/x-bzip2
+          files: ${{ needs.BuildPip.outputs.asset }}

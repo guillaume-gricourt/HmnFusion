@@ -1,4 +1,4 @@
-class Region():
+class Region:
     """Class to build Region object"""
 
     def __init__(self, chrom="", position=0, orientation="undefined"):
