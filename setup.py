@@ -5,7 +5,7 @@ import yaml
 
 # Version
 version = ""
-fversion = glob.glob("**/_version.py")[0]
+fversion = glob.glob("**/_version.py", recursive=True)[0]
 with open(fversion) as fid:
     lines = fid.read().splitlines()
     version = lines[0].split("=")[-1].strip().replace('"', "")
@@ -22,6 +22,7 @@ setuptools.setup(
     version=version,
     description="Analysis fusion from DNA genomics",
     author=["guillaume-gricourt"],
+    author_email=["guipagui@gmail.com"],
     classifiers=[
         "Environment :: Console",
         "Intended Audience :: Science/Research",
@@ -35,7 +36,8 @@ setuptools.setup(
         "Topic :: Scientific/Engineering :: Bio-Informatics",
         "Topic :: Scientific/Engineering :: Medical Science Apps.",
     ],
-    packages=["hmnfusion"],
+    package_dir={"": "src"},
+    packages=setuptools.find_packages(where="src"),
     include_package_data=True,
     entry_points={"console_scripts": ["hmnfusion=hmnfusion.__main__:main"]},
 )
