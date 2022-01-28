@@ -38,7 +38,7 @@ requirements:
 
 test:
   source_files:
-    - test
+    - tests
   imports:
     - hmnfusion
   requires:
