@@ -2,9 +2,8 @@ name: Build
 
 on:
   push:
-    branches: [feat-cicd, stable]
-  pull_request:
-    branches: [stable]
+    branches:
+      - stable
 
 jobs:
 
@@ -61,9 +60,10 @@ jobs:
           CHANGELOG_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gem install github_changelog_generator
-          AUTH=$(echo "$GITHUB_REPOSITORY" | sed -e 's/\// /g' | awk '{print "--user " $1 " --project " $2}')
-          echo "$AUTH"
-          github_changelog_generator "$AUTH" --no-unreleased
+          USER=$(echo "$GITHUB_REPOSITORY" | sed -e 's/\// /g' | awk '{print $1}')
+          PROJECT=$(echo "$GITHUB_REPOSITORY" | sed -e 's/\// /g' | awk '{print $2}')
+          echo "$USER $PROJECT"
+          github_changelog_generator --user "$USER" --project "$PROJECT" --no-unreleased
       - name: 'Upload Artifact Changelog'
         uses: actions/upload-artifact@v2
         with:
@@ -76,6 +76,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       version_path: ${{ steps.update_version.outputs.version_path }}
+      version_dir: ${{ steps.update_version.outputs.version_dir }}
     steps:
       - uses: actions/checkout@v2
         with:
@@ -86,8 +87,10 @@ jobs:
           TAG: ${{ needs.Tag.outputs.tag }}
         run: |
           VERSION_PATH=$(find . -name _version.py | head -n 1)
+          VERSION_DIR=$(dirname "$VERSION_PATH")
           sed -i "2s/.*/__version__ = \"$TAG\"/" "$VERSION_PATH"
           echo "::set-output name=version_path::${VERSION_PATH}"
+          echo "::set-output name=version_dir::${VERSION_DIR}"
       - name: 'Upload Artifact Version'
         uses: actions/upload-artifact@v2
         with:
@@ -123,7 +126,7 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: version-artifact
-          path: ${{ needs.Version.outputs.version_path }}
+          path: ${{ needs.Version.outputs.version_dir }}
       - name: 'Download Artifact Changelog'
         uses: actions/download-artifact@v2
         with:
@@ -159,9 +162,7 @@ jobs:
       bld_path: /tmp/build
       asset: pip.zip
     outputs:
-      package_path: ${{ steps.name_package.outputs.package_path }}
-      package_name: ${{ steps.name_package.outputs.package_name }}
-      package_label: ${{ steps.name_package.outputs.package_label }}
+      asset: ${{ env.asset }}
     defaults:
       run:
         shell: bash -l {0} # activate env conda
@@ -176,28 +177,20 @@ jobs:
           miniconda-version: "latest"
           environment-file: conda.recipes/conda_build_env.yaml
           activate-environment: build
-      - name: 'Set up output folder'
+      - name: 'Build pip package'
         run: |
-          mkdir -p ${CONDA_BLD_PATH}
-      - name: 'Build conda package'
+          pip install build
+          python3 -m build --outdir ${bld_path}
+      - name: 'Create asset'
         run: |
-          conda build --output-folder ${CONDA_BLD_PATH} .
-      - name: 'Grep conda name package'
-        id: name_package
-        run: |
-          echo "Copy env variables"
-          PACKAGE_PATH=$(conda build --output --output-folder ${CONDA_BLD_PATH} .)
-          echo "::set-output name=package_path::${PACKAGE_PATH}"
-          PACKAGE_NAME=$(basename "${PACKAGE_PATH}")
-          echo "::set-output name=package_name::${PACKAGE_NAME}"
-          PACKAGE_LABEL=$(basename "${PACKAGE_NAME}" | sed 's/.tar.bz2//g')
-          echo "::set-output name=package_label::${PACKAGE_LABEL}"
+          zip -r -j ${asset} ${bld_path}
       - name: 'Upload Artifact Package'
         uses: actions/upload-artifact@v2
         with:
-          name: package-artifact
-          path: ${{ steps.name_package.outputs.package_path }}
+          name: package-pip-artifact
+          path: ${{ env.asset }}
           retention-days: 1
+          if-no-files-found: error
 
   Release:
     needs: [Tag, BuildPip]
@@ -213,3 +206,44 @@ jobs:
           tag_name: ${{ needs.Tag.outputs.tag }}
           body: ${{ needs.Tag.outputs.changelog }}
           files: ${{ needs.BuildPip.outputs.asset }}
+
+  Docker:
+    needs: [Tag, BuildPip]
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+    steps:
+      - name: 'Checkout'
+        uses: actions/checkout@v2
+        with:
+          ref: stable
+      - name: 'Download Artifact Package - Pip'
+        uses: actions/download-artifact@v2
+        with:
+          name: package-pip-artifact
+      - name: 'Unzip pip artifact'
+        run: |
+          echo "list directory"
+          ls
+          unzip pip.zip
+          echo "list directory"
+          ls
+      - name: 'Define Image name'
+        run: |
+          image_name=${{ github.repository }}
+          image_name=$(echo "$image_name" | cut -f2 -d"/" | tr '[:upper:]' '[:lower:]')
+          echo "image_name=$image_name" >> "$GITHUB_ENV"
+      - name: 'Build image'
+        run: |
+          docker build . --file Dockerfile --tag ${{ env.image_name }} --label "runnumber=${GITHUB_RUN_ID}"
+      - name: 'Log in to registry'
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+      - name: 'Push image'
+        run: |
+          IMAGE_ID=$(echo ghcr.io/${{ github.repository_owner }}/${{ env.image_name }} | tr '[:upper:]' '[:lower:]')
+          VERSION=${{ needs.Tag.outputs.tag }}
+          echo "IMAGE_ID=$IMAGE_ID | VERSION=$VERSION"
+          docker tag ${{ env.image_name }} "${IMAGE_ID}:${VERSION}"
+          docker push "${IMAGE_ID}:${VERSION}"
