@@ -1,3 +1,4 @@
-hmnfusion/__pycache__
-test/__pycache__
+hmnfusion
+__pycache__
 *.egg-info/
+super-linter.log

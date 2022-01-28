@@ -2,8 +2,8 @@
 {% set data = load_setup_py_data() %}
 
 package:
-  name: {{ name }}
-  version: {{ data.version }}
+  name: {{ name|lower }}
+  version: {{ data['version'] }}
 
 source:
   path: ..
@@ -37,12 +37,22 @@ requirements:
     - pyyaml
 
 test:
+  source_files:
+    - tests
   imports:
     - hmnfusion
+  requires:
+    - pytest
   commands:
     - {{ name }} version
+    - python -m pytest
 
 about:
   home: https://github.com/guillaume-gricourt/HmnFusion
+  summary: {{ data['description'] }}
   license: Other
-  license_file: LICENSE.md
+  license_file: LICENSE
+
+extra:
+  recipe-maintainers:
+    - guillaume-gricourt

@@ -5,51 +5,30 @@ on: [push, pull_request]
 jobs:
 
   Lint:
-    runs-on: ${{ matrix.os }}-latest
-    strategy:
-      matrix:
-        python-version: [3.6, 3.7, 3.8, 3.9, 3.10]
-        os: [ubuntu, macos]
+    runs-on: ubuntu-latest
     steps:
       - name: 'Checkout'
         uses: actions/checkout@v2
         with:
           ref: ${{ github.ref }}
-      - name: 'Set up Python'
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.x'
-      - name: 'Lint with flake8'
-        run: |
-          pip install flake8
-          flake8 . --count --show-source --statistics
-
-  Pytest:
-    runs-on: ${{ matrix.os }}-latest
-    strategy:
-      matrix:
-        python-version: [3.6, 3.7, 3.8, 3.9, 3.10]
-        os: [ubuntu, macos]
-    steps:
-      - name: 'Checkout'
-        uses: actions/checkout@v2
-        with:
-          ref: ${{ github.ref }}
-      - name: 'Set up Python'
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.python-version }}
-      - name: 'Lint with flake8'
-        run: |
-          pip install pytest
-          python -m pytest
+          fetch-depth: 0
+      - name: Lint Code Base
+        uses: github/super-linter@v4
+        env:
+          VALIDATE_ALL_CODEBASE: false
+          VALIDATE_YAML: false
+          VALIDATE_DOCKERFILE_HADOLINT: false
+          DEFAULT_BRANCH: main
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   Build:
     runs-on: ${{ matrix.os }}-latest
     strategy:
       matrix:
-        os: ["ubuntu", "macos"]
-        python-version: [3.6, 3.7, 3.8, 3.9, 3.10]
+        os: ["ubuntu"]
+        python-version: ['3.7', '3.8', '3.9']
+    env:
+      bld_path: /tmp/build
     defaults:
       run:
         shell: bash -l {0}
@@ -62,9 +41,83 @@ jobs:
         uses: conda-incubator/setup-miniconda@v2
         with:
           miniconda-version: "latest"
-          python-version: ${{ matrix.python-version }}
           environment-file: conda.recipes/conda_build_env.yaml
-          auto-activate-base: true
-      - name: 'Build conda package'
+          activate-environment: build
+          python-version: ${{ matrix.python-version }}
+      - name: 'Set up output folder'
         run: |
-          conda build .
+          mkdir -p "${bld_path}"
+      - name: 'Build pip package'
+        run: |
+          pip install build
+          python3 -m build --outdir "${bld_path}"
+
+  Pytest:
+    needs: [Build]
+    runs-on: ${{ matrix.os }}-latest
+    strategy:
+      matrix:
+        python-version: ['3.7', '3.8', '3.9']
+        os: [ubuntu, macos]
+    env:
+      bld_path: /tmp/build
+    steps:
+      - name: 'Checkout'
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.ref }}
+      - name: 'Set up Python'
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: 'Install'
+        run: |
+          pip install .
+      - name: 'Run pytest'
+        run: |
+          pip install pytest
+          python -m pytest
+
+  Coverage:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.9']
+    outputs:
+      percent: ${{ steps.coverage.outputs.percent }}
+    steps:
+      - name: 'Checkout'
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.ref }}
+      - name: 'Set up Python'
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: 'Install Soft'
+        run: |
+          pip install .
+      - name: 'Install Deps'
+        run: |
+          pip install pytest-cov
+      - name: 'Run coverage'
+        id: coverage
+        run: |
+          coverage run -m pytest
+          coverage json
+          percent=$(python -c 'import json; data=json.load(open("coverage.json")); print(data["totals"]["percent_covered_display"])')
+          echo "::set-output name=percent::${percent}"
+
+  Badge:
+    needs: Coverage
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Badge version'
+        uses: schneegans/dynamic-badges-action@v1.1.0
+        with:
+          auth: ${{ secrets.GIST }}
+          gistID: 5b62753442bc7c44ae2995299575af0a
+          filename: coverage.json
+          label: CodeCoverage
+          message: "${{ needs.Coverage.outputs.percent }}%"
+          color: green
