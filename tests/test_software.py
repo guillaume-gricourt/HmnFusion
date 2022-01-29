@@ -21,8 +21,7 @@ def load_extractfusion(path):
     return data
 
 
-class Test_functional(Main_test):
-
+class Test_software(Main_test):
     def test_extract_fusion(self):
         # TEST-A
         with tempfile.NamedTemporaryFile(delete=False) as fd:
