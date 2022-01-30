@@ -1,37 +1,83 @@
 import copy
 import itertools
+from typing import Dict, Union
 
 import networkx as nx
 from hmnfusion import fusion as hmn_fusion
 
 
-class Graph:
-    """Class Fusion.
-    Provide attributes and methods to manipulate Fusion items
+class Graph(object):
+    """A graph store all fusion as node and edges are used to built consensus from them.
+
+    Attributes
+    ----------
+    g : nx.Graph
+        A graph object to deal data.
+
+    Methods
+    -------
+    __init__(consensus_interval=500)
+        Build a Graph object and store consensus_interval value in metadata.
     """
 
     node_number = 0
 
     def __init__(self, consensus_interval=500):
-        """Construct Fusion object with a software name (optional)"""
         self._g = nx.Graph()
         self.update_graph_metadata({"consensus_interval": consensus_interval})
 
     # Getters Setters
     @property
-    def graph(self):
+    def graph(self) -> nx.Graph:
         return self._g
 
     @graph.setter
-    def graph(self, g):
+    def graph(self, g: nx.Graph) -> None:
         self._g = g
 
     # Others.
-    def update_graph_metadata(self, data):
+    def update_graph_metadata(self, data: Union[str, int]) -> None:
+        """Add metadata into the graph.
+
+        Parameters
+        ----------
+        data : Union[str, int]
+            Data to add.
+
+        Return
+        ------
+        None
+        """
         for k, v in data.items():
             self.graph.graph[k] = v
 
-    def add_node(self, fusion, level=0, is_consensus=False, is_interest=False):
+    def add_node(self,
+        fusion: fusion.Fusion,
+        level: int = 0,
+        is_consensus: bool=False,
+        is_interest: bool=False
+    ) -> int:
+        """Add a node (eg. a fusion) to the graph.
+
+        Parameters
+        ----------
+        fusion : fusion.Fusion
+            A fusion event
+        level: int, default: 0
+            The level of the fusion
+              - 0: built directly from a software : Genefuse, Lumpy
+              - 1: a consensus between fusions coming from a unique software
+              - 2: a consensus between fusions coming from consensus previously defined
+        is_consensus: bool, default: False
+            If the fusion is a consensus of, at least, two fusions
+        is_interest: bool, default: False
+            If the fusion is enough interesting to quantify it.
+
+        Return
+        ------
+        int
+            Tht nth fusion in the graph
+        """
         fusion = copy.deepcopy(fusion)
         self.node_number += 1
         fusion.number = self.node_number
@@ -44,7 +90,22 @@ class Graph:
         )
         return self.node_number
 
-    def add_nodes(self, fusions):
+    def add_nodes(self, fusions: List[fusion.Fusion]) -> None:
+        """Add several nodes (eg. a fusion) to the graph.
+
+        Parameters
+        ----------
+        fusions : List[fusion.Fusion]
+            Some fusions to add
+
+        Return
+        ------
+        None
+
+        See Also
+        --------
+        add_node()
+        """
         for fusion in fusions:
             self.add_node(fusion)
 
@@ -75,8 +136,13 @@ class Graph:
         alone = [x for x in g.nodes if self.graph.degree[x] == 0]
         return (g, cons, alone)
 
-    def consensus_single(self):
-        """Create fusion consensus for each software"""
+    def consensus_single(self) -> None:
+        """Create consensus nodes from nodes already here in the graph.
+
+        Return
+        ------
+        None
+        """
         softwares = set(
             [self.graph.nodes[x]["fusion"].software for x in self.graph.nodes]
         )
@@ -140,8 +206,13 @@ class Graph:
     def select_node_interest(self):
         return [x for x in self.graph.nodes if self.graph[x]["is_interest"]]
 
-    def define_node_interest(self):
-        """ """
+    def define_node_interest(self) -> None:
+        """Set nodes in the graph if they are of interest
+
+        Return
+        ------
+        None
+        """
         g_lumpy, n_lumpy_consensus, n_lumpy_alone = self._grapp_subgraph("lumpy")
         n_lumpy_consensus = sorted(
             n_lumpy_consensus, reverse=True, key=lambda x: self.graph.nodes[x]["fusion"]
@@ -183,9 +254,13 @@ class Graph:
                 interest += 1
         return interest
 
-    def trim_node(self):
+    def trim_node(self) -> None:
         """Delete fusion in the graph which have on their breakpoints
         the same chromosome.
+
+        Return
+        ------
+        None
         """
         nodes = list(self.graph.nodes)
         for n in nodes:
@@ -196,7 +271,19 @@ class Graph:
             if self.graph.nodes[n]["is_consensus"] and self.graph.degree[n] == 0:
                 self.graph.remove_node(n)
 
-    def label_build_from(self, n):
+    def label_build_from(self, n) -> List[str]:
+        """Get name of all nodes used to build the selected node.
+
+        Parameters
+        ----------
+        n:
+            id of a node selected
+
+        Return
+        ------
+        List[str]
+            Labels of nodes
+        """
         labels = []
         if self.graph.nodes[n]["level"] > 0:
             candidates = nx.neighbors(self.graph, n)
@@ -210,13 +297,29 @@ class Graph:
         return labels
 
     # Import Export
-    def to_dict(self):
-        """Export Fusion as dict"""
+    def to_dict(self) -> Dict:
+        """Export the g (eg. graph) attribute as a Json
+        Return
+        ------
+        Dict
+            The graph attribute represented as a dictionary.
+        """
         return nx.readwrite.json_graph.cytoscape_data(self.graph)
 
     @classmethod
-    def from_dict(cls, data):
-        """Construct a Fusion object from a dict"""
+    def from_dict(cls, data: Dict) -> "Graph":
+        """Build object from a dictionary
+
+        Parameters
+        ----------
+        data: Dict
+            A dictionary with all data needed to build a Graph
+
+        Return
+        ------
+        Graph
+            A novel object.
+        """
         g = Graph()
         g.graph = nx.readwrite.json_graph.cytoscape_graph(data)
         nodes = g.graph.nodes
@@ -230,13 +333,13 @@ class Graph:
     def __key(self):
         return (self.graph, self.graph.graph["consensus_interval"])
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "Graph %s %s" % (self.graph, self.graph.graph["consensus_interval"])
 
     def __hash__(self):
         return hash(self.__key())
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
         if isinstance(other, Graph):
             return self.__key() == other.__key()
         return NotImplemented
