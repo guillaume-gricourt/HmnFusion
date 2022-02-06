@@ -35,7 +35,7 @@ def read_json(path: str) -> Dict:
         return json.load(fid)
 
 
-def update_list(li: List[object], indexes:List[int]) -> List[object]:
+def update_list(li: List[object], indexes: List[int]) -> List[object]:
     """From a list of index, delete items of a list
 
     Parameters

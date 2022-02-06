@@ -1,4 +1,4 @@
-from typing import Dict, Union
+from typing import Dict
 
 
 class Region(object):
@@ -19,7 +19,9 @@ class Region(object):
         Construct an object. All arguments are optional.
     """
 
-    def __init__(self, chrom:str = "", position: int = 0, orientation: str = "undefined"):
+    def __init__(
+        self, chrom: str = "", position: int = 0, orientation: str = "undefined"
+    ):
         self.chrom = chrom
         self.position = position
         self.orientation = orientation
@@ -67,7 +69,7 @@ class Region(object):
         return True
 
     # Import Export
-    def to_dict(self) -> Dict[str, Union[str, int]]:
+    def to_dict(self) -> Dict:
         """Export object as a dict.
 
         Return
@@ -80,7 +82,7 @@ class Region(object):
         )
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Union[str, int]]) -> "Region":
+    def from_dict(cls, data: Dict) -> "Region":
         """Build object from a dictionary.
 
         Parameters
@@ -109,7 +111,7 @@ class Region(object):
     def __hash__(self):
         return hash(self.__key())
 
-    def __eq__(self, other: object) -> None:
+    def __eq__(self, other: object):
         if isinstance(other, Region):
             return self.__key() == other.__key()
         return NotImplemented

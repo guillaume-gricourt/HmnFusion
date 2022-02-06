@@ -1,6 +1,6 @@
 import copy
 import itertools
-from typing import Dict, Union
+from typing import Dict, List
 
 import networkx as nx
 from hmnfusion import fusion as hmn_fusion
@@ -36,7 +36,7 @@ class Graph(object):
         self._g = g
 
     # Others.
-    def update_graph_metadata(self, data: Union[str, int]) -> None:
+    def update_graph_metadata(self, data: Dict) -> None:
         """Add metadata into the graph.
 
         Parameters
@@ -51,11 +51,12 @@ class Graph(object):
         for k, v in data.items():
             self.graph.graph[k] = v
 
-    def add_node(self,
-        fusion: fusion.Fusion,
+    def add_node(
+        self,
+        fusion: hmn_fusion.Fusion,
         level: int = 0,
-        is_consensus: bool=False,
-        is_interest: bool=False
+        is_consensus: bool = False,
+        is_interest: bool = False,
     ) -> int:
         """Add a node (eg. a fusion) to the graph.
 
@@ -90,7 +91,7 @@ class Graph(object):
         )
         return self.node_number
 
-    def add_nodes(self, fusions: List[fusion.Fusion]) -> None:
+    def add_nodes(self, fusions: List[hmn_fusion.Fusion]) -> None:
         """Add several nodes (eg. a fusion) to the graph.
 
         Parameters
@@ -146,8 +147,7 @@ class Graph(object):
         softwares = set(
             [self.graph.nodes[x]["fusion"].software for x in self.graph.nodes]
         )
-        softwares = sorted(list(softwares))
-        for software in softwares:
+        for software in sorted(list(softwares)):
             g, cons, alone = self._grapp_subgraph(software)
             nodes = g.nodes
             for fl, fr in itertools.combinations(nodes, 2):
@@ -179,8 +179,13 @@ class Graph(object):
                     else:
                         self._add_node_consensus(fl, fr)
 
-    def consensus_genefuse_lumpy(self):
-        """ """
+    def consensus_genefuse_lumpy(self) -> None:
+        """Create consensus nodes from nodes already built as consensus.
+
+        Return
+        ------
+        None
+        """
         g_genefuse, n_genefuse_consensus, n_genefuse_alone = self._grapp_subgraph(
             "genefuse"
         )
@@ -206,12 +211,13 @@ class Graph(object):
     def select_node_interest(self):
         return [x for x in self.graph.nodes if self.graph[x]["is_interest"]]
 
-    def define_node_interest(self) -> None:
+    def define_node_interest(self) -> int:
         """Set nodes in the graph if they are of interest
 
         Return
         ------
-        None
+        int:
+            Number of node flag as interest
         """
         g_lumpy, n_lumpy_consensus, n_lumpy_alone = self._grapp_subgraph("lumpy")
         n_lumpy_consensus = sorted(

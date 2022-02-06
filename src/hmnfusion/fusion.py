@@ -1,8 +1,10 @@
 import copy
 from json import JSONEncoder
-from typing import Dict
+from typing import Any, Dict
 
-from hmnfusion import _version, evidence, region
+from hmnfusion import _version
+from hmnfusion import evidence as hmn_evidence
+from hmnfusion import region
 
 
 class Fusion:
@@ -29,10 +31,10 @@ class Fusion:
         Construct an object with a software argument.
     """
 
-    def __init__(self, software:str = _version.__app_name__) -> None:
+    def __init__(self, software: str = _version.__app_name__) -> None:
         self._first = region.Region()
         self._second = region.Region()
-        self._evidence = evidence.Evidence()
+        self._evidence = hmn_evidence.Evidence()
         self._number = 0
         self._is_consensus = False
         self._software = software
@@ -55,11 +57,11 @@ class Fusion:
         self._second = copy.deepcopy(second)
 
     @property
-    def evidence(self) -> evidence.Evidence:
+    def evidence(self) -> hmn_evidence.Evidence:
         return self._evidence
 
     @evidence.setter
-    def evidence(self, e: evidence.Evidence) -> None:
+    def evidence(self, e: hmn_evidence.Evidence) -> None:
         self._evidence = copy.deepcopy(e)
 
     @property
@@ -87,7 +89,7 @@ class Fusion:
         self._software = software
 
     # Others
-    def update(self, other: 'Fusion') -> None:
+    def update(self, other: "Fusion") -> None:
         """Replace first, second, evidence and software attribute by an other fusion.
 
         Parameters
@@ -131,7 +133,7 @@ class Fusion:
             return _version.__app_name__
         return self.software
 
-    def is_near(self, other: 'Fusion', consensus_interval: int) -> bool:
+    def is_near(self, other: "Fusion", consensus_interval: int) -> bool:
         """Define if two fusions are close enough.
 
         Parameters
@@ -198,7 +200,7 @@ class Fusion:
         self.second = tmp
 
     # Import Export
-    def to_dict(self) -> Dict[str, object]:
+    def to_dict(self) -> Dict[Any, Any]:
         """Export object as a dict.
 
         Return
@@ -216,7 +218,7 @@ class Fusion:
         )
 
     @classmethod
-    def from_dict(cls, data: Dict[str, object]) -> 'Fusion':
+    def from_dict(cls, data: Dict[Any, Any]) -> "Fusion":
         """Build object from a dictionary.
 
         Parameters
@@ -232,7 +234,7 @@ class Fusion:
         f = Fusion()
         f.first = region.Region.from_dict(data.get("first", {}))
         f.second = region.Region.from_dict(data.get("second", {}))
-        f.evidence = evidence.Evidence.from_dict(data.get("evidence", {}))
+        f.evidence = hmn_evidence.Evidence.from_dict(data.get("evidence", {}))
         f.number = data.get("number", 0)
         f.is_consensus = data.get("is_consensus", False)
         f.software = data.get("software", "")
@@ -253,10 +255,10 @@ class Fusion:
             return self.__key() == other.__key()
         return NotImplemented
 
-    def __lt__(self, other: 'Fusion') -> bool:
+    def __lt__(self, other: "Fusion") -> bool:
         return self._evidence < other.evidence
 
-    def __gt__(self, other: 'Fusion') -> bool:
+    def __gt__(self, other: "Fusion") -> bool:
         return self._evidence > other.evidence
 
 
@@ -268,5 +270,6 @@ class FusionEncoder(JSONEncoder):
     default
         Let to encode data
     """
+
     def default(self, o):
         return o.to_dict()
