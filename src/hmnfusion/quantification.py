@@ -185,79 +185,70 @@ def _get_header():
     header.append("##fileformat=VCFv4.2")
     header.append("##source=HmnFusion")
     header.append(
-        '##INFO=<ID=SVTYPE,Number=1,Type=String,Description=\
-        "Type of structural variant">'
+        "##INFO=<ID=SVTYPE,Number=1,Type=String,Description="
+        '"Type of structural variant">'
     )
     header.append(
-        '##INFO=<ID=SOFT,Number=1,Type=String,Description=\
-        "Indicated from which software is derived">'
+        "##INFO=<ID=SOFT,Number=1,Type=String,Description="
+        '"Indicated from which software is derived">'
     )
     header.append(
-        '##INFO=<ID=FROM,Number=.,Type=String,Description=\
-        "Indicated from which reference is derived">'
+        "##INFO=<ID=FROM,Number=.,Type=String,Description="
+        '"Indicated from which reference is derived">'
+    )
+    header.append('##INFO=<ID=CONS,Number=.,Type=String,Description="Is a consensus">')
+    header.append(
+        "##INFO=<ID=VAF,Number=.,Type=Float,Description="
+        '"Allelic frequence observed">'
     )
     header.append(
-        '##INFO=<ID=CONS,Number=.,Type=String,Description=\
-        "Is a consensus">'
+        "##INFO=<ID=DP,Number=.,Type=Integer,Description="
+        '"Approximate read depth across all samples">'
     )
     header.append(
-        '##INFO=<ID=VAF,Number=.,Type=Float,Description=\
-        "Allelic frequence observed">'
+        "##INFO=<ID=SU,Number=.,Type=Integer,Description="
+        '"Number of pieces of evidence supporting the variant '
+        'across all samples">'
     )
     header.append(
-        '##INFO=<ID=DP,Number=.,Type=Integer,Description=\
-        "Approximate read depth across all samples">'
+        "##INFO=<ID=PE,Number=.,Type=Integer,Description="
+        '"Number of paired-end reads supporting the variant '
+        'across all samples">'
     )
     header.append(
-        '##INFO=<ID=SU,Number=.,Type=Integer,Description=\
-        "Number of pieces of evidence supporting the variant \
-        across all samples">'
+        "##INFO=<ID=SR,Number=.,Type=Integer,Description="
+        '"Number of split reads supporting the variant across '
+        'all samples">'
     )
     header.append(
-        '##INFO=<ID=PE,Number=.,Type=Integer,Description=\
-        "Number of paired-end reads supporting the variant \
-        across all samples">'
-    )
-    header.append(
-        '##INFO=<ID=SR,Number=.,Type=Integer,Description=\
-        "Number of split reads supporting the variant across \
-        all samples">'
-    )
-    header.append(
-        '##INFO=<ID=SC,Number=.,Type=Integer,Description=\
-        "Number of soft clipped reads supporting the variant across \
-        all samples">'
+        "##INFO=<ID=SC,Number=.,Type=Integer,Description="
+        '"Number of soft clipped reads supporting the variant across '
+        'all samples">'
     )
 
     header.append('##ALT=<ID=FUS,Description="Fusion">')
-
+    header.append('##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">')
     header.append(
-        '##FORMAT=<ID=GT,Number=1,Type=String,Description=\
-        "Genotype">'
+        '##FORMAT=<ID=VAF,Number=1,Type=Float,Description="Allelic frequence observed">'
     )
     header.append(
-        '##FORMAT=<ID=VAF,Number=1,Type=Float,Description=\
-        "Allelic frequence observed">'
+        '##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Approximate read depth">'
     )
     header.append(
-        '##FORMAT=<ID=DP,Number=1,Type=Integer,Description=\
-        "Approximate read depth">'
+        "##FORMAT=<ID=SU,Number=1,Type=Integer,Description="
+        '"Number of pieces of evidence supporting the variant">'
     )
     header.append(
-        '##FORMAT=<ID=SU,Number=1,Type=Integer,Description=\
-        "Number of pieces of evidence supporting the variant">'
+        "##FORMAT=<ID=PE,Number=1,Type=Integer,Description="
+        '"Number of paired-end reads supporting the variant">'
     )
     header.append(
-        '##FORMAT=<ID=PE,Number=1,Type=Integer,Description=\
-        "Number of paired-end reads supporting the variant">'
+        "##FORMAT=<ID=SR,Number=1,Type=Integer,Description="
+        '"Number of split reads supporting the variant">'
     )
     header.append(
-        '##FORMAT=<ID=SR,Number=1,Type=Integer,Description=\
-        "Number of split reads supporting the variant">'
-    )
-    header.append(
-        '##FORMAT=<ID=SC,Number=1,Type=Integer,Description=\
-        "Number of soft clipped reads supporting the variant">'
+        "##FORMAT=<ID=SC,Number=1,Type=Integer,Description="
+        '"Number of soft clipped reads supporting the variant">'
     )
 
     return "\n".join(header)

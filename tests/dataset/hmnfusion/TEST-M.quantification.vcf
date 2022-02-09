@@ -1,0 +1,37 @@
+##fileformat=VCFv4.2
+##source=HmnFusion
+##INFO=<ID=SVTYPE,Number=1,Type=String,Description="Type of structural variant">
+##INFO=<ID=SOFT,Number=1,Type=String,Description="Indicated from which software is derived">
+##INFO=<ID=FROM,Number=.,Type=String,Description="Indicated from which reference is derived">
+##INFO=<ID=CONS,Number=.,Type=String,Description="Is a consensus">
+##INFO=<ID=VAF,Number=.,Type=Float,Description="Allelic frequence observed">
+##INFO=<ID=DP,Number=.,Type=Integer,Description="Approximate read depth across all samples">
+##INFO=<ID=SU,Number=.,Type=Integer,Description="Number of pieces of evidence supporting the variant across all samples">
+##INFO=<ID=PE,Number=.,Type=Integer,Description="Number of paired-end reads supporting the variant across all samples">
+##INFO=<ID=SR,Number=.,Type=Integer,Description="Number of split reads supporting the variant across all samples">
+##INFO=<ID=SC,Number=.,Type=Integer,Description="Number of soft clipped reads supporting the variant across all samples">
+##ALT=<ID=FUS,Description="Fusion">
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+##FORMAT=<ID=VAF,Number=1,Type=Float,Description="Allelic frequence observed">
+##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Approximate read depth">
+##FORMAT=<ID=SU,Number=1,Type=Integer,Description="Number of pieces of evidence supporting the variant">
+##FORMAT=<ID=PE,Number=1,Type=Integer,Description="Number of paired-end reads supporting the variant">
+##FORMAT=<ID=SR,Number=1,Type=Integer,Description="Number of split reads supporting the variant">
+##FORMAT=<ID=SC,Number=1,Type=Integer,Description="Number of soft clipped reads supporting the variant">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	TEST-M
+chr9	133619867	GEN_1-1	N	<FUS>	.	.	SVTYPE=FUS:SOFT=genefuse:FROM=:CONS=False:VAF=0,00:DP=0:SU=0:SR=0:PE=0:SC=0	GT:VAF:DP:SU:SR:PE:SC	./.:0,00:0:0:0:0:0
+chr22	23632172	GEN_1-2	N	<FUS>	.	.	SVTYPE=FUS;DP=.;SU=.	GT:VAF:DP:SU:SR:PE:SC	./.:.:.:.:.:.:.
+chr9	133619863	GEN_2-1	N	<FUS>	.	.	SVTYPE=FUS:SOFT=genefuse:FROM=:CONS=False:VAF=0,00:DP=0:SU=0:SR=0:PE=0:SC=0	GT:VAF:DP:SU:SR:PE:SC	./.:0,00:0:0:0:0:0
+chr22	23632168	GEN_2-2	N	<FUS>	.	.	SVTYPE=FUS;DP=.;SU=.	GT:VAF:DP:SU:SR:PE:SC	./.:.:.:.:.:.:.
+chr22	23632166	GEN_3-1	N	<FUS>	.	.	SVTYPE=FUS:SOFT=genefuse:FROM=:CONS=False:VAF=0,00:DP=0:SU=0:SR=0:PE=0:SC=0	GT:VAF:DP:SU:SR:PE:SC	./.:0,00:0:0:0:0:0
+chr9	133619866	GEN_3-2	N	<FUS>	.	.	SVTYPE=FUS;DP=.;SU=.	GT:VAF:DP:SU:SR:PE:SC	./.:.:.:.:.:.:.
+chr9	133619867	LUM_4-1	N	<FUS>	.	.	SVTYPE=FUS:SOFT=lumpy:FROM=:CONS=False:VAF=0,00:DP=0:SU=0:SR=0:PE=0:SC=0	GT:VAF:DP:SU:SR:PE:SC	./.:0,00:0:0:0:0:0
+chr22	23632168	LUM_4-2	N	<FUS>	.	.	SVTYPE=FUS;DP=.;SU=.	GT:VAF:DP:SU:SR:PE:SC	./.:.:.:.:.:.:.
+chr9	133619865	LUM_5-1	N	<FUS>	.	.	SVTYPE=FUS:SOFT=lumpy:FROM=:CONS=False:VAF=0,00:DP=0:SU=0:SR=0:PE=0:SC=0	GT:VAF:DP:SU:SR:PE:SC	./.:0,00:0:0:0:0:0
+chr22	23632166	LUM_5-2	N	<FUS>	.	.	SVTYPE=FUS;DP=.;SU=.	GT:VAF:DP:SU:SR:PE:SC	./.:.:.:.:.:.:.
+chr22	23632166	HMN_6-1	N	<FUS>	.	.	SVTYPE=FUS:SOFT=hmnfusion:FROM=GEN_1-GEN_2-GEN_3:CONS=True:VAF=0,00:DP=0:SU=0:SR=0:PE=0:SC=0	GT:VAF:DP:SU:SR:PE:SC	./.:0,00:0:0:0:0:0
+chr9	133619866	HMN_6-2	N	<FUS>	.	.	SVTYPE=FUS;DP=.;SU=.	GT:VAF:DP:SU:SR:PE:SC	./.:.:.:.:.:.:.
+chr9	133619865	HMN_7-1	N	<FUS>	.	.	SVTYPE=FUS:SOFT=hmnfusion:FROM=LUM_4-LUM_5:CONS=True:VAF=0,00:DP=0:SU=0:SR=0:PE=0:SC=0	GT:VAF:DP:SU:SR:PE:SC	./.:0,00:0:0:0:0:0
+chr22	23632166	HMN_7-2	N	<FUS>	.	.	SVTYPE=FUS;DP=.;SU=.	GT:VAF:DP:SU:SR:PE:SC	./.:.:.:.:.:.:.
+chr22	23632166	HMN_8-1	N	<FUS>	.	.	SVTYPE=FUS:SOFT=hmnfusion:FROM=HMN_6-HMN_7:CONS=True:VAF=43,05:DP=4158:SU=1790:SR=1234:PE=96:SC=460	GT:VAF:DP:SU:SR:PE:SC	./.:43,05:4158:1790:1234:96:460
+chr9	133619866	HMN_8-2	N	<FUS>	.	.	SVTYPE=FUS;DP=.;SU=.	GT:VAF:DP:SU:SR:PE:SC	./.:.:.:.:.:.:.
