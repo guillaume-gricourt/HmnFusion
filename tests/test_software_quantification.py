@@ -1,11 +1,9 @@
 import filecmp
-import json
 import os
 import re
 import sys
 import tempfile
 from enum import Enum
-from typing import Tuple
 
 from main_test import Main_test
 
@@ -23,11 +21,15 @@ class CompareQuantification(Enum):
 def find_vaf(path: str):
     with open(path) as fid:
         text = fid.read()
-    m = re.search(r'(VAF=\d{2},\d{2})', text)
+    m = re.search(r"(VAF=\d{2},\d{2})", text)
+    if m is None:
+        return None
     return m.group(1)
 
 
-def quantification(sample, bed: str, input_type: InputType, compare: CompareQuantification):
+def quantification(
+    sample, bed: str, input_type: InputType, compare: CompareQuantification
+) -> bool:
     with tempfile.NamedTemporaryFile(delete=False) as fd:
         args = ["hmnfusion", "quantification"]
         if input_type == InputType.hmnfusion:
@@ -60,16 +62,25 @@ def quantification(sample, bed: str, input_type: InputType, compare: CompareQuan
 class Test_software(Main_test):
     def test_quantification_hmnfusion(self):
         sim = quantification(
-            self.sample_m, self.bed_bcr_path, InputType.hmnfusion, CompareQuantification.files
+            self.sample_m,
+            self.bed_bcr_path,
+            InputType.hmnfusion,
+            CompareQuantification.files,
         )
         self.assertTrue(sim)
         sim = quantification(
-            self.sample_p, self.bed_bcr_path, InputType.hmnfusion, CompareQuantification.files
+            self.sample_p,
+            self.bed_bcr_path,
+            InputType.hmnfusion,
+            CompareQuantification.files,
         )
         self.assertTrue(sim)
 
     def test_quantification_region(self):
         sim = quantification(
-            self.sample_p, self.bed_bcr_path, InputType.region, CompareQuantification.vaf
+            self.sample_p,
+            self.bed_bcr_path,
+            InputType.region,
+            CompareQuantification.vaf,
         )
         self.assertTrue(sim)
