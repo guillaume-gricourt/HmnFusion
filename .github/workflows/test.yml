@@ -55,6 +55,12 @@ jobs:
         run: |
           pip install build
           python3 -m build --outdir "${bld_path}"
+      - name: 'Install pip package'
+        run: |
+          pip install "${bld_path}/*whl"
+      - name: 'Show if it runs properly'
+        run: |
+          hmnfusion version
 
   Pytest:
     needs: [Build]
