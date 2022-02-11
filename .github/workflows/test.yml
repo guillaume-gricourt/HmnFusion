@@ -25,14 +25,12 @@ jobs:
           DEFAULT_BRANCH: main
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  Build:
+  BuildAndTest:
     runs-on: ${{ matrix.os }}-latest
     strategy:
       matrix:
         os: ["ubuntu"]
         python-version: ['3.7', '3.8', '3.9']
-    env:
-      bld_path: /tmp/build
     defaults:
       run:
         shell: bash -l {0}
@@ -48,41 +46,16 @@ jobs:
           environment-file: conda.recipes/conda_build_env.yaml
           activate-environment: build
           python-version: ${{ matrix.python-version }}
-      - name: 'Set up output folder'
-        run: |
-          mkdir -p "${bld_path}"
       - name: 'Build pip package'
         run: |
           pip install build
-          python3 -m build --outdir "${bld_path}"
+          python3 -m build .
       - name: 'Install pip package'
         run: |
-          pip install "${bld_path}/*whl"
+          pip install ./dist/*whl
       - name: 'Show if it runs properly'
         run: |
           hmnfusion version
-
-  Pytest:
-    needs: [Build]
-    runs-on: ${{ matrix.os }}-latest
-    strategy:
-      matrix:
-        python-version: ['3.7', '3.8', '3.9']
-        os: [ubuntu, macos]
-    env:
-      bld_path: /tmp/build
-    steps:
-      - name: 'Checkout'
-        uses: actions/checkout@v2
-        with:
-          ref: ${{ github.ref }}
-      - name: 'Set up Python'
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.python-version }}
-      - name: 'Install'
-        run: |
-          pip install .
       - name: 'Run pytest'
         run: |
           pip install pytest

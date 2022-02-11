@@ -2,3 +2,4 @@ __pycache__
 *.egg-info/
 super-linter.log
 dist
+build
