@@ -8,7 +8,7 @@ version = ""
 fversion = glob.glob("**/_version.py", recursive=True)[0]
 with open(fversion) as fid:
     lines = fid.read().splitlines()
-    version = lines[0].split("=")[-1].strip().replace('"', "")
+    version = lines[1].split("=")[-1].strip().replace('"', "")
 
 # App name - dependencies
 env = {}
@@ -39,5 +39,6 @@ setuptools.setup(
     package_dir={"": "src"},
     packages=setuptools.find_packages(where="src"),
     include_package_data=True,
+    install_requires=install_requires,
     entry_points={"console_scripts": ["hmnfusion=hmnfusion.__main__:main"]},
 )
