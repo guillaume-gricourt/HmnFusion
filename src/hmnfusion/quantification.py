@@ -1,4 +1,6 @@
 import logging
+import os
+import shutil
 
 import numpy as np
 import pandas as pd
@@ -171,87 +173,17 @@ def run(params, bed, g):
                 g.graph.nodes[n]["fusion"].evidence.clipped += 1
 
 
-# Write.
-def _get_header():
-    """Provide header to build vcf file"""
-    header = []
-    header.append("##fileformat=VCFv4.2")
-    header.append("##source=HmnFusion")
-    header.append(
-        "##INFO=<ID=SVTYPE,Number=1,Type=String,Description="
-        '"Type of structural variant">'
-    )
-    header.append(
-        "##INFO=<ID=SOFT,Number=1,Type=String,Description="
-        '"Indicated from which software is derived">'
-    )
-    header.append(
-        "##INFO=<ID=FROM,Number=.,Type=String,Description="
-        '"Indicated from which reference is derived">'
-    )
-    header.append('##INFO=<ID=CONS,Number=.,Type=String,Description="Is a consensus">')
-    header.append(
-        "##INFO=<ID=VAF,Number=.,Type=Float,Description="
-        '"Allelic frequence observed">'
-    )
-    header.append(
-        "##INFO=<ID=DP,Number=.,Type=Integer,Description="
-        '"Approximate read depth across all samples">'
-    )
-    header.append(
-        "##INFO=<ID=SU,Number=.,Type=Integer,Description="
-        '"Number of pieces of evidence supporting the variant '
-        'across all samples">'
-    )
-    header.append(
-        "##INFO=<ID=PE,Number=.,Type=Integer,Description="
-        '"Number of paired-end reads supporting the variant '
-        'across all samples">'
-    )
-    header.append(
-        "##INFO=<ID=SR,Number=.,Type=Integer,Description="
-        '"Number of split reads supporting the variant across '
-        'all samples">'
-    )
-    header.append(
-        "##INFO=<ID=SC,Number=.,Type=Integer,Description="
-        '"Number of soft clipped reads supporting the variant across '
-        'all samples">'
-    )
-
-    header.append('##ALT=<ID=FUS,Description="Fusion">')
-    header.append('##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">')
-    header.append(
-        '##FORMAT=<ID=VAF,Number=1,Type=Float,Description="Allelic frequence observed">'
-    )
-    header.append(
-        '##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Approximate read depth">'
-    )
-    header.append(
-        "##FORMAT=<ID=SU,Number=1,Type=Integer,Description="
-        '"Number of pieces of evidence supporting the variant">'
-    )
-    header.append(
-        "##FORMAT=<ID=PE,Number=1,Type=Integer,Description="
-        '"Number of paired-end reads supporting the variant">'
-    )
-    header.append(
-        "##FORMAT=<ID=SR,Number=1,Type=Integer,Description="
-        '"Number of split reads supporting the variant">'
-    )
-    header.append(
-        "##FORMAT=<ID=SC,Number=1,Type=Integer,Description="
-        '"Number of soft clipped reads supporting the variant">'
-    )
-
-    return "\n".join(header)
-
-
 def write(filename, name, g):
     """Write a vcf file from a list of Fusion"""
     # Header.
-    with open(filename, "w") as fod:
-        fod.write(_get_header() + "\n")
+    shutil.copyfile(
+        src=os.path.join(
+            os.path.dirname(os.path.realpath(__file__)),
+            "templates",
+            "vcf.header.4-2.txt",
+        ),
+        dst=filename,
+    )
 
     # Fusions.
     columns = ["#CHROM", "POS", "ID", "REF", "ALT", "QUAL", "FILTER", "INFO", "FORMAT"]
