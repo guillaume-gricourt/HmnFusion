@@ -1,16 +1,9 @@
 import logging
-import re
 
 import numpy as np
 import pandas as pd
 import pysam
 from hmnfusion import region
-
-
-def check_region(region):
-    if re.search(r"[\d\w]+:\d+", region, flags=re.I):
-        return True
-    return False
 
 
 def read_bed(filename):

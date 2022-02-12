@@ -118,7 +118,7 @@ def _cmd_quantification(args):
                 "HmnFusion Json file doesn't exist : %s" % (finputs["hmnfusion_json"],),
             )
     if args.region:
-        if not quantification.check_region(args.region):
+        if not region.Region.check_region(args.region):
             utils.abort(
                 AP,
                 "Region format is not well formated. \

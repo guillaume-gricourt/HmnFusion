@@ -82,6 +82,12 @@ class TestRegion(unittest.TestCase):
         b = Region.from_dict(data)
         self.assertEqual(a, b)
 
+    def test_check_region(self):
+        """Test check_region()"""
+        self.assertFalse(Region.check_region(":10"))
+        self.assertFalse(Region.check_region("10-10"))
+        self.assertTrue(Region.check_region("10:10"))
+        self.assertTrue(Region.check_region("chr10:10"))
 
 if __name__ == "__main__":
     unittest.main()
