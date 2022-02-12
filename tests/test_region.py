@@ -89,5 +89,6 @@ class TestRegion(unittest.TestCase):
         self.assertTrue(Region.check_region("10:10"))
         self.assertTrue(Region.check_region("chr10:10"))
 
+
 if __name__ == "__main__":
     unittest.main()
