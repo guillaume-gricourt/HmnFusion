@@ -12,7 +12,7 @@ class TestBed(Main_test):
     @classmethod
     def setUp(self):
         self.bed_a_df = pd.DataFrame(
-            {"chrom" : ["1", "1", "2"], "start" : [5, 15, 5], "end" : [10, 25, 10]}
+            {"chrom": ["1", "1", "2"], "start": [5, 15, 5], "end": [10, 25, 10]}
         )
 
     def test_init(self):
@@ -45,16 +45,12 @@ class TestBed(Main_test):
 
         # Test 1
         region = Region("1", 8, "left")
-        sel = bed.df.apply(
-            Bed.select_bed, axis=1, args=(region,)
-        )
+        sel = bed.df.apply(Bed.select_bed, axis=1, args=(region,))
         self.assertEqual(sel.sum(), 1)
 
         # Test 2
         region = Region("1", 2, "left")
-        sel = bed.df.apply(
-            Bed.select_bed, axis=1, args=(region,)
-        )
+        sel = bed.df.apply(Bed.select_bed, axis=1, args=(region,))
         self.assertEqual(sel.sum(), 0)
 
 

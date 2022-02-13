@@ -17,6 +17,7 @@ class Bed(object):
     __init__()
         Construct an empty object.
     """
+
     HEADER = ["chrom", "start", "end"]
 
     def __init__(self) -> None:
