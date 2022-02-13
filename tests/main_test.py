@@ -63,6 +63,7 @@ class Main_test(unittest.TestCase):
 
     # Auxiliary.
     bed_bcr_path = os.path.join(dataset_path, "bed", "bcr.bed")
+    bed_a_path = os.path.join(dataset_path, "bed", "a.bed")
 
     @classmethod
     def launch(cls, args):

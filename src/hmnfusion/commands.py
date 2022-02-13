@@ -2,8 +2,9 @@ import argparse
 import logging
 import os
 
+from hmnfusion import _version
+from hmnfusion import bed as ibed
 from hmnfusion import (
-    _version,
     extractfusion,
     fusion,
     graph,
@@ -118,7 +119,7 @@ def _cmd_quantification(args):
                 "HmnFusion Json file doesn't exist : %s" % (finputs["hmnfusion_json"],),
             )
     if args.region:
-        if not quantification.check_region(args.region):
+        if not region.Region.check_region(args.region):
             utils.abort(
                 AP,
                 "Region format is not well formated. \
@@ -178,7 +179,7 @@ def _cmd_quantification(args):
 
     # Parsing bed file.
     logging.info("Parsing bed file")
-    bed = quantification.read_bed(args.input_bed)
+    bed = ibed.Bed.from_bed(args.input_bed)
 
     # Parsing fusions.
     logging.info("Get region")

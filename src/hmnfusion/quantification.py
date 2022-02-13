@@ -1,38 +1,34 @@
 import logging
-import re
+import os
+import shutil
+from typing import List
 
 import numpy as np
 import pandas as pd
 import pysam
-from hmnfusion import region
-
-
-def check_region(region):
-    if re.search(r"[\d\w]+:\d+", region, flags=re.I):
-        return True
-    return False
-
-
-def read_bed(filename):
-    """Read a bed file. Return a dataframe"""
-    isHeader = 0
-    with open(filename) as fid:
-        if "track" in fid.readline():
-            isHeader = 1
-    bed = pd.read_csv(
-        filename,
-        sep="\t",
-        usecols=[0, 1, 2],
-        names=["chrom", "start", "end"],
-        dtype={"chrom": str, "start": int, "end": int},
-        skiprows=isHeader,
-    )
-    return bed
+from hmnfusion import bed as ibed
+from hmnfusion import graph, region
 
 
 # Helper functions
-def _cigar2position(cigars, start):
-    """Construct from a cigar and a position, a position/operation"""
+def cigar2position(cigars: List[List[int]], start: int) -> dict:
+    """Construct from a cigar and a position, a position/operation.
+
+    Parameters
+    ----------
+    cigars:
+        A cigar coming from pysam
+    start:
+        A genomic coordinate
+
+    Returns
+    -------
+    dict
+        A dictionary with:
+          - key: genomic coordinate
+          - value: cigar attribute (H, S, M, ...)
+
+    """
     data = {}
     if cigars[0][0] in [4, 5]:
         for i in range(cigars[0][1]):
@@ -56,16 +52,22 @@ def _cigar2position(cigars, start):
     return data
 
 
-def _select_bed(x, r):
-    """Select from a bed file, regions cross over an other region"""
-    if x["chrom"] == r.chrom:
-        if x["start"] <= r.position and x["end"] >= r.position:
-            return True
-    return False
+def run(params: dict, bed: ibed.Bed, g: graph.Graph) -> None:
+    """Main function to quantify fusion, by updating Graph object
 
+    Parameters
+    ----------
+    params: dict
+        Some parameters
+    bed: hmnfusion.bed.Bed
+        A Bed object
+    g: hmnfusion.graph.Graph
+        An object containing fusion data
 
-def run(params, bed, g):
-    """Main function to quantify fusion"""
+    Return
+    ------
+    None
+    """
     alignment = pysam.AlignmentFile(
         params["falignment"]["path"], params["falignment"]["mode"]
     )
@@ -77,19 +79,19 @@ def run(params, bed, g):
         if not g.graph.nodes[n]["is_interest"]:
             continue
         # Check fusion against bed.
-        sub_first = pd.DataFrame(columns=bed.columns)
-        sub_second = pd.DataFrame(columns=bed.columns)
+        sub_first = pd.DataFrame(columns=ibed.Bed.HEADER)
+        sub_second = pd.DataFrame(columns=ibed.Bed.HEADER)
 
         if g.graph.nodes[n]["fusion"].first.is_init():
-            sel = bed.apply(
-                _select_bed, axis=1, args=(g.graph.nodes[n]["fusion"].first,)
+            sel = bed.df.apply(
+                ibed.Bed.select_bed, axis=1, args=(g.graph.nodes[n]["fusion"].first,)
             )
-            sub_first = bed[sel]
+            sub_first = bed.df[sel]
         if g.graph.nodes[n]["fusion"].second.is_init():
-            sel = bed.apply(
-                _select_bed, axis=1, args=(g.graph.nodes[n]["fusion"].second,)
+            sel = bed.df.apply(
+                ibed.Bed.select_bed, axis=1, args=(g.graph.nodes[n]["fusion"].second,)
             )
-            sub_second = bed[sel]
+            sub_second = bed.df[sel]
         if len(sub_first) > 1 or len(sub_second) > 1:
             logging.warning(
                 "Fusion %s is found multiple times in bed -> skipping"
@@ -113,7 +115,7 @@ def run(params, bed, g):
             continue
 
         # Init.
-        bed_sel = pd.DataFrame(columns=bed.columns)
+        bed_sel = pd.DataFrame(columns=ibed.Bed.HEADER)
         r = region.Region()
         if len(sub_first) == 1:
             bed_sel = sub_first
@@ -141,7 +143,7 @@ def run(params, bed, g):
             ):
                 continue
 
-            cigar2pos = _cigar2position(
+            cigar2pos = cigar2position(
                 aligned_segment.cigartuples, aligned_segment.reference_start
             )
             if r.position not in cigar2pos.keys():
@@ -178,87 +180,30 @@ def run(params, bed, g):
                 g.graph.nodes[n]["fusion"].evidence.clipped += 1
 
 
-# Write.
-def _get_header():
-    """Provide header to build vcf file"""
-    header = []
-    header.append("##fileformat=VCFv4.2")
-    header.append("##source=HmnFusion")
-    header.append(
-        "##INFO=<ID=SVTYPE,Number=1,Type=String,Description="
-        '"Type of structural variant">'
-    )
-    header.append(
-        "##INFO=<ID=SOFT,Number=1,Type=String,Description="
-        '"Indicated from which software is derived">'
-    )
-    header.append(
-        "##INFO=<ID=FROM,Number=.,Type=String,Description="
-        '"Indicated from which reference is derived">'
-    )
-    header.append('##INFO=<ID=CONS,Number=.,Type=String,Description="Is a consensus">')
-    header.append(
-        "##INFO=<ID=VAF,Number=.,Type=Float,Description="
-        '"Allelic frequence observed">'
-    )
-    header.append(
-        "##INFO=<ID=DP,Number=.,Type=Integer,Description="
-        '"Approximate read depth across all samples">'
-    )
-    header.append(
-        "##INFO=<ID=SU,Number=.,Type=Integer,Description="
-        '"Number of pieces of evidence supporting the variant '
-        'across all samples">'
-    )
-    header.append(
-        "##INFO=<ID=PE,Number=.,Type=Integer,Description="
-        '"Number of paired-end reads supporting the variant '
-        'across all samples">'
-    )
-    header.append(
-        "##INFO=<ID=SR,Number=.,Type=Integer,Description="
-        '"Number of split reads supporting the variant across '
-        'all samples">'
-    )
-    header.append(
-        "##INFO=<ID=SC,Number=.,Type=Integer,Description="
-        '"Number of soft clipped reads supporting the variant across '
-        'all samples">'
-    )
+def write(filename: str, name: str, g: graph.Graph) -> None:
+    """Write a vcf file from a list of Fusion
+    Parameters
+    ----------
+    filename: str
+        A filename to write fusion
+    name: str
+        Name of sample
+    g: hmnfusion.graph.Graph
+        A graph object to extract data
 
-    header.append('##ALT=<ID=FUS,Description="Fusion">')
-    header.append('##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">')
-    header.append(
-        '##FORMAT=<ID=VAF,Number=1,Type=Float,Description="Allelic frequence observed">'
-    )
-    header.append(
-        '##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Approximate read depth">'
-    )
-    header.append(
-        "##FORMAT=<ID=SU,Number=1,Type=Integer,Description="
-        '"Number of pieces of evidence supporting the variant">'
-    )
-    header.append(
-        "##FORMAT=<ID=PE,Number=1,Type=Integer,Description="
-        '"Number of paired-end reads supporting the variant">'
-    )
-    header.append(
-        "##FORMAT=<ID=SR,Number=1,Type=Integer,Description="
-        '"Number of split reads supporting the variant">'
-    )
-    header.append(
-        "##FORMAT=<ID=SC,Number=1,Type=Integer,Description="
-        '"Number of soft clipped reads supporting the variant">'
-    )
-
-    return "\n".join(header)
-
-
-def write(filename, name, g):
-    """Write a vcf file from a list of Fusion"""
+    Return
+    ------
+    None
+    """
     # Header.
-    with open(filename, "w") as fod:
-        fod.write(_get_header() + "\n")
+    shutil.copyfile(
+        src=os.path.join(
+            os.path.dirname(os.path.realpath(__file__)),
+            "templates",
+            "vcf.header.4-2.txt",
+        ),
+        dst=filename,
+    )
 
     # Fusions.
     columns = ["#CHROM", "POS", "ID", "REF", "ALT", "QUAL", "FILTER", "INFO", "FORMAT"]
@@ -284,12 +229,12 @@ def write(filename, name, g):
         infos += ["PE=%s" % (g.graph.nodes[n]["fusion"].evidence.mate,)]
         infos += ["SC=%s" % (g.graph.nodes[n]["fusion"].evidence.clipped,)]
 
-        infos = ":".join(infos)
+        sinfos = ":".join(infos)
         values = [
             g.graph.nodes[n]["fusion"].first.chrom,
             g.graph.nodes[n]["fusion"].first.position,
         ]
-        values += [ident_1, "N", "<FUS>", ".", ".", infos]
+        values += [ident_1, "N", "<FUS>", ".", ".", sinfos]
         values += ["GT:VAF:DP:SU:SR:PE:SC"]
 
         infos_values = []
@@ -311,7 +256,7 @@ def write(filename, name, g):
         if g.graph.nodes[n]["fusion"].second.is_init():
             ident_2 += "-2"
             # Second.
-            infos = ";".join(["SVTYPE=FUS", "DP=.", "SU=."])
+            sinfos = ";".join(["SVTYPE=FUS", "DP=.", "SU=."])
             values = [
                 g.graph.nodes[n]["fusion"].second.chrom,
                 g.graph.nodes[n]["fusion"].second.position,
@@ -320,7 +265,7 @@ def write(filename, name, g):
                 "<FUS>",
                 ".",
                 ".",
-                infos,
+                sinfos,
                 "GT:VAF:DP:SU:SR:PE:SC",
                 "./.:.:.:.:.:.:.",
             ]

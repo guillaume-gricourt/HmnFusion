@@ -3,3 +3,4 @@ __pycache__
 super-linter.log
 dist
 build
+*.swp

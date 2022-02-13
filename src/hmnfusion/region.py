@@ -1,3 +1,4 @@
+import re
 from typing import Dict
 
 
@@ -100,6 +101,24 @@ class Region(object):
         region.chrom = data.get("chrom", "")
         region.position = data.get("position", 0)
         return region
+
+    @classmethod
+    def check_region(cls, region: str) -> bool:
+        """Verify if a string corresponds to a region
+
+        Parameters
+        ----------
+        region: str
+            A string to parse.
+
+        Return
+        ------
+        bool:
+            True if it corresponds to a region, False otherwise.
+        """
+        if re.search(r"[\d\w]+:\d+", region, flags=re.I):
+            return True
+        return False
 
     # Meta functions
     def __key(self):
