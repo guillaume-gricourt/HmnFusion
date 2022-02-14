@@ -1,4 +1,5 @@
 import hashlib
+from typing import List
 
 import pandas as pd
 import pysam
@@ -7,14 +8,31 @@ from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.dimensions import ColumnDimension, DimensionHolder
 
 
-def extract(finputs, event):
-    """Extract event of interest from vcf input files"""
+def extract(finputs: List[str]) -> pd.DataFrame:
+    """Extract event of interest from vcf input files
+
+    Parameters
+    ----------
+    finputs: List[str]
+        A list of path of VCF files
+
+    Return
+    ------
+    pd.DataFrame
+        Return a dataframe with:
+            - index: region_id formatted as "<contig> <genomic coordinate> <base reference> <base alternative"
+            - columns:
+                - "event": str (deletion)
+                - "contig": str, contig name
+                - "start": int, genomic coordinate
+                - "deletion": str, sequence
+    """
     df = pd.DataFrame()
     for finput in finputs:
         vcf_in = pysam.VariantFile(finput)
         for record in vcf_in.fetch():
             # Check if variant is a deletion.
-            if event in ["all", "deletion"] and len(record.ref) > len(record.alts[0]):
+            if len(record.ref) > len(record.alts[0]):
                 region_name = "%s %s %s %s" % (
                     record.contig,
                     record.pos,
@@ -36,8 +54,25 @@ def extract(finputs, event):
     return df
 
 
-def signatures(freference, df):
-    """Identify MH motif from event"""
+def signatures(freference: str, df: pd.DataFrame) -> pd.DataFrame:
+    """Identify MH motif from event
+
+    Parameters
+    ----------
+    freference: str
+        Path of the reference file (fasta format expected)
+    df: pd.DataFrame
+        A dataframe built from VCF files
+
+    Return
+    ------
+    pd.DataFrame
+        The df dataframe with a supplementary column "mmej_sequence" (str)
+
+    See also
+    --------
+    extract()
+    """
 
     def _signatures(x, freference):
         len_deletion = len(x["deletion"])
@@ -66,8 +101,24 @@ def signatures(freference, df):
     return df
 
 
-def conclude(df):
-    """Conclude about the presens of MMEJ signature"""
+def conclude(df: pd.DataFrame) -> pd.DataFrame:
+    """Conclude about the presens of MMEJ signature
+
+    Parameters
+    ----------
+    df: pd.DataFrame
+        A dataframe with "mmej_sequence" column
+
+    Return
+    ------
+    pd.DataFrame
+        The df dataframe with a supplementary column "mmej_conclusion" (str)
+
+    See also
+    --------
+    extract()
+    signatures()
+    """
 
     def _conclude(x):
         res = ""
@@ -87,9 +138,25 @@ def conclude(df):
     return df
 
 
-# Write.
-def write(filename, df):
-    """Write dataframe to output"""
+def write(filename: str, df: pd.DataFrame) -> None:
+    """Write dataframe to a file.
+    Parameters
+    ----------
+    filename: str
+        Path of an output file (xlsx, excel format)
+    df: pd.DataFrame
+        A dataframe to write
+
+    Return
+    ------
+    None
+
+    See also
+    --------
+    extract()
+    signatures()
+    conclude()
+    """
     headers = [
         "contig",
         "start",
