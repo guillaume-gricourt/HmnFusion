@@ -1,23 +1,28 @@
-<h3 align=center>HmnFusion</h3>
+# HmnFusion
 
-# Introduction
-A tool to aggregate results of fusion produced by Genefuse and Lumpy and calculate allelic frequency. 
+[![Release](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/guillaume-gricourt/5b62753442bc7c44ae2995299575af0a/raw/version.json)](version)  
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![GitHub Super-Linter](https://github.com/brsynth/rpFbaAnalysis/workflows/Tests/badge.svg)](https://github.com/marketplace/actions/super-linter)
+[![Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/guillaume-gricourt/5b62753442bc7c44ae2995299575af0a/raw/coverage.json)](code_coverage)  
 
-# Getting Started
+## Introduction
+A tool to aggregate results of fusion produced by Genefuse and Lumpy and calculate allelic frequency.  
 
-## Installing
+## Getting Started
+
+### Installing
 Installation is done with `pip`
 ```bash
 pip install hmnfusion
 ```
 
-## Running
+### Running
 Software is available by
 <pre>HmnFusion <i>command</i> <i>options</i></pre>
 
-# Commands
+## Commands
 
-## Extract Fusion
+### Extract Fusion
 
 Aggregate results from Genefuse and Lumpy to produce a Json file.
 
@@ -28,7 +33,7 @@ HmnFusion extractfusion \
     --output-json <i>file</i>
 </pre>
 
-## Quantification
+### Quantification
 
 Calculate allelic frequency given postion or Json file produced by `extractfusion` command.
 A fusion is defined by two breakpoints. Only one must be in bed intervals, allelic depth is computed only on this side.
@@ -43,21 +48,33 @@ HmnFusion quantification \
     --output-vcf <i>file</i>
 </pre>
 
+### Docker
 
-# Built with these main libraries
+Run *extractfusion* with docker like:  
+<pre>
+docker run -it \
+    --rm \
+    hmnfusion:lastest \
+    extractfusion \
+    --genefuse-json <i>file</i> | --genefuse-html <i>file</i> \
+    --lumpy-vcf <i>file</i> \
+    --output-json <i>file</i>
+</pre>
+
+## Built with these main libraries
 
 * [beautifulsoup4](https://pypi.org/project/beautifulsoup4) - Parsing efficiently HTML file
 * [pysam](https://github.com/pysam-developers/pysam) - Essential library to work with BAM and VCF files
 * [Pandas](https://github.com/pandas-dev/pandas) - Essential dataframe object
 
-# Versioning
+## Versioning
 
 [SemVer](http://semver.org/) is used for versioning.
 
-# Authors
+## Authors
 
 * **Guillaume Gricourt** - *Initial work*
 
-# License
+## License
 
-See the [LICENSE.md](LICENSE) file for details
+See the [LICENSE](LICENSE) file for details

@@ -1,0 +1,2 @@
+include environment.yml
+graft src/hmnfusion/templates
