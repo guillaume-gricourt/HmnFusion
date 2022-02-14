@@ -241,7 +241,7 @@ def _cmd_mmej(args):
 
     # Run.
     logging.info("Extract events from files")
-    df = mmej.extract(args.input_vcf, event=args.event)
+    df = mmej.extract(args.input_vcf)
 
     logging.info("Caracterize events with reference file")
     df = mmej.signatures(args.reference, df)
@@ -258,13 +258,6 @@ def _cmd_mmej(args):
 P_mmej = AP_subparsers.add_parser("mmej", help=_cmd_mmej.__doc__)
 P_mmej.add_argument("-i", "--input-vcf", nargs="+", help="Vcf file")
 P_mmej.add_argument("-r", "--reference", required=True, help="Genome of reference")
-P_mmej.add_argument(
-    "-e",
-    "--event",
-    default="deletion",
-    choices=["deletion", "fusion", "all"],
-    help="Event from which to detect MMEJ",
-)
 P_mmej.add_argument("--output-xlsx", help="Output file")
 P_mmej.set_defaults(func=_cmd_mmej)
 

@@ -7,14 +7,14 @@ from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.dimensions import ColumnDimension, DimensionHolder
 
 
-def extract(finputs, event):
+def extract(finputs):
     """Extract event of interest from vcf input files"""
     df = pd.DataFrame()
     for finput in finputs:
         vcf_in = pysam.VariantFile(finput)
         for record in vcf_in.fetch():
             # Check if variant is a deletion.
-            if event in ["all", "deletion"] and len(record.ref) > len(record.alts[0]):
+            if len(record.ref) > len(record.alts[0]):
                 region_name = "%s %s %s %s" % (
                     record.contig,
                     record.pos,
