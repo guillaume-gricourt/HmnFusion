@@ -127,17 +127,9 @@ def _cmd_quantification(args):
             )
         finputs["region"] = args.region
 
-    falignment_path = ""
-    falignment_mode = ""
-    if args.input_bam:
-        falignment_path = args.input_bam
-        falignment_mode = "rb"
-    if args.input_sam:
-        falignment_path = args.input_sam
-        falignment_mode = "r"
     finputs["alignment"] = {}
-    finputs["alignment"]["path"] = falignment_path
-    finputs["alignment"]["mode"] = falignment_mode
+    finputs["alignment"]["path"] = args.input_bam
+    finputs["alignment"]["mode"] = "rb"
     if not os.path.isfile(finputs["alignment"]["path"]):
         utils.abort(
             AP,
@@ -215,9 +207,7 @@ P_qpg.add_argument("--region", help="Region format <chrom>:<postion>")
 P_qpg.add_argument(
     "--hmnfusion-json", help='Output Json produced by command "extractfusion"'
 )
-P_qiag = P_quantification.add_mutually_exclusive_group(required=True)
-P_qiag.add_argument("--input-bam", help="Bam file")
-P_qiag.add_argument("--input-sam", help="Sam file")
+P_quantification.add_argument("--input-bam", required=True, help="Bam file")
 P_quantification.add_argument("--input-bed", help="Bed file")
 P_quantification.add_argument("--name", required=True, help="Name of sample")
 P_quantification.add_argument(
