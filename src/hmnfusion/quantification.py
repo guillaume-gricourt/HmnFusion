@@ -200,6 +200,7 @@ def write(filename: str, name: str, g: graph.Graph) -> None:
         src=os.path.join(
             os.path.dirname(os.path.realpath(__file__)),
             "templates",
+            "vcf",
             "vcf.header.4-2.txt",
         ),
         dst=filename,
