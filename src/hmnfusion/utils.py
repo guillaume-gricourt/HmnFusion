@@ -1,4 +1,5 @@
 import json
+import logging
 import subprocess
 from typing import Dict, List
 
@@ -57,7 +58,25 @@ def update_list(li: List[object], indexes: List[int]) -> List[object]:
         up += 1
     return li
 
-def cmdline(args: str) -> str:
-    args = args.split()
+
+def cmdline(args: List[str], logger: logging.Logger = logging.getLogger()) -> int:
+    """Run a command line.
+
+    Parameters
+    ----------
+    args: List[str]
+        A list of argument
+    logger: logging.Logger (default: logging.getLogger())
+        A logger object
+
+    Return
+    ------
+    int
+        Return code from the comand line
+    """
     ret = subprocess.run(args, capture_output=True, encoding="utf8")
-    return ret
+    if ret.stdout not is None:
+        logging.info(ret.stdout)
+    if ret.stderr not is None:
+        loggin.warning(ret.stderr)
+    return ret.returncode

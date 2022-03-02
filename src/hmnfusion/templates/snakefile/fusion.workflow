@@ -14,6 +14,17 @@ rule all:
 	input:
 		rules.quantification.output.vcf
 
+rule genefuse:
+    input:
+        fwd = 
+        rev =
+        bed = 
+    output:
+        
+rule lumpy:
+    input:
+        bam = 
+    out
 rule extract:
 	input:
 		genefuse = GENEFUSE_FILE,

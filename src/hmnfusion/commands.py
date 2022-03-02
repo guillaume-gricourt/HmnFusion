@@ -267,10 +267,13 @@ def _cmd_wkf_hmnfusion(args):
     logging.info("Start - Worfklow HmnFusion")
     # Args.
     genefuse_file = ""
+    genefuse_fmt = ""
     if args.genefuse_json is None:
         genefuse_file = args.genefuse_html
+        genefuse_fmt = "html"
     else:
         genefuse_file = args.genefuse_json
+        genefuse_fmt = "json"
 
     if not os.path.isfile(genefuse_file):
         utils.abort(
@@ -278,24 +281,33 @@ def _cmd_wkf_hmnfusion(args):
         )
     if not os.path.isfile(args.lumpy_vcf):
         utils.abort(AP, "File Lumpy doesn't exist : %s" % (args.lumpy_vcf,))
+    if not os.path.isfile(args.bam_file):
+        utils.abort(AP, "File bam doesn't exist : %s" % (args.bam_file,))
+    if not os.path.isfile(args.bed_file):
+        utils.abort(AP, "File bed doesn't exist : %s" % (args.bed_file,))
     if not os.path.isdir(os.path.dirname(os.path.abspath(args.output_vcf))):
         utils.abort(AP, "Outdir doesn't exist : %s" % (args.output_vcf,))
 
     # Run.
-    logging.info("Run HmnFusion - ExtractFusion")
+    logging.info("Build command line")
     args = ["snakemake"]
     args = ["-c", args.threads]
     args += ["--config"]
-    args += ["lumpy=" + args.lumpy_vcf]
-    args += [""]
+    args += ["lumpy_file=" + args.lumpy_vcf]
+    args += ["genefuse_file=" + args.genefuse_file]
+    args += ["genefuse_fmt=" + args.genefuse_fmt]
+    args += ["bam_file=" + args.bam_file]
+    args += ["bed_file=" + args.bed_file]
+    args += ["name=" + args.name]
+    args += ["output_file=" + args.output_vcf]
 
-    logging.info("Run HmnFusion - Quantification")
-
+    logging.info("Run HmnFusion")
+    ret = utils.cmdline(args)
 
     logging.info("End - Worfklow HmnFusion")
 
 
-P_wkf_hmnfusion = AP_subparsers.add_parser("mmej", help=_cmd_wkf_hmnfusion.__doc__)
+P_wkf_hmnfusion = AP_subparsers.add_parser("worflow-hmnfusion", help=_cmd_wkf_hmnfusion.__doc__)
 P_wkf_hmnfusion.add_argument("--lumpy-vcf", help="Lumpy Vcf file")
 P_wkf_hf_g = P_wkf_hmnfusion.add_mutually_exclusive_group(required=True)
 P_wkf_hf_g.add_argument("--genefuse-json", help="Genefuse, json file")
