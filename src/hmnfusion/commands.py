@@ -262,6 +262,52 @@ P_mmej.add_argument("--output-xlsx", help="Output file")
 P_mmej.set_defaults(func=_cmd_mmej)
 
 
+def _cmd_wkf_hmnfusion(args):
+    """Worflow to run HmnFusion ExtractFusion & Quantification"""
+    logging.info("Start - Worfklow HmnFusion")
+    # Args.
+    genefuse_file = ""
+    if args.genefuse_json is None:
+        genefuse_file = args.genefuse_html
+    else:
+        genefuse_file = args.genefuse_json
+
+    if not os.path.isfile(genefuse_file):
+        utils.abort(
+            AP, "File Genefuse doesn't exist : %s" % (genefuse_file,)
+        )
+    if not os.path.isfile(args.lumpy_vcf):
+        utils.abort(AP, "File Lumpy doesn't exist : %s" % (args.lumpy_vcf,))
+    if not os.path.isdir(os.path.dirname(os.path.abspath(args.output_vcf))):
+        utils.abort(AP, "Outdir doesn't exist : %s" % (args.output_vcf,))
+
+    # Run.
+    logging.info("Run HmnFusion - ExtractFusion")
+    args = ["snakemake"]
+    args = ["-c", args.threads]
+    args += ["--config"]
+    args += ["lumpy=" + args.lumpy_vcf]
+    args += [""]
+
+    logging.info("Run HmnFusion - Quantification")
+
+
+    logging.info("End - Worfklow HmnFusion")
+
+
+P_wkf_hmnfusion = AP_subparsers.add_parser("mmej", help=_cmd_wkf_hmnfusion.__doc__)
+P_wkf_hmnfusion.add_argument("--lumpy-vcf", help="Lumpy Vcf file")
+P_wkf_hf_g = P_wkf_hmnfusion.add_mutually_exclusive_group(required=True)
+P_wkf_hf_g.add_argument("--genefuse-json", help="Genefuse, json file")
+P_wkf_hf_g.add_argument("--genefuse-html", help="Genefuse, html file")
+P_wkf_hmnfusion.add_argument("--input-bam", required=True, help="Bam file")
+P_wkf_hmnfusion.add_argument("--input-bed", help="Bed file")
+P_wkf_hmnfusion.add_argument("--name", required=True, help="Name of sample")
+P_wkf_hmnfusion.add_argument("--output-vcf", help="Vcf file output")
+P_wkf_hmnfusion.add_argument("--threads", type=1, default=1, help="Threads used")
+P_wkf_hmnfusion.set_defaults(func=_cmd_wkf_hmnfusion)
+
+
 # Version.
 def print_version(_args):
     """Display this program"s version"""

@@ -4,3 +4,4 @@ super-linter.log
 dist
 build
 *.swp
+.snakemake

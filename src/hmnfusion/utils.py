@@ -1,4 +1,5 @@
 import json
+import subprocess
 from typing import Dict, List
 
 
@@ -55,3 +56,8 @@ def update_list(li: List[object], indexes: List[int]) -> List[object]:
         del li[ix - up]
         up += 1
     return li
+
+def cmdline(args: str) -> str:
+    args = args.split()
+    ret = subprocess.run(args, capture_output=True, encoding="utf8")
+    return ret
