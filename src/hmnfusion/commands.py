@@ -12,6 +12,7 @@ from hmnfusion import (
     quantification,
     region,
     utils,
+    workflow,
 )
 
 AP = argparse.ArgumentParser(
@@ -276,38 +277,45 @@ def _cmd_wkf_hmnfusion(args):
         genefuse_fmt = "json"
 
     if not os.path.isfile(genefuse_file):
-        utils.abort(
-            AP, "File Genefuse doesn't exist : %s" % (genefuse_file,)
-        )
+        utils.abort(AP, "File Genefuse doesn't exist : %s" % (genefuse_file,))
     if not os.path.isfile(args.lumpy_vcf):
         utils.abort(AP, "File Lumpy doesn't exist : %s" % (args.lumpy_vcf,))
-    if not os.path.isfile(args.bam_file):
-        utils.abort(AP, "File bam doesn't exist : %s" % (args.bam_file,))
-    if not os.path.isfile(args.bed_file):
-        utils.abort(AP, "File bed doesn't exist : %s" % (args.bed_file,))
+    if not os.path.isfile(args.input_bam):
+        utils.abort(AP, "File bam doesn't exist : %s" % (args.input_bam,))
+    if not os.path.isfile(args.input_bed_hmnfusion):
+        utils.abort(AP, "File bed doesn't exist : %s" % (args.input_bed_hmnfusion,))
     if not os.path.isdir(os.path.dirname(os.path.abspath(args.output_vcf))):
         utils.abort(AP, "Outdir doesn't exist : %s" % (args.output_vcf,))
 
     # Run.
-    logging.info("Build command line")
-    args = ["snakemake"]
-    args = ["-c", args.threads]
-    args += ["--config"]
-    args += ["lumpy_file=" + args.lumpy_vcf]
-    args += ["genefuse_file=" + args.genefuse_file]
-    args += ["genefuse_fmt=" + args.genefuse_fmt]
-    args += ["bam_file=" + args.bam_file]
-    args += ["bed_file=" + args.bed_file]
-    args += ["name=" + args.name]
-    args += ["output_file=" + args.output_vcf]
+    logging.info("Run Worflow HmnFusion")
+    config = {
+        "lumpy": args.lumpy_vcf,
+        "genefuse_file": args.genefuse_file,
+        "genefuse_fmt": genefuse_fmt,
+        "bam": args.bam_file,
+        "bed_hmnfusion": args.bed_file,
+        "name": args.name,
+        "output": args.output_vcf,
+    }
 
-    logging.info("Run HmnFusion")
-    ret = utils.cmdline(args)
+    workflow.run(
+        snakefile=os.path.join(
+            os.path.dirname(os.path.realpath(__file__)),
+            "templates",
+            "snakefile",
+            "hmnfusion.snakefile",
+        ),
+        config=config,
+        cores=args.threads,
+    )
 
     logging.info("End - Worfklow HmnFusion")
 
 
-P_wkf_hmnfusion = AP_subparsers.add_parser("worflow-hmnfusion", help=_cmd_wkf_hmnfusion.__doc__)
+P_wkf_hmnfusion = AP_subparsers.add_parser(
+    "worflow-hmnfusion", help=_cmd_wkf_hmnfusion.__doc__
+)
 P_wkf_hmnfusion.add_argument("--lumpy-vcf", help="Lumpy Vcf file")
 P_wkf_hf_g = P_wkf_hmnfusion.add_mutually_exclusive_group(required=True)
 P_wkf_hf_g.add_argument("--genefuse-json", help="Genefuse, json file")
@@ -316,8 +324,80 @@ P_wkf_hmnfusion.add_argument("--input-bam", required=True, help="Bam file")
 P_wkf_hmnfusion.add_argument("--input-bed", help="Bed file")
 P_wkf_hmnfusion.add_argument("--name", required=True, help="Name of sample")
 P_wkf_hmnfusion.add_argument("--output-vcf", help="Vcf file output")
-P_wkf_hmnfusion.add_argument("--threads", type=1, default=1, help="Threads used")
+P_wkf_hmnfusion.add_argument("--threads", type=int, default=1, help="Threads used")
 P_wkf_hmnfusion.set_defaults(func=_cmd_wkf_hmnfusion)
+
+
+def _cmd_wkf_fusion(args):
+    """Worflow to detect & quantify fusions with Genefuse, Lumpy and HmnFusion"""
+    logging.info("Start - Worfklow Fusion")
+    # Args.
+    if not os.path.isfile(args.input_fastq_forward):
+        utils.abort(
+            AP, "File Fastq Forward doesn't exist : %s" % (args.input_fastq_forward,)
+        )
+    if not os.path.isfile(args.input_fastq_reverse):
+        utils.abort(
+            AP, "File Fastq Reverse doesn't exist : %s" % (args.input_fastq_reverse,)
+        )
+    if not os.path.isfile(args.input_bam_file):
+        utils.abort(AP, "File bam doesn't exist : %s" % (args.input_bam_file,))
+    if not os.path.isfile(args.input_bed_genefuse):
+        utils.abort(
+            AP, "File Genefuse bed doesn't exist : %s" % (args.input_bed_genefuse,)
+        )
+    if not os.path.isfile(args.input_bed_lumpy):
+        utils.abort(AP, "File Lumpy bed doesn't exist : %s" % (args.input_bed_lumpy,))
+    if not os.path.isfile(args.input_bed_hmnfusion):
+        utils.abort(
+            AP, "File HmnFusion bed doesn't exist : %s" % (args.input_bed_hmnfusion,)
+        )
+    if not os.path.isdir(os.path.dirname(os.path.abspath(args.output_vcf))):
+        utils.abort(AP, "Outdir doesn't exist : %s" % (args.output_vcf,))
+
+    # Run.
+    logging.info("Detect all excutables")
+    utils.find_executable(executable="genefuse")
+    utils.find_executable(executable="lumpy")
+    utils.find_executable(executable="SplitReads", msg="")
+
+    logging.info("Run Workflow Fusion")
+    config = {
+        "fastq_fwd": args.input_fastq_forward,
+        "fastq_rev": args.input_fastq_reverse,
+        "bam": args.input_bam_file,
+        "bed_genefuse": args.input_bed_genefuse,
+        "bed_lumpy": args.input_bed_lumpy,
+        "bed_hmnfusion": args.input_bed_hmnfusion,
+        "name": args.name,
+        "output_file": args.output_vcf,
+    }
+
+    workflow.run(
+        snakefile=os.path.join(
+            os.path.dirname(os.path.realpath(__file__)),
+            "templates",
+            "snakefile",
+            "fusion.snakefile",
+        ),
+        config=config,
+        cores=args.threads,
+    )
+
+    logging.info("End - Worfklow Fusion")
+
+
+P_wkf_fusion = AP_subparsers.add_parser("worflow-fusion", help=_cmd_wkf_fusion.__doc__)
+P_wkf_fusion.add_argument("--input-fastq-forward", help="Fastq file forward")
+P_wkf_fusion.add_argument("--input-fastq-reverse", help="Fastq file reverse")
+P_wkf_fusion.add_argument("--input-bam", help="Bam file")
+P_wkf_fusion.add_argument("--input-bed-genefuse", help="Genefuse bed file")
+P_wkf_fusion.add_argument("--input-bed-lumpy", help="Lumpy bed file")
+P_wkf_fusion.add_argument("--input-bed-hmnfusion", help="HmnFusion bed file")
+P_wkf_fusion.add_argument("--name", required=True, help="Name of sample")
+P_wkf_fusion.add_argument("--output-vcf", help="Vcf file output")
+P_wkf_fusion.add_argument("--threads", type=int, default=1, help="Threads used")
+P_wkf_fusion.set_defaults(func=_cmd_wkf_fusion)
 
 
 # Version.
