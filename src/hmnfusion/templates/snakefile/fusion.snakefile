@@ -1,11 +1,12 @@
 import tempfile
 
 # Args.
-LUMPY = config["lumpy_file"]
-GENEFUSE_FILE = config["genefuse_file"]
-GENEFUSE_FMT = config["genefuse_fmt"]
-BAM = config["bam_file"]
-BED_HMNFUSION = config["bed_file"]
+FASTQ_FWD = config["fastq_fwd"]
+FASTQ_REV = config["fastq_rev"]
+BAM = config["bam"]
+BED_GENEFUSE = config["bed_genefuse"]
+BED_LUMPY = config["bed_lumpy"]
+BED_HMNFUSION = config["bed_hmnfusion"]
 NAME = config["name"]
 OUTPUT = config["output_file"]
 
