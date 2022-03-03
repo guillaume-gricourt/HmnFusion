@@ -1,7 +1,24 @@
 import json
 import logging
+import shutil
 import subprocess
 from typing import Dict, List
+
+
+class ExecutableNotFound(Exception):
+    """Custom class to throw an error if an executable is not found."""
+
+    def __init__(self, *args):
+        if args:
+            self.message = args[0]
+        else:
+            self.message = None
+
+    def __str__(self):
+        if self.message:
+            return "ExecutableNotFound, {0}".format(self.message)
+        else:
+            return "ExecutableNotFound"
 
 
 def abort(parser, msg: str = ""):
@@ -80,3 +97,22 @@ def cmdline(args: List[str], logger: logging.Logger = logging.getLogger()) -> in
     if ret.stderr is not None:
         logging.warning(ret.stderr)
     return ret.returncode
+
+
+def find_executable(executable: str, msg: str = "") -> None:
+    """Find an executable in the path and raise an error if not found.
+
+    Parameters
+    ----------
+    executable: str
+        Name of the executable
+    msg: str (default: executable name)
+        Message to throw in the error
+    Return
+    ------
+    None
+    """
+    if shutil.which(executable) is None:
+        if msg == "":
+            msg = executable
+        raise ExecutableNotFound(msg)
