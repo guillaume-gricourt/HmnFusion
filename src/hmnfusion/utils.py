@@ -75,8 +75,8 @@ def cmdline(args: List[str], logger: logging.Logger = logging.getLogger()) -> in
         Return code from the comand line
     """
     ret = subprocess.run(args, capture_output=True, encoding="utf8")
-    if ret.stdout not is None:
+    if ret.stdout is not None:
         logging.info(ret.stdout)
-    if ret.stderr not is None:
-        loggin.warning(ret.stderr)
+    if ret.stderr is not None:
+        logging.warning(ret.stderr)
     return ret.returncode
