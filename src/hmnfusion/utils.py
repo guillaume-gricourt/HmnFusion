@@ -1,5 +1,7 @@
+import argparse
 import json
 import logging
+import re
 import shutil
 import subprocess
 from typing import Dict, List
@@ -116,3 +118,21 @@ def find_executable(executable: str, msg: str = "") -> None:
         if msg == "":
             msg = executable
         raise ExecutableNotFound(msg)
+
+
+def validate_name_sample(name: str) -> str:
+    """Validate sample name to fit in VCF file (no space allowed)
+
+    Parameters
+    ----------
+    name: str
+        Name to check
+
+    Return
+    ------
+    str
+        Name to check
+    """
+    if re.search(r"\s+", name):
+        raise argparse.ArgumentTypeError("Space are not allowed")
+    return name
