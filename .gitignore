@@ -5,3 +5,6 @@ dist
 build
 *.swp
 .snakemake
+*.whl
+*.tar.gz
+run.sh
