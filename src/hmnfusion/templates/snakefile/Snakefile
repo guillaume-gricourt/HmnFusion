@@ -12,25 +12,23 @@ BED_LUMPY = config.get("bed_lumpy")
 REF = config.get("ref", "")
 
 # common
-BAM = config["bam"]
-BED_HMNFUSION = config["bed_hmnfusion"]
-NAME = config["name"]
-OUTPUT = config["output_file"]
+BAM = config.get("bam", "")
+BED_HMNFUSION = config.get("bed_hmnfusion", "")
+NAME = config.get("name", "")
+OUTPUT = config.get("output_file", "")
 
 OUTDIR = os.path.dirname(OUTPUT)
 
 # dynamic
-LUMPY = config.get(
-    "lumpy",
-    os.path.join(OUTDIR, ".".join([NAME, "lumpy", "vcf"]))
-)
+LUMPY = config.get("lumpy", os.path.join(OUTDIR, ".".join([NAME, "lumpy", "vcf"])))
 GENEFUSE = config.get(
-    "genefuse",
-    os.path.join(OUTDIR, ".".join([NAME, "genefuse", "html"]))
+    "genefuse", os.path.join(OUTDIR, ".".join([NAME, "genefuse", "html"]))
 )
 GENEFUSE_FMT = config.get("genefuse_fmt", "html")
 
-HMNFUSION_EXTRACTFUSION = os.path.join(tempfile.gettempdir(), NAME + ".extractfusion.json")
+HMNFUSION_EXTRACTFUSION = os.path.join(
+    tempfile.gettempdir(), NAME + ".extractfusion.json"
+)
 LUMPY_DISCORDANT = os.path.join(tempfile.gettempdir(), NAME + ".lumpy.discordant.bam")
 LUMPY_SPLITTER = os.path.join(tempfile.gettempdir(), NAME + ".lumpy.splitter.bam")
 
@@ -48,90 +46,97 @@ print("Lumpy/Genefuse", LUMPY, GENEFUSE, GENEFUSE_FMT)
 print("Out", OUTPUT, OUTDIR)
 print("Include", INCLUDE)
 
+
 #############
 ##  Rules  ##
 #############
 rule all:
     input:
-        INCLUDE
+        INCLUDE,
+
 
 # Lumpy.
 rule lumpy_discordant:
     input:
-        bam = BAM
+        bam=BAM,
     params:
-        soft = "samtools"
+        soft="samtools",
     output:
-        bam = temp(LUMPY_DISCORDANT)
+        bam=temp(LUMPY_DISCORDANT),
     shell:
-        '{params.soft} view -b -F 1294 {input.bam} | {params.soft} sort - -o {output.bam}'
+        "{params.soft} view -b -F 1294 {input.bam} | {params.soft} sort - -o {output.bam}"
+
 
 rule lumpy_splitters:
     input:
-        bam = BAM
+        bam=BAM,
     params:
-        samtools = "samtools",
-        script = "extractSplitReads_BwaMem"
+        samtools="samtools",
+        script="extractSplitReads_BwaMem",
     output:
-        bam = temp(LUMPY_SPLITTER)
+        bam=temp(LUMPY_SPLITTER),
     shell:
-        '{params.samtools} view -h {input.bam} | {params.script} -i stdin | {params.samtools} sort -o {output.bam}'
+        "{params.samtools} view -h {input.bam} | {params.script} -i stdin | {params.samtools} sort -o {output.bam}"
+
 
 rule lumpy_express:
     input:
-        basal = BAM,
-        splitter = rules.lumpy_splitters.output.bam,
-        discordant = rules.lumpy_discordant.output.bam
+        basal=BAM,
+        splitter=rules.lumpy_splitters.output.bam,
+        discordant=rules.lumpy_discordant.output.bam,
     params:
-        soft = "lumpyexpress",
-        bed = BED_LUMPY
+        soft="lumpyexpress",
+        bed=BED_LUMPY,
     output:
-        vcf = LUMPY
+        vcf=LUMPY,
     shell:
-        '{params.soft} -B {input.basal} -S {input.splitter} -D {input.discordant} -o {output.vcf} -x {params.bed}'
+        "{params.soft} -B {input.basal} -S {input.splitter} -D {input.discordant} -o {output.vcf} -x {params.bed}"
+
 
 # GeneFuse
 rule genefuse:
     input:
-        r1 = FASTQ_FWD,
-        r2 = FASTQ_REV
+        r1=FASTQ_FWD,
+        r2=FASTQ_REV,
     params:
-        ref = REF,
-        fusion = BED_GENEFUSE,
-        soft = "genefuse"
+        ref=REF,
+        fusion=BED_GENEFUSE,
+        soft="genefuse",
     output:
-        html = GENEFUSE
+        html=GENEFUSE,
     shell:
         "{params.soft} --read1 {input.r1} --read2 {input.r2} --fusion {params.fusion} --ref {params.ref} -h {output.html} -d 20 -D -U"
+
 
 # HmnFusion
 rule extract:
     input:
-        genefuse = GENEFUSE,
-        lumpy = LUMPY
+        genefuse=GENEFUSE,
+        lumpy=LUMPY,
     params:
-        genefuse = GENEFUSE_FMT
+        genefuse=GENEFUSE_FMT,
     output:
-        json = temp(HMNFUSION_EXTRACTFUSION)
+        json=temp(HMNFUSION_EXTRACTFUSION),
     shell:
         'hmnfusion extractfusion \
-            --genefuse-"{params.genefuse}" "{input.genefuse}" \
-            --lumpy-vcf "{input.lumpy}" \
-            --output-json "{output.json}"'
+        --genefuse-"{params.genefuse}" "{input.genefuse}" \
+        --lumpy-vcf "{input.lumpy}" \
+        --output-json "{output.json}"'
+
 
 rule quantification:
     input:
-        json = rules.extract.output.json,
-        bam = BAM
+        json=rules.extract.output.json,
+        bam=BAM,
     params:
-        bed = BED_HMNFUSION,
-        name = NAME
+        bed=BED_HMNFUSION,
+        name=NAME,
     output:
-        vcf = OUTPUT
+        vcf=OUTPUT,
     shell:
         'hmnfusion quantification \
-            --hmnfusion-json "{input.json}" \
-            --input-bam "{input.bam}" \
-            --input-bed "{params.bed}" \
-            --name "{params.name}" \
-            --output-vcf "{output.vcf}"'
+        --hmnfusion-json "{input.json}" \
+        --input-bam "{input.bam}" \
+        --input-bed "{params.bed}" \
+        --name "{params.name}" \
+        --output-vcf "{output.vcf}"'
