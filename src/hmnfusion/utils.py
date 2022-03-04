@@ -1,4 +1,3 @@
-import argparse
 import json
 import logging
 import re
@@ -128,11 +127,16 @@ def validate_name_sample(name: str) -> str:
     name: str
         Name to check
 
+    Raises
+    ------
+    ValueError
+        If the characters not allowed are in the string.
+
     Return
     ------
     str
         Name to check
     """
     if re.search(r"\s+", name):
-        raise argparse.ArgumentTypeError("Space are not allowed")
+        raise ValueError("Space are not allowed")
     return name
