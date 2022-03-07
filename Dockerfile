@@ -41,13 +41,12 @@ RUN wget https://github.com/arq5x/lumpy-sv/releases/download/0.3.0/lumpy-sv.tar.
 RUN cd lumpy-sv && \
     make && \
     cp bin/* /usr/local/bin/ && \
-    cp scripts/extractSplitReads_BwaMem /usr/local/bin/ && \
-    cp scripts/lumpyexpress /usr/local/bin/ && \
+    cp scripts/* /usr/local/bin/ && \
     cd /opt && \
     rm -rf lumpy-sv
 
 # HmnFusion
-COPY *whl /opt/
+COPY dist/*whl /opt/
 RUN pip install --no-cache-dir /opt/*whl
 
 ENTRYPOINT ["hmnfusion"]
