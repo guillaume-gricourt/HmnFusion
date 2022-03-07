@@ -262,6 +262,68 @@ P_mmej.add_argument("--output-xlsx", help="Output file")
 P_mmej.set_defaults(func=_cmd_mmej)
 
 
+def _cmd_mmej_fusion(args):
+    """Identify MMEJ from fusion"""
+    logging.info("Start analysis - MMEJ Fusion")
+    # Grep args.
+    fmt = ""
+    input_path = ""
+    if args.genefuse_json:
+        fmt = "genefuse_json"
+        input_path = args.genefuse_json
+    elif args.genefuse_html:
+        fmt = "genefuse_html"
+        input_path = args.genefuse_html
+    elif args.lumpy_vcf:
+        fmt = "lumpy_vcf"
+        input_path = args.lumpy_vcf
+    elif args.hmnfusion_json:
+        fmt = "hmnfusion_json"
+        input_path = args.hmnfusion_json
+
+    # Check if all exists.
+    if not os.path.isfile(input_path):
+        utils.abort(
+            AP, "File input doesn't exist : %s" % (input_path,)
+        )
+    if not os.path.isdir(os.path.dirname(os.path.abspath(foutput))):
+        utils.abort(AP, "Outdir doesn't exist : %s" % (foutput,))
+
+    # Run.
+    logging.info("Load input file")
+    g = graph.Graph()
+    g = mmej_fusion.load_file(input_path, fmt, g)
+
+    # Subset.
+    fusions = mmej_fusion.subset_graph(g)
+
+    # Process fusion.
+    for fusion in fusions:
+        path_bam_filter = mmej_fusion.filter_sequence(path=args.input_bam, fus=fusion)
+        path_bam_consensus = mmej_fusion.create_consensus(path_reference=args.input_reference, path_bam=path_bam_filter)
+    logging.info("End analysis - MMEJ Fusion")
+
+
+P_mmej_fus = AP_subparsers.add_parser(
+    "mmej-fusion", help=_cmd_mmej_fusion.__doc__
+)
+P_mmej_fus_genefuse = P_mmej_fus.add_mutually_exclusive_group(required=True)
+P_mmej_fus_genefuse.add_argument("--genefuse-json", help="Genefuse, json file")
+P_mmej_fus_genefuse.add_argument("--genefuse-html", help="Genefuse, html file")
+P_mmej_fus.add_argument("--lumpy-vcf", help="Genefuse, html file")
+P_mmej_fus.add_argument("--hmnfusion-json", help="HmnFusion, json file")
+P_mmej_fus.add_argument("--input-bam", help="Bam file")
+P_mmej_fus.add_argument("--input-reference", help="Reference, fasta file")
+P_mmej_fus.add_argument(
+    "--size-to-extract",
+    type=int,
+    default=30,
+    help="Size of sequence to extract before and after the genomic coordinate",
+)
+P_mmej_fus.add_argument("--output-xlsx", help="Excel file output")
+P_mmej_fus.set_defaults(func=_cmd_mmej_fusion)
+
+
 # Version.
 def print_version(_args):
     """Display this program"s version"""
