@@ -41,7 +41,7 @@ RUN wget https://github.com/arq5x/lumpy-sv/releases/download/0.3.0/lumpy-sv.tar.
 RUN cd lumpy-sv && \
     make && \
     cp bin/* /usr/local/bin/ && \
-    cp scripts/* /usr/local/bin/ && \
+    cp -r scripts/* /usr/local/bin/ && \
     cd /opt && \
     rm -rf lumpy-sv
 
