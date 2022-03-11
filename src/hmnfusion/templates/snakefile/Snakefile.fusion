@@ -9,7 +9,8 @@ FASTQ_FWD = config.get("fastq_fwd", "")
 FASTQ_REV = config.get("fastq_rev", "")
 BED_GENEFUSE = config.get("bed_genefuse", "")
 BED_LUMPY = config.get("bed_lumpy", "")
-REF = config.get("ref", "")
+REFERENCE = config.get("reference", "")
+THREADS_GENEFUSE = config.get("threads_genefuse", 1)
 
 # common
 BAM = config.get("bam", "")

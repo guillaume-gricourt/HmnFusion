@@ -4,6 +4,8 @@ rule lumpy_discordant:
         bam=BAM,
     params:
         soft="samtools",
+    conda:
+        "lumpy-sv",
     output:
         bam=temp(LUMPY_DISCORDANT),
     shell:
@@ -16,6 +18,8 @@ rule lumpy_splitters:
     params:
         samtools="samtools",
         script="extractSplitReads_BwaMem",
+    conda:
+        "lumpy-sv",
     output:
         bam=temp(LUMPY_SPLITTER),
     shell:
@@ -30,6 +34,8 @@ rule lumpy_express:
     params:
         soft="lumpyexpress",
         bed=BED_LUMPY,
+    conda:
+        "lumpy-sv",
     output:
         vcf=LUMPY,
     shell:
@@ -42,10 +48,11 @@ rule genefuse:
         r1=FASTQ_FWD,
         r2=FASTQ_REV,
     params:
-        ref=REF,
+        ref=REFERENCE,
         fusion=BED_GENEFUSE,
         soft="genefuse",
     output:
         html=GENEFUSE,
+    threads: THREADS_GENEFUSE,
     shell:
-        "{params.soft} --read1 {input.r1} --read2 {input.r2} --fusion {params.fusion} --ref {params.ref} -h {output.html} -d 20 -D -U"
+        "{params.soft} --thread {threads} --read1 {input.r1} --read2 {input.r2} --fusion {params.fusion} --ref {params.ref} -h {output.html} -d 20 -D -U"

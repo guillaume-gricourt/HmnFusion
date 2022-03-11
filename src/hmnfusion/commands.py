@@ -1,5 +1,6 @@
 import argparse
 import logging
+import math
 import os
 
 from hmnfusion import _version
@@ -324,7 +325,6 @@ P_wkf_hmnfusion.add_argument(
 )
 P_wkf_hmnfusion.add_argument("--name", required=True, help="Name of sample")
 P_wkf_hmnfusion.add_argument("--output-vcf", required=True, help="Vcf file output")
-P_wkf_hmnfusion.add_argument("--threads", type=int, default=1, help="Threads used")
 P_wkf_hmnfusion.set_defaults(func=_cmd_wkf_hmnfusion)
 
 
@@ -340,14 +340,14 @@ def _cmd_wkf_fusion(args):
         utils.abort(
             AP, "File Fastq Reverse doesn't exist : %s" % (args.input_fastq_reverse,)
         )
-    if not os.path.isfile(args.input_bam_file):
-        utils.abort(AP, "File bam doesn't exist : %s" % (args.input_bam_file,))
+    if not os.path.isfile(args.input_bam):
+        utils.abort(AP, "File bam doesn't exist : %s" % (args.input_bam,))
     if not os.path.isfile(args.input_bed_hmnfusion):
         utils.abort(
             AP, "File HmnFusion bed doesn't exist : %s" % (args.input_bed_hmnfusion,)
         )
     bed_genefuse = args.input_bed_genefuse
-    if not os.path.isfile(bed_genefuse):
+    if bed_genefuse is None or not os.path.isfile(bed_genefuse):
         bed_genefuse = os.path.join(
             os.path.dirname(os.path.realpath(__file__)),
             "templates",
@@ -355,32 +355,35 @@ def _cmd_wkf_fusion(args):
             "genefuse.bed",
         )
     bed_lumpy = args.input_bed_lumpy
-    if not os.path.isfile(bed_lumpy):
+    if bed_lumpy is None or not os.path.isfile(bed_lumpy):
         bed_lumpy = os.path.join(
             os.path.dirname(os.path.realpath(__file__)), "templates", "bed", "lumpy.bed"
+        )
+    if not os.path.isfile(args.input_reference_fasta):
+        utils.abort(
+            AP, "File reference doesn't exist : %s" % (args.input_reference_fasta,)
         )
     if not os.path.isdir(os.path.dirname(os.path.abspath(args.output_vcf))):
         utils.abort(AP, "Outdir doesn't exist : %s" % (args.output_vcf,))
 
+    # Threads
+    threads_genefuse = 1
+    if args.threads > 1:
+        threads_genefuse = math.ceil(args.threads * 0.8)
+
     # Run.
-    logging.info("Detect all excutables")
-    utils.find_executable(executable="samtools")
-    utils.find_executable(executable="genefuse")
-    utils.find_executable(executable="lumpyexpress")
-    utils.find_executable(
-        executable="extractSplitReads_BwaMem",
-        msg="Script available from Lumpy is not found",
-    )
     logging.info("Run Workflow Fusion")
     config = {
         "fastq_fwd": args.input_fastq_forward,
         "fastq_rev": args.input_fastq_reverse,
-        "bam": args.input_bam_file,
-        "bed_genefuse": bed_genefuse,
+        "bam": args.input_bam,
+        "bed_gt/srcenefuse": bed_genefuse,
         "bed_lumpy": bed_lumpy,
         "bed_hmnfusion": args.input_bed_hmnfusion,
         "name": args.name,
+        "reference": args.input_reference_fasta,
         "output_file": args.output_vcf,
+        "threads_genefuse": threads_genefuse,
     }
     workflow.run(
         snakefile=os.path.join(
@@ -403,16 +406,22 @@ P_wkf_fusion.add_argument(
     "--input-fastq-reverse", required=True, help="Fastq file reverse"
 )
 P_wkf_fusion.add_argument("--input-bam", required=True, help="Bam file")
-P_wkf_fusion.add_argument(
-    "--input-bed-genefuse", required=True, help="Genefuse bed file"
-)
-P_wkf_fusion.add_argument("--input-bed-lumpy", required=True, help="Lumpy bed file")
+P_wkf_fusion.add_argument("--input-bed-genefuse", help="Genefuse bed file")
+P_wkf_fusion.add_argument("--input-bed-lumpy", help="Lumpy bed file")
 P_wkf_fusion.add_argument(
     "--input-bed-hmnfusion", required=True, help="HmnFusion bed file"
 )
+P_wkf_fusion.add_argument("--input-reference-fasta", help="Reference fasta file (hg19)")
 P_wkf_fusion.add_argument("--name", required=True, help="Name of sample")
 P_wkf_fusion.add_argument("--output-vcf", required=True, help="Vcf file output")
-P_wkf_fusion.add_argument("--threads", type=int, default=1, help="Threads used")
+P_wkf_fusion.add_argument(
+    "--threads",
+    type=int,
+    default=1,
+    choices=range(1, 7),
+    metavar="[1-6]",
+    help="Threads used",
+)
 P_wkf_fusion.set_defaults(func=_cmd_wkf_fusion)
 
 
