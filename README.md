@@ -48,17 +48,50 @@ HmnFusion quantification \
     --output-vcf <i>file</i>
 </pre>
 
-### Docker
+## Docker
 
+### Run ExtractFusion
 Run *extractfusion* with docker like:  
 <pre>
 docker run -it \
     --rm \
-    hmnfusion:lastest \
+    hmnfusion:latest \
     extractfusion \
     --genefuse-json <i>file</i> | --genefuse-html <i>file</i> \
     --lumpy-vcf <i>file</i> \
     --output-json <i>file</i>
+</pre>
+
+### Run Workflow HmnFusion
+Running combined *extractfusion* and *quantification* with one commandi line:   
+<pre>
+docker run -it \
+    --rm \
+    hmnfusion:latest \
+    workflow-hmnfusion \
+    --genefuse-html <i>file</i> \
+    --lumpy-vcf <i>file</i> \
+    --input-bam <i>file</i> \
+    --input-bed <i>file</i> \
+    --name <i>sample_name</i> \
+    --output-vcf <i>file</i>
+</pre>
+
+### Run Workflow Fusion
+Run with one command line GeneFuse, Lumpy and HmnFusion:  
+<pre>
+docker run -it \
+    --rm \
+    hmnfusion:latest \
+    workflow-fusion \
+    --input-fastq-forward <i>file</i> \
+    --input-fastq-reverse <i>file</i> \
+    --input-bam <i>file</i> \
+    --output-vcf <i>file</i> \
+    --input-reference-fasta <i>file</i> \
+    --input-bed-hmnfusion <i>file</i> \
+    --name <i>sample_name</i> \
+    --threads 4
 </pre>
 
 ## Built with these main libraries
@@ -66,6 +99,7 @@ docker run -it \
 * [beautifulsoup4](https://pypi.org/project/beautifulsoup4) - Parsing efficiently HTML file
 * [pysam](https://github.com/pysam-developers/pysam) - Essential library to work with BAM and VCF files
 * [Pandas](https://github.com/pandas-dev/pandas) - Essential dataframe object
+* [Snakemake](https://snakemake.readthedocs.io/en/stable/) - Use workflow
 
 ## Versioning
 

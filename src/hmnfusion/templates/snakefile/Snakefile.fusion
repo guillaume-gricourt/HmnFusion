@@ -1,0 +1,48 @@
+import os
+import tempfile
+
+############
+##  Args  ##
+############
+# fusion
+FASTQ_FWD = config.get("fastq_fwd", "")
+FASTQ_REV = config.get("fastq_rev", "")
+BED_GENEFUSE = config.get("bed_genefuse", "")
+BED_LUMPY = config.get("bed_lumpy", "")
+REFERENCE = config.get("reference", "")
+THREADS_GENEFUSE = config.get("threads_genefuse", 1)
+
+# common
+BAM = config.get("bam", "")
+BED_HMNFUSION = config.get("bed_hmnfusion", "")
+NAME = config.get("name", "")
+OUTPUT = config.get("output_file", "")
+
+OUTDIR = os.path.dirname(OUTPUT)
+
+# dynamic
+GENEFUSE_FMT = "html"
+LUMPY = os.path.join(OUTDIR, ".".join([NAME, "lumpy", "vcf"]))
+GENEFUSE = os.path.join(OUTDIR, ".".join([NAME, "genefuse", "html"]))
+
+# tmp
+HMNFUSION_EXTRACTFUSION = os.path.join(
+    tempfile.gettempdir(), NAME + ".extractfusion.json"
+)
+LUMPY_DISCORDANT = os.path.join(tempfile.gettempdir(), NAME + ".lumpy.discordant.bam")
+LUMPY_SPLITTER = os.path.join(tempfile.gettempdir(), NAME + ".lumpy.splitter.bam")
+
+# Include File
+INCLUDE = []
+INCLUDE.append(OUTPUT)
+
+#############
+##  Rules  ##
+#############
+rule all:
+    input:
+        INCLUDE,
+
+
+include: "workflow.fusion"
+include: "workflow.hmnfusion"

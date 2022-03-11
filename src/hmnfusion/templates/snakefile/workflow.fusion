@@ -1,0 +1,58 @@
+# Lumpy.
+rule lumpy_discordant:
+    input:
+        bam=BAM,
+    params:
+        soft="samtools",
+    conda:
+        "lumpy-sv",
+    output:
+        bam=temp(LUMPY_DISCORDANT),
+    shell:
+        "{params.soft} view -b -F 1294 {input.bam} | {params.soft} sort - -o {output.bam}"
+
+
+rule lumpy_splitters:
+    input:
+        bam=BAM,
+    params:
+        samtools="samtools",
+        script="extractSplitReads_BwaMem",
+    conda:
+        "lumpy-sv",
+    output:
+        bam=temp(LUMPY_SPLITTER),
+    shell:
+        "{params.samtools} view -h {input.bam} | {params.script} -i stdin | {params.samtools} sort -o {output.bam}"
+
+
+rule lumpy_express:
+    input:
+        basal=BAM,
+        splitter=rules.lumpy_splitters.output.bam,
+        discordant=rules.lumpy_discordant.output.bam,
+    params:
+        soft="lumpyexpress",
+        bed=BED_LUMPY,
+    conda:
+        "lumpy-sv",
+    output:
+        vcf=LUMPY,
+    shell:
+        "{params.soft} -B {input.basal} -S {input.splitter} -D {input.discordant} -o {output.vcf} -x {params.bed}"
+
+
+# GeneFuse
+rule genefuse:
+    input:
+        r1=FASTQ_FWD,
+        r2=FASTQ_REV,
+    params:
+        ref=REFERENCE,
+        fusion=BED_GENEFUSE,
+        soft="genefuse",
+    output:
+        html=GENEFUSE,
+    threads: THREADS_GENEFUSE,
+    shell:
+        "{params.soft} --thread {threads} --read1 {input.r1} --read2 {input.r2} --fusion {params.fusion} --ref {params.ref} -h {output.html} -d 20 -D -U"
