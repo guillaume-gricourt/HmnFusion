@@ -1,4 +1,5 @@
-FROM python:3.9-bullseye
+FROM  continuumio/miniconda3:4.10.3
+#FROM python:3.9-bullseye
 
 
 RUN apt-get update
@@ -9,41 +10,24 @@ RUN apt-get install -y \
     libcurl4-openssl-dev \
     liblzma-dev \
     libncurses5-dev \
-    wget
+    wget \
+    zlib1g-dev
 
 WORKDIR /opt
 
-# Samtools
-RUN wget https://github.com/samtools/samtools/releases/download/1.15/samtools-1.15.tar.bz2 && \
-    tar -xf samtools-1.15.tar.bz2 && \
-    cd samtools-1.15 && \
-    ./configure && \
-    make && \
-    make install && \
-    cd /opt \
-    rm samtools-1.15.tar.bz2
-
 # GeneFuse
-RUN wget https://github.com/OpenGene/GeneFuse/archive/refs/tags/v0.8.0.tar.gz -O GeneFuse.tar.gz && \
+RUN wget https://github.com/OpenGene/GeneFuse/archive/refs/tags/v0.6.1.tar.gz -O GeneFuse.tar.gz && \
     tar -xf GeneFuse.tar.gz && \
     rm GeneFuse.tar.gz
 
-RUN cd GeneFuse-0.8.0 && \
+RUN cd GeneFuse-0.6.1 && \
     make && \
-    make install && \
-    cd /opt
+    cp genefuse /usr/local/bin/
 
 # Lumpy
-RUN wget https://github.com/arq5x/lumpy-sv/releases/download/0.3.0/lumpy-sv.tar.gz -O Lumpy.tar.gz && \
-    tar -xf Lumpy.tar.gz && \
-    rm Lumpy.tar.gz
-
-RUN cd lumpy-sv && \
-    make && \
-    cp bin/* /usr/local/bin/ && \
-    cp -r scripts/* /usr/local/bin/ && \
-    cd /opt && \
-    rm -rf lumpy-sv
+RUN conda create -n lumpy-sv \
+    -c bioconda -c conda-forge -c default \
+    lumpy-sv=0.2.14a openssl=1.0
 
 # HmnFusion
 COPY dist/*whl /opt/
