@@ -11,7 +11,7 @@ A tool to aggregate results of fusion produced by Genefuse and Lumpy and calcula
 ## Getting Started
 
 ### Installing
-Installation is done with `pip`
+Install with `pip`
 ```bash
 pip install hmnfusion
 ```
@@ -27,7 +27,7 @@ Software is available by
 Aggregate results from Genefuse and Lumpy to produce a Json file.
 
 <pre>
-HmnFusion extractfusion \
+hmnfusion extractfusion \
     --genefuse-json <i>file</i> | --genefuse-html <i>file</i>\
     --lumpy-vcf <i>file</i> \
     --output-json <i>file</i>
@@ -40,7 +40,7 @@ A fusion is defined by two breakpoints. Only one must be in bed intervals, allel
 Name sample is used in vcf file.
 
 <pre>
-HmnFusion quantification \
+hmnfusion quantification \
     --hmnfusion-file <i>file</i> | --region <i>chromosome:position</i> \
     --input-bam <i>file</i> | --input-sam <i>file</i> \
     --input-bed <i>file</i> \
