@@ -480,8 +480,8 @@ class TestGraph(unittest.TestCase):
             in [self.g4ag.graph.nodes[x]["fusion"] for x in self.g4ag.graph.nodes]
         )
 
-    def test_consensus(self):
-        """Test consensus_single(self) and consensus_genefuse_lumpy(self)"""
+    def test_consensus_single(self):
+        """Test consensus_single(self)"""
         # single
         self.helper_build_consensus_single()
 
@@ -554,6 +554,10 @@ class TestGraph(unittest.TestCase):
         self.helper_check_quali(self.g4cgl, [self.f3g, self.f3l])
         self.helper_check_quali(self.g4dgl, [self.f3g, self.f3l])
 
+    def test_consensus_genefuse_lumpy(self):
+        """Test consensus_genefuse_lumpy(self)"""
+        # single
+        self.helper_build_consensus_single()
         # genefuse_lumpy
         # self.helper_plot_graph(self.g2bgl)
         self.helper_build_consensus_genefuse_lumpy()
