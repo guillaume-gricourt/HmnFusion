@@ -63,7 +63,7 @@ docker run -it \
 </pre>
 
 ### Run Workflow HmnFusion
-Running combined *extractfusion* and *quantification* with one commandi line:   
+Running combined *extractfusion* and *quantification* with one command-line:  
 <pre>
 docker run -it \
     --rm \
@@ -78,7 +78,7 @@ docker run -it \
 </pre>
 
 ### Run Workflow Fusion
-Run with one command line GeneFuse, Lumpy and HmnFusion:  
+Run with one command-line GeneFuse, Lumpy and HmnFusion:  
 <pre>
 docker run -it \
     --rm \
