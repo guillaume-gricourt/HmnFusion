@@ -57,6 +57,16 @@ class TestGraph(unittest.TestCase):
         self.r19 = dict(chrom="chr10", orientation="left", position=400)
         self.r20 = dict(chrom="chr10", orientation="right", position=6000)
 
+        # Region - Tricky
+        self.r21 = dict(chrom="chr9", orientation="left", position=1760)
+        self.r22 = dict(chrom="chr22", orientation="right", position=2004)
+        self.r23 = dict(chrom="chr9", orientation="left", position=1100)
+        self.r24 = dict(chrom="chr22", orientation="right", position=2736)
+        self.r25 = dict(chrom="chr9", orientation="left", position=1242)
+        self.r26 = dict(chrom="chr22", orientation="right", position=2594)
+        self.r27 = dict(chrom="chr9", orientation="left", position=1616)
+        self.r28 = dict(chrom="chr22", orientation="right", position=2146)
+
         # Fusion.
         self.f1 = fusion.Fusion()
         # Same chr
@@ -124,6 +134,19 @@ class TestGraph(unittest.TestCase):
         self.f9l = fusion.Fusion.from_dict(
             dict(first=self.r18, second=self.r17, evidence=self.e9, software="lumpy")
         )
+        # Tricky
+        self.f11l = fusion.Fusion.from_dict(
+            dict(first=self.r21, second=self.r22, evidence=self.e2, software="lumpy")
+        )
+        self.f12l = fusion.Fusion.from_dict(
+            dict(first=self.r23, second=self.r24, evidence=self.e3, software="lumpy")
+        )
+        self.f13l = fusion.Fusion.from_dict(
+            dict(first=self.r25, second=self.r26, evidence=self.e4, software="lumpy")
+        )
+        self.f14l = fusion.Fusion.from_dict(
+            dict(first=self.r27, second=self.r28, evidence=self.e5, software="lumpy")
+        )
 
         """
         --------
@@ -178,9 +201,19 @@ class TestGraph(unittest.TestCase):
         self.g4cg.add_nodes([self.f6g, self.f2g, self.f3g, self.f4g])
         self.g4dg.add_nodes([self.f1g, self.f2g, self.f3g, self.f4g])
         self.g4eg.add_nodes([self.f6g, self.f7g, self.f8g, self.f9g])
-        self.gg = [self.g1ag, self.g2ag, self.g2bg, self.g3ag, self.g3bg]
-        self.gg += [self.g3cg, self.g4ag, self.g4bg, self.g4cg, self.g4dg]
-        self.gg += [self.g4eg]
+        self.gg = [
+            self.g1ag,
+            self.g2ag,
+            self.g2bg,
+            self.g3ag,
+            self.g3bg,
+            self.g3cg,
+            self.g4ag,
+            self.g4bg,
+            self.g4cg,
+            self.g4dg,
+            self.g4eg,
+        ]
 
         # Build graph lumpy.
         self.g1al = graph.Graph()
@@ -194,6 +227,7 @@ class TestGraph(unittest.TestCase):
         self.g4cl = graph.Graph()
         self.g4dl = graph.Graph()
         self.g4el = graph.Graph()
+        self.g4fl = graph.Graph()
 
         self.g1al.add_node(self.f1l)
         self.g2al.add_nodes([self.f1l, self.f5l])
@@ -206,6 +240,7 @@ class TestGraph(unittest.TestCase):
         self.g4cl.add_nodes([self.f6l, self.f2l, self.f3l, self.f4l])
         self.g4dl.add_nodes([self.f1l, self.f2l, self.f3l, self.f4l])
         self.g4el.add_nodes([self.f6l, self.f7l, self.f8l, self.f9l])
+        self.g4fl.add_nodes([self.f11l, self.f12l, self.f13l, self.f14l])
         self.gl = [
             self.g1al,
             self.g2al,
@@ -218,6 +253,7 @@ class TestGraph(unittest.TestCase):
             self.g4cl,
             self.g4dl,
             self.g4el,
+            self.g4fl,
         ]
 
         # Build graph genefuse-lumpy.
@@ -382,7 +418,6 @@ class TestGraph(unittest.TestCase):
             for x in g.graph.nodes
             if g.graph.nodes[x]["level"] == 2
         )
-
         self.assertEqual(cons_lev1, th_lev1)
         self.assertEqual(cons_lev2, th_lev2)
 
@@ -429,10 +464,13 @@ class TestGraph(unittest.TestCase):
         )
         self.assertEqual(fusions, th_fusions)
 
-    def helper_plot_graph(self, g):
+    def helper_plot_graph(self, g, path=None):
         plt.subplot()
         nx.draw(g.graph, with_labels=True, font_weight="bold")
-        plt.show()
+        if path:
+            plt.savefig(path)
+        else:
+            plt.show()
 
     def test_init(self):
         """Check initialize attributes values"""
@@ -485,6 +523,7 @@ class TestGraph(unittest.TestCase):
         # single
         self.helper_build_consensus_single()
 
+        self.helper_plot_graph(self.g4fl, "/tmp/graph.png")
         self.helper_check_quanti(self.g1ag, 1, 0, 1, 0, 0)
         self.helper_check_quanti(self.g2ag, 2, 0, 2, 0, 0)
         self.helper_check_quanti(self.g2bg, 3, 2, 2, 1, 0)
@@ -514,6 +553,7 @@ class TestGraph(unittest.TestCase):
         # --
         self.helper_check_quanti(self.g4dl, 5, 4, 4, 1, 0)
         self.helper_check_quanti(self.g4el, 4, 0, 4, 0, 0)
+        self.helper_check_quanti(self.g4fl, 5, 4, 4, 1, 0)
 
         self.helper_check_quanti(self.g1agl, 2, 0, 2, 0, 0)
         self.helper_check_quanti(self.g2agl, 4, 0, 4, 0, 0)
@@ -545,6 +585,7 @@ class TestGraph(unittest.TestCase):
         self.helper_check_quali(self.g4bl, [self.f4l, self.f6l])
         self.helper_check_quali(self.g4cl, [self.f3l])
         self.helper_check_quali(self.g4dl, [self.f3l])
+        self.helper_check_quali(self.g4fl, [self.f14l])
 
         self.helper_check_quali(self.g2bgl, [self.f2g, self.f2l])
         self.helper_check_quali(self.g3bgl, [self.f3g, self.f3l])
