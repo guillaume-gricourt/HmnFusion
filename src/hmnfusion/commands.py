@@ -137,6 +137,11 @@ def _cmd_quantification(args):
             AP,
             "Input alignment file doesn't exist : %s" % (finputs["alignment"]["path"],),
         )
+    if not utils.check_bam_index(finputs["alignment"]["path"]):
+        utils.abort(
+            AP,
+            "Input alignment file must be in BAM format, index could not be build"
+        )
     finputs["bed"] = args.input_bed
     if not os.path.isfile(args.input_bed):
         utils.abort(AP, "Bed file doesn't exist : %s" % (args.input_bed,))
@@ -342,6 +347,11 @@ def _cmd_wkf_fusion(args):
         )
     if not os.path.isfile(args.input_bam):
         utils.abort(AP, "File bam doesn't exist : %s" % (args.input_bam,))
+    if not utils.check_bam_index(args.input_bam):
+        utils.abort(
+            AP,
+            "Input alignment file must be in BAM format, index could not be build"
+        )
     if not os.path.isfile(args.input_bed_hmnfusion):
         utils.abort(
             AP, "File HmnFusion bed doesn't exist : %s" % (args.input_bed_hmnfusion,)
