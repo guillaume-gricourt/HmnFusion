@@ -2,6 +2,7 @@ import copy
 import itertools
 from typing import Dict, List
 
+import matplotlib.pyplot as plt
 import networkx as nx
 from hmnfusion import fusion as hmn_fusion
 
@@ -368,6 +369,22 @@ class Graph(object):
                 g.graph.nodes[n]["fusion"]
             )
         return g
+
+    def to_plot(self, path: str) -> None:
+        """Plot graph to a file.
+
+        Parameters
+        ----------
+        path: str
+            Path of the plot
+
+        Return
+        ------
+        None
+        """
+        plt.subplot()
+        nx.draw(g.graph, with_labels=True, font_weight="bold")
+        plt.savefig(path)
 
     # Meta functions
     def __key(self):

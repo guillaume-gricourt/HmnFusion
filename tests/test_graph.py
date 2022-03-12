@@ -1,6 +1,5 @@
 import unittest
 
-import matplotlib.pyplot as plt
 import networkx as nx
 from hmnfusion import fusion, graph
 
@@ -464,14 +463,6 @@ class TestGraph(unittest.TestCase):
         )
         self.assertEqual(fusions, th_fusions)
 
-    def helper_plot_graph(self, g, path=None):
-        plt.subplot()
-        nx.draw(g.graph, with_labels=True, font_weight="bold")
-        if path:
-            plt.savefig(path)
-        else:
-            plt.show()
-
     def test_init(self):
         """Check initialize attributes values"""
         self.assertTrue(nx.is_empty(self.g1.graph))
@@ -523,7 +514,7 @@ class TestGraph(unittest.TestCase):
         # single
         self.helper_build_consensus_single()
 
-        self.helper_plot_graph(self.g4fl, "/tmp/graph.png")
+        # self.g4fl.to_plot("/tmp/graph.png")
         self.helper_check_quanti(self.g1ag, 1, 0, 1, 0, 0)
         self.helper_check_quanti(self.g2ag, 2, 0, 2, 0, 0)
         self.helper_check_quanti(self.g2bg, 3, 2, 2, 1, 0)
@@ -600,7 +591,6 @@ class TestGraph(unittest.TestCase):
         # single
         self.helper_build_consensus_single()
         # genefuse_lumpy
-        # self.helper_plot_graph(self.g2bgl)
         self.helper_build_consensus_genefuse_lumpy()
 
         self.helper_check_quanti(self.g1ag, 1, 0, 1, 0, 0)
