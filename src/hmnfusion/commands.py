@@ -307,7 +307,7 @@ def _cmd_wkf_hmnfusion(args):
             "Snakefile.hmnfusion",
         ),
         config=config,
-        cores=args.threads,
+        cores=1,
     )
     logging.info("End - Worfklow HmnFusion")
 
@@ -377,7 +377,7 @@ def _cmd_wkf_fusion(args):
         "fastq_fwd": args.input_fastq_forward,
         "fastq_rev": args.input_fastq_reverse,
         "bam": args.input_bam,
-        "bed_gt/srcenefuse": bed_genefuse,
+        "bed_genefuse": bed_genefuse,
         "bed_lumpy": bed_lumpy,
         "bed_hmnfusion": args.input_bed_hmnfusion,
         "name": args.name,
