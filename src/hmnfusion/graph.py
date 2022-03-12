@@ -123,6 +123,7 @@ class Graph(object):
         node_fusion = self.add_node(fusion, level, True)
         self.graph.add_edge(nl, node_fusion)
         self.graph.add_edge(nr, node_fusion)
+        return node_fusion
 
     def _grapp_subgraph(self, software=""):
         g = nx.subgraph(
@@ -150,6 +151,7 @@ class Graph(object):
         for software in sorted(list(softwares)):
             g, cons, alone = self._grapp_subgraph(software)
             nodes = g.nodes
+            nodes_added = []
             for fl, fr in itertools.combinations(nodes, 2):
                 if self.graph.nodes[fl]["fusion"].is_near(
                     self.graph.nodes[fr]["fusion"],
@@ -177,7 +179,39 @@ class Graph(object):
                                     self.graph.nodes[fr]["fusion"]
                                 )
                     else:
-                        self._add_node_consensus(fl, fr)
+                        nodes_added.append(self._add_node_consensus(fl, fr))
+            # Refined for circular nodes.
+            while len(nodes_added) > 1:
+                combs = list(itertools.combinations(nodes_added, 2))
+                loop = -1
+                for ix, (fl, fr) in enumerate(combs):
+                    if self.graph.nodes[fl]["fusion"].is_near(
+                        self.graph.nodes[fr]["fusion"],
+                        self.graph.graph["consensus_interval"],
+                    ):
+                        node_kept = -1
+                        node_rm = -1
+                        neighbors = []
+                        # Select node to keep.
+                        if (
+                            self.graph.nodes[fl]["fusion"]
+                            > self.graph.nodes[fr]["fusion"]
+                        ):
+                            node_kept = fl
+                            node_rm = fr
+                        else:
+                            node_kept = fr
+                            node_rm = fl
+                        neighbors = set(nx.neighbors(self.graph, node_rm)).difference(set(nx.neighbors(self.graph, node_kept)))
+                        for nc in neighbors:
+                            self.graph.add_edge(nc, node_kept)
+                        nodes_added.remove(node_rm)
+                        self.graph.remove_node(node_rm)
+                        break
+                    loop = ix
+                # If no update was done
+                if loop + 1 == len(combs):
+                    break
 
     def consensus_genefuse_lumpy(self) -> None:
         """Create consensus nodes from nodes already built as consensus.
