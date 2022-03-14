@@ -1,6 +1,8 @@
 import unittest
 
 import networkx as nx
+import pandas as pd
+from hmnfusion import bed as hmn_bed
 from hmnfusion import fusion, graph
 
 
@@ -723,8 +725,13 @@ class TestGraph(unittest.TestCase):
         self.helper_check_interest(
             self.g1at, 0, 0, 4, [self.f6g, self.f7g, self.f8g, self.f9g]
         )
+        bed = hmn_bed.Bed(
+            pd.DataFrame(
+                {"chrom": ["chr10", "chr12"], "start": [10, 10], "end": [10000, 10000]}
+            )
+        )
 
-        self.g1at.trim_node()
+        self.g1at.trim_node(bed)
 
         self.helper_check_quanti(self.g1at, 12, 8, 8, 0, 4)
         self.helper_check_interest(
