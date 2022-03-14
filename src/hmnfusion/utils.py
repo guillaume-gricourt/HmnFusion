@@ -1,10 +1,11 @@
 import json
 import logging
-import pysam
 import re
 import shutil
 import subprocess
 from typing import Dict, List
+
+import pysam
 
 
 class ExecutableNotFound(Exception):
@@ -117,7 +118,7 @@ def check_bam_index(path: str) -> bool:
     alignment = pysam.AlignmentFile(path)
     try:
         alignment.check_index()
-    except ValueError as e:
+    except ValueError:
         pysam.index(path)
     finally:
         alignment.close()
