@@ -4,6 +4,7 @@ rule extract:
         genefuse=GENEFUSE,
         lumpy=LUMPY,
     params:
+        bed=BED_HMNFUSION,
         genefuse=GENEFUSE_FMT,
     output:
         json=temp(HMNFUSION_EXTRACTFUSION),
@@ -11,6 +12,7 @@ rule extract:
         'hmnfusion extractfusion \
         --genefuse-"{params.genefuse}" "{input.genefuse}" \
         --lumpy-vcf "{input.lumpy}" \
+        --input-bed-hmnfusion "{params.bed}" \
         --output-json "{output.json}"'
 
 
