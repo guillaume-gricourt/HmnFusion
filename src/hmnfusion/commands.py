@@ -31,16 +31,16 @@ def _cmd_extract_fusion(args):
     # Grep args.
     finputs = {}
     finputs["genefuse"] = {}
-    if args.genefuse_json:
-        finputs["genefuse"]["path"] = os.path.abspath(args.genefuse_json)
+    if args.input_genefuse_json:
+        finputs["genefuse"]["path"] = os.path.abspath(args.input_genefuse_json)
         finputs["genefuse"]["format"] = "json"
-    elif args.genefuse_html:
-        finputs["genefuse"]["path"] = os.path.abspath(args.genefuse_html)
+    elif args.input_genefuse_html:
+        finputs["genefuse"]["path"] = os.path.abspath(args.input_genefuse_html)
         finputs["genefuse"]["format"] = "html"
     finputs["lumpy"] = {}
-    finputs["lumpy"]["path"] = os.path.abspath(args.lumpy_vcf)
+    finputs["lumpy"]["path"] = os.path.abspath(args.input_lumpy_vcf)
     finputs["lumpy"]["format"] = "vcf"
-    foutput = args.output_json
+    foutput = args.output_hmnfusion_json
     # Check if all exists.
     if not os.path.isfile(finputs["genefuse"]["path"]):
         utils.abort(
@@ -50,7 +50,7 @@ def _cmd_extract_fusion(args):
         utils.abort(AP, "File Lumpy doesn't exist : %s" % (finputs["lumpy"]["path"],))
     if not os.path.isdir(os.path.dirname(os.path.abspath(foutput))):
         utils.abort(AP, "Outdir doesn't exist : %s" % (foutput,))
-    bed_hmnfusion = args.input_bed_hmnfusion
+    bed_hmnfusion = args.input_hmnfusion_bed
     if bed_hmnfusion is None or not os.path.isfile(bed_hmnfusion):
         logging.warning("Use default hmnfusion bed")
         bed_hmnfusion = os.path.join(
@@ -103,17 +103,17 @@ P_extract_fusion = AP_subparsers.add_parser(
     "extractfusion", help=_cmd_extract_fusion.__doc__
 )
 P_efgg = P_extract_fusion.add_mutually_exclusive_group(required=True)
-P_efgg.add_argument("--genefuse-json", help="Genefuse, json file")
-P_efgg.add_argument("--genefuse-html", help="Genefuse, html file")
-P_extract_fusion.add_argument("--lumpy-vcf", required=True, help="Lumpy vcf file")
-P_extract_fusion.add_argument("--input-bed-hmnfusion", required=True, help="Bed file")
+P_efgg.add_argument("--input-genefuse-json", help="Genefuse, json file")
+P_efgg.add_argument("--input-genefuse-html", help="Genefuse, html file")
+P_extract_fusion.add_argument("--input-lumpy-vcf", required=True, help="Lumpy vcf file")
+P_extract_fusion.add_argument("--input-hmnfusion-bed", required=True, help="Bed file")
 P_extract_fusion.add_argument(
     "--consensus-interval",
     type=int,
     default=500,
     help="Interval, pb, for which Fusion are considered equal if their chrom are",
 )
-P_extract_fusion.add_argument("--output-json", help="Json file output")
+P_extract_fusion.add_argument("--output-hmnfusion-json", help="Json file output")
 P_extract_fusion.set_defaults(func=_cmd_extract_fusion)
 
 
@@ -125,10 +125,10 @@ def _cmd_quantification(args):
     # Check if all exists.
     logging.info("Check args")
     finputs = {}
-    foutput = args.output_vcf
+    foutput = args.output_hmnfusion_vcf
     finputs["output"] = foutput
-    if args.hmnfusion_json:
-        finputs["hmnfusion_json"] = args.hmnfusion_json
+    if args.input_hmnfusion_json:
+        finputs["hmnfusion_json"] = args.input_hmnfusion_json
         if not os.path.isfile(finputs["hmnfusion_json"]):
             utils.abort(
                 AP,
@@ -144,7 +144,7 @@ def _cmd_quantification(args):
         finputs["region"] = args.region
 
     finputs["alignment"] = {}
-    finputs["alignment"]["path"] = args.input_bam
+    finputs["alignment"]["path"] = args.input_sample_bam
     finputs["alignment"]["mode"] = "rb"
     if not os.path.isfile(finputs["alignment"]["path"]):
         utils.abort(
@@ -155,7 +155,7 @@ def _cmd_quantification(args):
         utils.abort(
             AP, "Input alignment file must be in BAM format, index could not be build"
         )
-    bed_hmnfusion = args.input_bed
+    bed_hmnfusion = args.input_hmnfusion_bed
     if bed_hmnfusion is None or not os.path.isfile(bed_hmnfusion):
         logging.warning("Use default hmnfusion bed")
         bed_hmnfusion = os.path.join(
@@ -198,7 +198,7 @@ def _cmd_quantification(args):
 
     # Parsing bed file.
     logging.info("Parsing bed file")
-    bed = ibed.Bed.from_bed(args.input_bed)
+    bed = ibed.Bed.from_bed(args.input_hmnfusion_bed)
 
     # Parsing fusions.
     logging.info("Get region")
@@ -212,7 +212,7 @@ def _cmd_quantification(args):
         fus.set_region(reg)
         fus.evidence.raw = 0
         g.add_node(fus, 0, False, True)
-    elif args.hmnfusion_json:
+    elif args.input_hmnfusion_json:
         g = extractfusion.read_hmnfusion_json(finputs["hmnfusion_json"])
 
     # Process
@@ -232,10 +232,10 @@ P_quantification = AP_subparsers.add_parser(
 P_qpg = P_quantification.add_mutually_exclusive_group(required=True)
 P_qpg.add_argument("--region", help="Region format <chrom>:<postion>")
 P_qpg.add_argument(
-    "--hmnfusion-json", help='Output Json produced by command "extractfusion"'
+    "--input-hmnfusion-json", help='Output Json produced by command "extractfusion"'
 )
-P_quantification.add_argument("--input-bam", required=True, help="Bam file")
-P_quantification.add_argument("--input-bed", help="Bed file")
+P_quantification.add_argument("--input-sample-bam", required=True, help="Bam file")
+P_quantification.add_argument("--input-hmnfusion-bed", help="Bed file")
 P_quantification.add_argument("--name", required=True, help="Name of sample")
 P_quantification.add_argument(
     "--baseclipped-interval",
@@ -249,44 +249,48 @@ P_quantification.add_argument(
     default=4,
     help="Number of base hard/soft-clipped bases to count in interval (pb)",
 )
-P_quantification.add_argument("--output-vcf", help="Vcf file output")
+P_quantification.add_argument("--output-hmnfusion-vcf", help="Vcf file output")
 P_quantification.set_defaults(func=_cmd_quantification)
 
 
 # mmej signatures.
-def _cmd_mmej(args):
+def _cmd_mmej_deletion(args):
     """Detect MMEJ signatures from deletion, fusion"""
     logging.info("Start analysis")
     # Grep args.
-    for finput in args.input_vcf:
+    for finput in args.input_sample_vcf:
         if not os.path.isfile(finput):
             utils.abort(AP, 'Vcf file doesn"t exist : %s' % (finput,))
-    if not os.path.isfile(args.reference):
-        utils.abort(AP, 'Reference file doesn"t exist : %s' % (args.reference,))
-    if not os.path.isdir(os.path.dirname(os.path.abspath(args.output_xlsx))):
-        utils.abort(AP, 'Outdir doesn"t exist : %s' % (args.output_xlsx,))
+    if not os.path.isfile(args.input_reference_fasta):
+        utils.abort(
+            AP, 'Reference file doesn"t exist : %s' % (args.input_reference_fasta,)
+        )
+    if not os.path.isdir(os.path.dirname(os.path.abspath(args.output_hmnfusion_xlsx))):
+        utils.abort(AP, 'Outdir doesn"t exist : %s' % (args.output_hmnfusion_xlsx,))
 
     # Run.
     logging.info("Extract events from files")
-    df = mmej.extract(args.input_vcf)
+    df = mmej.extract(args.input_sample_vcf)
 
     logging.info("Caracterize events with reference file")
-    df = mmej.signatures(args.reference, df)
+    df = mmej.signatures(args.input_reference_fasta, df)
 
     logging.info("MMEJ signatures significance")
     df = mmej.conclude(df)
 
     logging.info("Write output")
-    mmej.write(args.output_xlsx, df)
+    mmej.write(args.output_hmnfusion_xlsx, df)
 
     logging.info("Analysis is finished")
 
 
-P_mmej = AP_subparsers.add_parser("mmej", help=_cmd_mmej.__doc__)
-P_mmej.add_argument("-i", "--input-vcf", nargs="+", help="Vcf file")
-P_mmej.add_argument("-r", "--reference", required=True, help="Genome of reference")
-P_mmej.add_argument("--output-xlsx", help="Output file")
-P_mmej.set_defaults(func=_cmd_mmej)
+P_mmej = AP_subparsers.add_parser("mmej-deletion", help=_cmd_mmej_deletion.__doc__)
+P_mmej.add_argument("--input-sample-vcf", nargs="+", help="Vcf file")
+P_mmej.add_argument(
+    "--input-reference-fasta", required=True, help="Genome of reference"
+)
+P_mmej.add_argument("--output-hmnfusion-xlsx", help="Output file")
+P_mmej.set_defaults(func=_cmd_mmej_deletion)
 
 
 def _cmd_wkf_hmnfusion(args):
@@ -295,43 +299,40 @@ def _cmd_wkf_hmnfusion(args):
     # Args.
     genefuse_file = ""
     genefuse_fmt = ""
-    if args.genefuse_json is None:
-        genefuse_file = args.genefuse_html
+    if args.input_genefuse_json is None:
+        genefuse_file = args.input_genefuse_html
         genefuse_fmt = "html"
     else:
-        genefuse_file = args.genefuse_json
+        genefuse_file = args.input_genefuse_json
         genefuse_fmt = "json"
-
     if not os.path.isfile(genefuse_file):
         utils.abort(AP, "File Genefuse doesn't exist : %s" % (genefuse_file,))
-    if not os.path.isfile(args.lumpy_vcf):
-        utils.abort(AP, "File Lumpy doesn't exist : %s" % (args.lumpy_vcf,))
-    if not os.path.isfile(args.input_bam):
-        utils.abort(AP, "File bam doesn't exist : %s" % (args.input_bam,))
-    bed_hmnfusion = args.input_bed_hmnfusion
-    if bed_hmnfusion is None or not os.path.isfile(bed_hmnfusion):
+    if not os.path.isfile(args.input_lumpy_vcf):
+        utils.abort(AP, "File Lumpy doesn't exist : %s" % (args.input_lumpy_vcf,))
+    if not os.path.isfile(args.input_sample_bam):
+        utils.abort(AP, "File bam doesn't exist : %s" % (args.input_sample_bam,))
+    input_hmnfusion_bed = args.input_hmnfusion_bed
+    if input_hmnfusion_bed is None or not os.path.isfile(input_hmnfusion_bed):
         logging.warning("Use default hmnfusion bed")
-        bed_hmnfusion = os.path.join(
+        input_hmnfusion_bed = os.path.join(
             os.path.dirname(os.path.realpath(__file__)),
             "templates",
             "bed",
             "hmnfusion.bed",
         )
-    if not os.path.isfile(args.input_bed_hmnfusion):
-        utils.abort(AP, "File bed doesn't exist : %s" % (args.input_bed_hmnfusion,))
-    if not os.path.isdir(os.path.dirname(os.path.abspath(args.output_vcf))):
-        utils.abort(AP, "Outdir doesn't exist : %s" % (args.output_vcf,))
+    if not os.path.isdir(os.path.dirname(os.path.abspath(args.output_hmnfusion_vcf))):
+        utils.abort(AP, "Outdir doesn't exist : %s" % (args.output_hmnfusion_vcf,))
 
     # Run.
     logging.info("Run Worflow HmnFusion")
     config = {
-        "lumpy": args.lumpy_vcf,
+        "input_sample_bam": args.input_sample_bam,
+        "name": args.name,
+        "input_hmnfusion_bed": input_hmnfusion_bed,
+        "output_hmnfusion_vcf": args.output_hmnfusion_vcf,
+        "lumpy": args.input_lumpy_vcf,
         "genefuse": genefuse_file,
         "genefuse_fmt": genefuse_fmt,
-        "bam": args.input_bam,
-        "bed_hmnfusion": bed_hmnfusion,
-        "name": args.name,
-        "output_file": args.output_vcf,
     }
     workflow.run(
         snakefile=os.path.join(
@@ -349,14 +350,16 @@ def _cmd_wkf_hmnfusion(args):
 P_wkf_hmnfusion = AP_subparsers.add_parser(
     "workflow-hmnfusion", help=_cmd_wkf_hmnfusion.__doc__
 )
-P_wkf_hmnfusion.add_argument("--lumpy-vcf", required=True, help="Lumpy Vcf file")
+P_wkf_hmnfusion.add_argument("--input-lumpy-vcf", required=True, help="Lumpy Vcf file")
 P_wkf_hf_g = P_wkf_hmnfusion.add_mutually_exclusive_group(required=True)
-P_wkf_hf_g.add_argument("--genefuse-json", help="Genefuse, json file")
-P_wkf_hf_g.add_argument("--genefuse-html", help="Genefuse, html file")
-P_wkf_hmnfusion.add_argument("--input-bam", required=True, help="Bam file")
-P_wkf_hmnfusion.add_argument("--input-bed-hmnfusion", help="HmnFusion bed file")
+P_wkf_hf_g.add_argument("--input-genefuse-json", help="Genefuse, json file")
+P_wkf_hf_g.add_argument("--input-genefuse-html", help="Genefuse, html file")
+P_wkf_hmnfusion.add_argument("--input-sample-bam", required=True, help="Bam file")
+P_wkf_hmnfusion.add_argument("--input-hmnfusion-bed", help="HmnFusion bed file")
 P_wkf_hmnfusion.add_argument("--name", required=True, help="Name of sample")
-P_wkf_hmnfusion.add_argument("--output-vcf", required=True, help="Vcf file output")
+P_wkf_hmnfusion.add_argument(
+    "--output-hmnfusion-vcf", required=True, help="Vcf file output"
+)
 P_wkf_hmnfusion.set_defaults(func=_cmd_wkf_hmnfusion)
 
 
@@ -364,50 +367,54 @@ def _cmd_wkf_fusion(args):
     """Worflow to detect & quantify fusions with Genefuse, Lumpy and HmnFusion"""
     logging.info("Start - Worfklow Fusion")
     # Args.
-    if not os.path.isfile(args.input_fastq_forward):
+    if not os.path.isfile(args.input_forward_fastq):
         utils.abort(
-            AP, "File Fastq Forward doesn't exist : %s" % (args.input_fastq_forward,)
+            AP, "File Fastq Forward doesn't exist : %s" % (args.input_forward_fastq,)
         )
-    if not os.path.isfile(args.input_fastq_reverse):
+    if not os.path.isfile(args.input_reverse_fastq):
         utils.abort(
-            AP, "File Fastq Reverse doesn't exist : %s" % (args.input_fastq_reverse,)
+            AP, "File Fastq Reverse doesn't exist : %s" % (args.input_reverse_fastq,)
         )
-    if not os.path.isfile(args.input_bam):
-        utils.abort(AP, "File bam doesn't exist : %s" % (args.input_bam,))
-    if not utils.check_bam_index(args.input_bam):
+    if not os.path.isfile(args.input_sample_bam):
+        utils.abort(AP, "File bam doesn't exist : %s" % (args.input_sample_bam,))
+    if not utils.check_bam_index(args.input_sample_bam):
         utils.abort(
             AP, "Input alignment file must be in BAM format, index could not be build"
         )
-    bed_hmnfusion = args.input_bed_hmnfusion
-    if bed_hmnfusion is None or not os.path.isfile(bed_hmnfusion):
+    input_hmnfusion_bed = args.input_hmnfusion_bed
+    if input_hmnfusion_bed is None or not os.path.isfile(input_hmnfusion_bed):
         logging.warning("Use default hmnfusion bed")
-        bed_hmnfusion = os.path.join(
+        input_hmnfusion_bed = os.path.join(
             os.path.dirname(os.path.realpath(__file__)),
             "templates",
             "bed",
             "hmnfusion.bed",
         )
-    bed_genefuse = args.input_bed_genefuse
-    if bed_genefuse is None or not os.path.isfile(bed_genefuse):
+    input_genefuse_bed = args.input_genefuse_bed
+    if input_genefuse_bed is None or not os.path.isfile(input_genefuse_bed):
         logging.warning("Use default genefuse bed")
-        bed_genefuse = os.path.join(
+        input_genefuse_bed = os.path.join(
             os.path.dirname(os.path.realpath(__file__)),
             "templates",
             "bed",
             "genefuse.bed",
         )
-    bed_lumpy = args.input_bed_lumpy
-    if bed_lumpy is None or not os.path.isfile(bed_lumpy):
+    input_lumpy_bed = args.input_lumpy_bed
+    if input_lumpy_bed is None or not os.path.isfile(input_lumpy_bed):
         logging.warning("Use default lumpy bed")
-        bed_lumpy = os.path.join(
+        input_lumpy_bed = os.path.join(
             os.path.dirname(os.path.realpath(__file__)), "templates", "bed", "lumpy.bed"
         )
     if not os.path.isfile(args.input_reference_fasta):
         utils.abort(
             AP, "File reference doesn't exist : %s" % (args.input_reference_fasta,)
         )
-    if not os.path.isdir(os.path.dirname(os.path.abspath(args.output_vcf))):
-        utils.abort(AP, "Outdir doesn't exist : %s" % (args.output_vcf,))
+    if not os.path.isdir(os.path.dirname(os.path.abspath(args.output_hmnfusion_vcf))):
+        utils.abort(AP, "Outdir doesn't exist : %s" % (args.output_hmnfusion_vcf,))
+    if not os.path.isdir(os.path.dirname(os.path.abspath(args.output_genefuse_html))):
+        utils.abort(AP, "Outdir doesn't exist : %s" % (args.output_genefuse_html,))
+    if not os.path.isdir(os.path.dirname(os.path.abspath(args.output_lumpy_vcf))):
+        utils.abort(AP, "Outdir doesn't exist : %s" % (args.output_lumpy_vcf,))
 
     # Threads
     threads_genefuse = 1
@@ -417,15 +424,17 @@ def _cmd_wkf_fusion(args):
     # Run.
     logging.info("Run Workflow Fusion")
     config = {
-        "fastq_fwd": args.input_fastq_forward,
-        "fastq_rev": args.input_fastq_reverse,
-        "bam": args.input_bam,
-        "bed_genefuse": bed_genefuse,
-        "bed_lumpy": bed_lumpy,
-        "bed_hmnfusion": bed_hmnfusion,
+        "input_forward_fastq": args.input_forward_fastq,
+        "input_reverse_fastq": args.input_reverse_fastq,
+        "input_sample_bam": args.input_sample_bam,
         "name": args.name,
-        "reference": args.input_reference_fasta,
-        "output_file": args.output_vcf,
+        "input_genefuse_bed": input_genefuse_bed,
+        "input_hmnfusion_bed": input_hmnfusion_bed,
+        "input_lumpy_bed": input_lumpy_bed,
+        "input_reference_fasta": args.input_reference_fasta,
+        "output_hmnfusion_vcf": args.output_hmnfusion_vcf,
+        "genefuse": args.output_genefuse_html,
+        "lumpy": args.output_lumpy_vcf,
         "threads_genefuse": threads_genefuse,
     }
     workflow.run(
@@ -443,18 +452,28 @@ def _cmd_wkf_fusion(args):
 
 P_wkf_fusion = AP_subparsers.add_parser("workflow-fusion", help=_cmd_wkf_fusion.__doc__)
 P_wkf_fusion.add_argument(
-    "--input-fastq-forward", required=True, help="Fastq file forward"
+    "--input-forward-fastq", required=True, help="Fastq file forward"
 )
 P_wkf_fusion.add_argument(
-    "--input-fastq-reverse", required=True, help="Fastq file reverse"
+    "--input-reverse-fastq", required=True, help="Fastq file reverse"
 )
-P_wkf_fusion.add_argument("--input-bam", required=True, help="Bam file")
-P_wkf_fusion.add_argument("--input-bed-genefuse", help="Genefuse bed file")
-P_wkf_fusion.add_argument("--input-bed-lumpy", help="Lumpy bed file")
-P_wkf_fusion.add_argument("--input-bed-hmnfusion", help="HmnFusion bed file")
-P_wkf_fusion.add_argument("--input-reference-fasta", required=True, help="Reference fasta file (hg19)")
+P_wkf_fusion.add_argument("--input-sample-bam", required=True, help="Bam file")
+P_wkf_fusion.add_argument("--input-genefuse-bed", help="Genefuse bed file")
+P_wkf_fusion.add_argument("--input-lumpy-bed", help="Lumpy bed file")
+P_wkf_fusion.add_argument("--input-hmnfusion-bed", help="HmnFusion bed file")
+P_wkf_fusion.add_argument(
+    "--input-reference-fasta", required=True, help="Reference fasta file (hg19)"
+)
 P_wkf_fusion.add_argument("--name", required=True, help="Name of sample")
-P_wkf_fusion.add_argument("--output-vcf", required=True, help="Vcf file output")
+P_wkf_fusion.add_argument(
+    "--output-hmnfusion-vcf", required=True, help="Vcf file output"
+)
+P_wkf_fusion.add_argument(
+    "--output-genefuse-html", required=True, help="Genefuse html file output"
+)
+P_wkf_fusion.add_argument(
+    "--output-lumpy-vcf", required=True, help="Lumpy vcf file output"
+)
 P_wkf_fusion.add_argument(
     "--threads",
     type=int,

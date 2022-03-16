@@ -4,31 +4,31 @@ rule extract:
         genefuse=GENEFUSE,
         lumpy=LUMPY,
     params:
-        bed=BED_HMNFUSION,
+        bed=INPUT_HMNFUSION_BED,
         genefuse=GENEFUSE_FMT,
     output:
         json=temp(HMNFUSION_EXTRACTFUSION),
     shell:
         'hmnfusion extractfusion \
-        --genefuse-"{params.genefuse}" "{input.genefuse}" \
-        --lumpy-vcf "{input.lumpy}" \
-        --input-bed-hmnfusion "{params.bed}" \
-        --output-json "{output.json}"'
+        --input-genefuse-"{params.genefuse}" "{input.genefuse}" \
+        --input-lumpy-vcf "{input.lumpy}" \
+        --input-hmnfusion-bed "{params.bed}" \
+        --output-hmnfusion-json "{output.json}"'
 
 
 rule quantification:
     input:
         json=rules.extract.output.json,
-        bam=BAM,
+        bam=INPUT_SAMPLE_BAM,
     params:
-        bed=BED_HMNFUSION,
+        bed=INPUT_HMNFUSION_BED,
         name=NAME,
     output:
-        vcf=OUTPUT,
+        vcf=OUTPUT_HMNFUSION_VCF,
     shell:
         'hmnfusion quantification \
-        --hmnfusion-json "{input.json}" \
-        --input-bam "{input.bam}" \
-        --input-bed "{params.bed}" \
+        --input-hmnfusion-json "{input.json}" \
+        --input-sample-bam "{input.bam}" \
+        --input-hmnfusion-bed "{params.bed}" \
         --name "{params.name}" \
-        --output-vcf "{output.vcf}"'
+        --output-hmnfusion-vcf "{output.vcf}"'
