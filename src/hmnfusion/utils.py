@@ -3,7 +3,10 @@ import logging
 import re
 import shutil
 import subprocess
-from typing import Dict, List
+import tempfile
+from typing import Dict, List, Tuple
+
+import pysam
 
 
 class ExecutableNotFound(Exception):
@@ -140,3 +143,62 @@ def validate_name_sample(name: str) -> str:
     if re.search(r"\s+", name):
         raise ValueError("Space are not allowed")
     return name
+
+
+def bam_to_fastq(path: str, compress: int = 4, threads: int = 1) -> Tuple[str, str]:
+    """Convert a bam to two fastq files.
+
+    Parameters
+    ----------
+    path: str
+        Path to the bam file
+    compress: int (default: 4)
+        Level of compress fastq file, 0 is disable
+    threads: int (default: 1)
+        Number of threads to use
+
+    Return
+    ------
+    Tuple[str, str]
+        Path of the fastq files: forward & revers
+    """
+    main_args = ["--threads", str(threads)]
+    # Sort bam.
+    tmp_sort = tempfile.NamedTemporaryFile(suffix=".bam")
+    args = main_args + ["-n", "-o", tmp_sort.name, path]
+    pysam.sort(*args)
+    # Fixmate bam.
+    tmp_fixmate = tempfile.NamedTemporaryFile(suffix=".bam")
+    args = main_args + [tmp_sort.name, tmp_fixmate.name]
+    pysam.fixmate(*args)
+    # Label file.
+    suffixes = ["R{0}", "fastq"]
+    if compress > 0:
+        suffixes.append("gz")
+    label_suffixes = "." + ".".join(suffixes)
+    tmp_fq_fwd = tempfile.NamedTemporaryFile(
+        suffix=label_suffixes.format("1"), delete=False
+    )
+    tmp_fq_rev = tempfile.NamedTemporaryFile(
+        suffix=label_suffixes.format("2"), delete=False
+    )
+    # Convert to fastq.
+    args = main_args + [
+        "-c",
+        str(compress),
+        "-f",
+        "1",
+        "-F",
+        "0x900",
+        "-1",
+        tmp_fq_fwd.name,
+        "-2",
+        tmp_fq_rev.name,
+        tmp_fixmate.name,
+    ]
+    pysam.fastq(*args)
+    # Clean up.
+    tmp_sort.close()
+    tmp_fixmate.close()
+
+    return tmp_fq_fwd.name, tmp_fq_rev.name
