@@ -99,8 +99,9 @@ docker run -it \
     --input-reverse-fastq <i>file</i> \
     --input-sample-bam <i>file</i> \
     --output-hmnfusion-vcf <i>file</i> \
+    --output-genefuse-html <i>file</i> \
+    --output-lumpy-vcf <i>file</i> \
     --input-reference-fasta <i>file</i> \
-    --input-hmnfusion-bed <i>file</i> \
     --name <i>sample_name</i> \
     --threads 4
 </pre>
