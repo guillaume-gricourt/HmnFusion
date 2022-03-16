@@ -35,6 +35,7 @@ requirements:
     - pytest
     - python
     - pyyaml
+    - snakemake
 
 test:
   source_files:

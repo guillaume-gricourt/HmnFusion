@@ -33,13 +33,13 @@ def quantification(
     with tempfile.NamedTemporaryFile(delete=False) as fd:
         args = ["hmnfusion", "quantification"]
         if input_type == InputType.hmnfusion:
-            args += ["--hmnfusion-json", sample.extractfusion]
+            args += ["--input-hmnfusion-json", sample.extractfusion]
         elif input_type == InputType.region:
             args += ["--region", sample.region]
-        args += ["--input-bam", sample.bam]
-        args += ["--input-bed", bed]
+        args += ["--input-sample-bam", sample.bam]
+        args += ["--input-hmnfusion-bed", bed]
         args += ["--name", sample.name]
-        args += ["--output-vcf", fd.name]
+        args += ["--output-hmnfusion-vcf", fd.name]
 
         ret = Main_test.launch(args)
         if ret.returncode > 0:
