@@ -20,8 +20,8 @@ class Bed(object):
 
     HEADER = ["chrom", "start", "end"]
 
-    def __init__(self) -> None:
-        self.df = pd.DataFrame()
+    def __init__(self, df=pd.DataFrame()) -> None:
+        self.df = df
 
     @classmethod
     def from_bed(cls, path: str) -> "Bed":

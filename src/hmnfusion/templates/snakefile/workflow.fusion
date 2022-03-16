@@ -1,7 +1,7 @@
 # Lumpy.
 rule lumpy_discordant:
     input:
-        bam=BAM,
+        bam=INPUT_SAMPLE_BAM,
     params:
         soft="samtools",
     conda:
@@ -14,7 +14,7 @@ rule lumpy_discordant:
 
 rule lumpy_splitters:
     input:
-        bam=BAM,
+        bam=INPUT_SAMPLE_BAM,
     params:
         samtools="samtools",
         script="extractSplitReads_BwaMem",
@@ -28,12 +28,12 @@ rule lumpy_splitters:
 
 rule lumpy_express:
     input:
-        basal=BAM,
+        basal=INPUT_SAMPLE_BAM,
         splitter=rules.lumpy_splitters.output.bam,
         discordant=rules.lumpy_discordant.output.bam,
     params:
         soft="lumpyexpress",
-        bed=BED_LUMPY,
+        bed=INPUT_LUMPY_BED,
     conda:
         "lumpy-sv",
     output:
@@ -45,11 +45,11 @@ rule lumpy_express:
 # GeneFuse
 rule genefuse:
     input:
-        r1=FASTQ_FWD,
-        r2=FASTQ_REV,
+        r1=INPUT_FORWARD_FASTQ,
+        r2=INPUT_REVERSE_FASTQ,
     params:
-        ref=REFERENCE,
-        fusion=BED_GENEFUSE,
+        ref=INPUT_REFERENCE_FASTA,
+        fusion=INPUT_GENEFUSE_BED,
         soft="genefuse",
     output:
         html=GENEFUSE,

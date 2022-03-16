@@ -11,7 +11,7 @@ A tool to aggregate results of fusion produced by Genefuse and Lumpy and calcula
 ## Getting Started
 
 ### Installing
-Installation is done with `pip`
+Install with `pip`
 ```bash
 pip install hmnfusion
 ```
@@ -27,10 +27,10 @@ Software is available by
 Aggregate results from Genefuse and Lumpy to produce a Json file.
 
 <pre>
-HmnFusion extractfusion \
-    --genefuse-json <i>file</i> | --genefuse-html <i>file</i>\
-    --lumpy-vcf <i>file</i> \
-    --output-json <i>file</i>
+hmnfusion extractfusion \
+    --input-genefuse-json <i>file</i> | --input-genefuse-html <i>file</i>\
+    --input-lumpy-vcf <i>file</i> \
+    --output-hmnfusion-json <i>file</i>
 </pre>
 
 ### Quantification
@@ -40,12 +40,23 @@ A fusion is defined by two breakpoints. Only one must be in bed intervals, allel
 Name sample is used in vcf file.
 
 <pre>
-HmnFusion quantification \
-    --hmnfusion-file <i>file</i> | --region <i>chromosome:position</i> \
-    --input-bam <i>file</i> | --input-sam <i>file</i> \
-    --input-bed <i>file</i> \
+hmnfusion quantification \
+    --input-hmnfusion-json <i>file</i> | --region <i>chromosome:position</i> \
+    --input-sample-bam <i>file</i> | --input-sam <i>file</i> \
+    --input-hmnfusion-bed <i>file</i> \
     --name <i>sample_name</i> \
-    --output-vcf <i>file</i>
+    --output-hmnfusion-vcf <i>file</i>
+</pre>
+
+### MMEJ - Deletion
+
+Extract MMEJ information from VCF file coming from classic variant caller (GATK, Varscan, ...)
+
+<pre>
+hmnfusion mmej-deletion \
+    --input-sample-vcf <i>file</i> <i>file</i> ... \
+    --input-reference-fasta <i>file</i> \
+    --output-hmnfusion-xlsx <i>file</i>
 </pre>
 
 ## Docker
@@ -57,39 +68,40 @@ docker run -it \
     --rm \
     hmnfusion:latest \
     extractfusion \
-    --genefuse-json <i>file</i> | --genefuse-html <i>file</i> \
-    --lumpy-vcf <i>file</i> \
-    --output-json <i>file</i>
+    --input-genefuse-json <i>file</i> | --input-genefuse-html <i>file</i> \
+    --input-lumpy-vcf <i>file</i> \
+    --output-hmnfusion-json <i>file</i>
 </pre>
 
 ### Run Workflow HmnFusion
-Running combined *extractfusion* and *quantification* with one commandi line:   
+Running combined *extractfusion* and *quantification* with one command-line:  
 <pre>
 docker run -it \
     --rm \
     hmnfusion:latest \
     workflow-hmnfusion \
-    --genefuse-html <i>file</i> \
-    --lumpy-vcf <i>file</i> \
-    --input-bam <i>file</i> \
-    --input-bed <i>file</i> \
+    --input-genefuse-html <i>file</i> \
+    --input-lumpy-vcf <i>file</i> \
+    --input-sample-bam <i>file</i> \
+    --input-hmnfusion-bed <i>file</i> \
     --name <i>sample_name</i> \
-    --output-vcf <i>file</i>
+    --output-hmnfusion-vcf <i>file</i>
 </pre>
 
 ### Run Workflow Fusion
-Run with one command line GeneFuse, Lumpy and HmnFusion:  
+Run with one command-line GeneFuse, Lumpy and HmnFusion:  
 <pre>
 docker run -it \
     --rm \
     hmnfusion:latest \
     workflow-fusion \
-    --input-fastq-forward <i>file</i> \
-    --input-fastq-reverse <i>file</i> \
-    --input-bam <i>file</i> \
-    --output-vcf <i>file</i> \
+    --input-forward-fastq <i>file</i> \
+    --input-reverse-fastq <i>file</i> \
+    --input-sample-bam <i>file</i> \
+    --output-hmnfusion-vcf <i>file</i> \
+    --output-genefuse-html <i>file</i> \
+    --output-lumpy-vcf <i>file</i> \
     --input-reference-fasta <i>file</i> \
-    --input-bed-hmnfusion <i>file</i> \
     --name <i>sample_name</i> \
     --threads 4
 </pre>

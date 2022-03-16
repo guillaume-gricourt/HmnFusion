@@ -5,6 +5,8 @@ import shutil
 import subprocess
 from typing import Dict, List
 
+import pysam
+
 
 class ExecutableNotFound(Exception):
     """Custom class to throw an error if an executable is not found."""
@@ -98,6 +100,33 @@ def cmdline(args: List[str], logger: logging.Logger = logging.getLogger()) -> in
     if ret.stderr is not None:
         logging.warning(ret.stderr)
     return ret.returncode
+
+
+def check_bam_index(path: str) -> bool:
+    """Build index file for a bam file if not found.
+
+    Parameters
+    ----------
+    path: str
+        Path of the bam file
+
+    Return
+    ------
+    bool
+        True if index is present or is written, False otherwise.
+    """
+    alignment = pysam.AlignmentFile(path)
+    try:
+        alignment.check_index()
+    except ValueError:
+        pysam.index(path)
+    finally:
+        alignment.close()
+    try:
+        alignment = pysam.AlignmentFile(path, require_index=True)
+        return True
+    except Exception:
+        return False
 
 
 def find_executable(executable: str, msg: str = "") -> None:

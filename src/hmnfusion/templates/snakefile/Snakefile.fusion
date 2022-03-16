@@ -4,26 +4,30 @@ import tempfile
 ############
 ##  Args  ##
 ############
-# fusion
-FASTQ_FWD = config.get("fastq_fwd", "")
-FASTQ_REV = config.get("fastq_rev", "")
-BED_GENEFUSE = config.get("bed_genefuse", "")
-BED_LUMPY = config.get("bed_lumpy", "")
-REFERENCE = config.get("reference", "")
-THREADS_GENEFUSE = config.get("threads_genefuse", 1)
+# Input sample
+INPUT_FORWARD_FASTQ = config.get("input_forward_fastq", "")
+INPUT_REVERSE_FASTQ = config.get("input_reverse_fastq", "")
+INPUT_SAMPLE_BAM = config.get("input_sample_bam", "")
 
-# common
-BAM = config.get("bam", "")
-BED_HMNFUSION = config.get("bed_hmnfusion", "")
 NAME = config.get("name", "")
-OUTPUT = config.get("output_file", "")
 
-OUTDIR = os.path.dirname(OUTPUT)
+# Input bed
+INPUT_GENEFUSE_BED = config.get("input_genefuse_bed", "")
+INPUT_HMNFUSION_BED = config.get("input_hmnfusion_bed", "")
+INPUT_LUMPY_BED = config.get("input_lumpy_bed", "")
 
-# dynamic
+# Input ref
+INPUT_REFERENCE_FASTA = config.get("input_reference_fasta", "")
+
+# output
+OUTPUT_HMNFUSION_VCF = config.get("output_hmnfusion_vcf", "")
+
+# GeneFuse & Lumpy
+GENEFUSE = config.get("genefuse", "")
 GENEFUSE_FMT = "html"
-LUMPY = os.path.join(OUTDIR, ".".join([NAME, "lumpy", "vcf"]))
-GENEFUSE = os.path.join(OUTDIR, ".".join([NAME, "genefuse", "html"]))
+LUMPY = config.get("lumpy", "")
+
+THREADS_GENEFUSE = config.get("threads_genefuse", 1)
 
 # tmp
 HMNFUSION_EXTRACTFUSION = os.path.join(
@@ -34,7 +38,7 @@ LUMPY_SPLITTER = os.path.join(tempfile.gettempdir(), NAME + ".lumpy.splitter.bam
 
 # Include File
 INCLUDE = []
-INCLUDE.append(OUTPUT)
+INCLUDE.append(OUTPUT_HMNFUSION_VCF)
 
 #############
 ##  Rules  ##
