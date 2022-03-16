@@ -9,6 +9,7 @@ class Main_test(unittest.TestCase):
         "Sample",
         [
             "name",
+            "fastq",
             "bam",
             "sam",
             "genefuse_json",
@@ -22,6 +23,7 @@ class Main_test(unittest.TestCase):
 
     dataset_path = os.path.join(os.path.dirname(__file__), "dataset")
     # Sample.
+    fastq_path = os.path.join(dataset_path, "fastq")
     bam_path = os.path.join(dataset_path, "bam")
     hmnfusion_path = os.path.join(dataset_path, "hmnfusion")
     genefuse_path = os.path.join(dataset_path, "genefuse")
@@ -29,6 +31,7 @@ class Main_test(unittest.TestCase):
 
     sample_a = Sample(
         name="TEST-A",
+        fastq="",
         bam=os.path.join(bam_path, "TEST-A.bam"),
         sam=os.path.join(bam_path, "TEST-A.sam"),
         genefuse_json="",
@@ -40,6 +43,10 @@ class Main_test(unittest.TestCase):
     )
     sample_m = Sample(
         name="TEST-M",
+        fastq=(
+            os.path.join(fastq_path, "TEST-M.R1.fastq"),
+            os.path.join(fastq_path, "TEST-M.R2.fastq"),
+        ),
         bam=os.path.join(bam_path, "TEST-M.bam"),
         sam="",
         genefuse_json=os.path.join(genefuse_path, "TEST-M.json"),
@@ -51,6 +58,7 @@ class Main_test(unittest.TestCase):
     )
     sample_p = Sample(
         name="TEST-P",
+        fastq="",
         bam=os.path.join(bam_path, "TEST-P.bam"),
         sam=os.path.join(bam_path, "TEST-P.sam"),
         genefuse_json=os.path.join(genefuse_path, "TEST-P.json"),
