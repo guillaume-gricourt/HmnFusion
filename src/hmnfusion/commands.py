@@ -367,20 +367,24 @@ def _cmd_wkf_fusion(args):
     """Worflow to detect & quantify fusions with Genefuse, Lumpy and HmnFusion"""
     logging.info("Start - Worfklow Fusion")
     # Args.
-    if not os.path.isfile(args.input_forward_fastq):
-        utils.abort(
-            AP, "File Fastq Forward doesn't exist : %s" % (args.input_forward_fastq,)
-        )
-    if not os.path.isfile(args.input_reverse_fastq):
-        utils.abort(
-            AP, "File Fastq Reverse doesn't exist : %s" % (args.input_reverse_fastq,)
-        )
     if not os.path.isfile(args.input_sample_bam):
         utils.abort(AP, "File bam doesn't exist : %s" % (args.input_sample_bam,))
     if not utils.check_bam_index(args.input_sample_bam):
         utils.abort(
             AP, "Input alignment file must be in BAM format, index could not be build"
         )
+
+    input_forward_fastq = args.input_forward_fastq
+    input_reverse_fastq = args.input_reverse_fastq
+    is_convert_bam = False
+    if (
+        input_forward_fastq is None
+        or not os.path.isfile(input_forward_fastq)
+        or input_reverse_fastq is None
+        or not os.path.isfile(input_reverse_fastq)
+    ):
+        is_convert_bam = True
+
     input_hmnfusion_bed = args.input_hmnfusion_bed
     if input_hmnfusion_bed is None or not os.path.isfile(input_hmnfusion_bed):
         logging.warning("Use default hmnfusion bed")
@@ -422,10 +426,16 @@ def _cmd_wkf_fusion(args):
         threads_genefuse = math.ceil(args.threads * 0.8)
 
     # Run.
+    if is_convert_bam:
+        logging.info("Convert bam to fastq")
+        input_forward_fastq, input_reverse_fastq = utils.bam_to_fastq(
+            path=args.input_sample_bam, threads=args.threads
+        )
+
     logging.info("Run Workflow Fusion")
     config = {
-        "input_forward_fastq": args.input_forward_fastq,
-        "input_reverse_fastq": args.input_reverse_fastq,
+        "input_forward_fastq": input_forward_fastq,
+        "input_reverse_fastq": input_reverse_fastq,
         "input_sample_bam": args.input_sample_bam,
         "name": args.name,
         "input_genefuse_bed": input_genefuse_bed,
@@ -451,12 +461,8 @@ def _cmd_wkf_fusion(args):
 
 
 P_wkf_fusion = AP_subparsers.add_parser("workflow-fusion", help=_cmd_wkf_fusion.__doc__)
-P_wkf_fusion.add_argument(
-    "--input-forward-fastq", required=True, help="Fastq file forward"
-)
-P_wkf_fusion.add_argument(
-    "--input-reverse-fastq", required=True, help="Fastq file reverse"
-)
+P_wkf_fusion.add_argument("--input-forward-fastq", help="Fastq file forward")
+P_wkf_fusion.add_argument("--input-reverse-fastq", help="Fastq file reverse")
 P_wkf_fusion.add_argument("--input-sample-bam", required=True, help="Bam file")
 P_wkf_fusion.add_argument("--input-genefuse-bed", help="Genefuse bed file")
 P_wkf_fusion.add_argument("--input-lumpy-bed", help="Lumpy bed file")
