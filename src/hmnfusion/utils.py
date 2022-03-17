@@ -8,8 +8,6 @@ from typing import Dict, List, Tuple
 
 import pysam
 
-import pysam
-
 
 class ExecutableNotFound(Exception):
     """Custom class to throw an error if an executable is not found."""
