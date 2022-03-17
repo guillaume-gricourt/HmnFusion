@@ -8,3 +8,4 @@ build
 *.whl
 *.tar.gz
 run.sh
+debug/
