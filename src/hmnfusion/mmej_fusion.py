@@ -1,13 +1,13 @@
-import json
 import pysam
-import re
 import subprocess
+import tempfile
+from typing import List
 
-import networkx as nx
-from hmnfusion import extractfusion, fusion, graph, region
+from hmnfusion import extractfusion, fusion, graph
+from hmnfusion import region as iregion
 
 
-def load_file(path:str , fmt: str, g: graph.Graph = graph.Graph()) -> graph.Graph:
+def load_file(path: str, fmt: str, g: graph.Graph = graph.Graph()) -> graph.Graph:
     if fmt == "genefuse_html":
         extractfusion.read_genefuse_html(g, path)
     elif fmt == "genefuse_json":
@@ -22,15 +22,15 @@ def load_file(path:str , fmt: str, g: graph.Graph = graph.Graph()) -> graph.Grap
 
 
 def subset_graph(g: graph.Graph) -> List[fusion.Fusion]:
-    nodes = [x for x in g.nodes if not g.nodes[x]["is_consensus"]]
-    nodes = [x["fusion"] for x in nodes]
+    nodes = [x for x in g.graph.nodes if not g.graph.nodes[x]["is_consensus"]]
+    nodes = [g.graph.nodes[x]["fusion"] for x in nodes]
     return nodes
 
 
-def fetch_reference(region: region.Region, interval: int, path_reference: str):
+def fetch_reference(region: iregion.Region, interval: int, path_reference: str):
     start = region - interval
     end = region + interval
-    reg = "%s:%s-%s" % (self.region_a.chr, start, end)
+    reg = "%s:%s-%s" % (region.chr, start, end)
     seq = pysam.faidx(path_reference, reg)
     return seq
 
@@ -43,7 +43,7 @@ def filter_sequence(path: str, fus: fusion.Fusion, interval: int = 300) -> str:
     with pysam.AlignmentFile(tmpfile.name, "wb", header=bam_original.header) as fod:
         for region in [fus.first, fus.second]:
             sregion = "%s:%s-%s" % (region.chrom, region.position - interval, region.position + interval)
-            for aligned_segment in alignment.fetch(region = sregion):
+            for aligned_segment in bam_original.fetch(region=sregion):
                 # Filtering.
                 if aligned_segment.is_unmapped or aligned_segment.is_duplicate or aligned_segment.is_supplementary:
                     continue
@@ -69,7 +69,7 @@ def create_consensus(path_reference: str, path_bam: str) -> str:
     tmpfile = tempfile.NamedTemporaryFile(delete=False)
     args = [
         "gencore",
-        "-i", path,
+        "-i", path_bam,
         "-o", tmpfile.name,
         "-r", path_reference,
         "-s", "2"

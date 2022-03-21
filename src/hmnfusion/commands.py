@@ -9,6 +9,7 @@ from hmnfusion import (
     fusion,
     graph,
     mmej,
+    mmej_fusion,
     quantification,
     region,
     utils,
@@ -286,8 +287,8 @@ def _cmd_mmej_fusion(args):
         utils.abort(
             AP, "File input doesn't exist : %s" % (input_path,)
         )
-    if not os.path.isdir(os.path.dirname(os.path.abspath(foutput))):
-        utils.abort(AP, "Outdir doesn't exist : %s" % (foutput,))
+    if not os.path.isdir(os.path.dirname(os.path.abspath(args.output_xlsx))):
+        utils.abort(AP, "Outdir doesn't exist : %s" % (args.output_xlsx,))
 
     # Run.
     logging.info("Load input file")
@@ -298,20 +299,23 @@ def _cmd_mmej_fusion(args):
     fusions = mmej_fusion.subset_graph(g)
 
     # Process fusion.
-    for fusion in fusions:
+    print('nb of fusion', len(fusions))
+    for fusion in fusions[:1]:
+        print(fusion)
         path_bam_filter = mmej_fusion.filter_sequence(path=args.input_bam, fus=fusion)
-        path_bam_consensus = mmej_fusion.create_consensus(path_reference=args.input_reference, path_bam=path_bam_filter)
+        print(path_bam_filter)
+        # path_bam_consensus = mmej_fusion.create_consensus(path_reference=args.input_reference, path_bam=path_bam_filter)
     logging.info("End analysis - MMEJ Fusion")
 
 
 P_mmej_fus = AP_subparsers.add_parser(
     "mmej-fusion", help=_cmd_mmej_fusion.__doc__
 )
-P_mmej_fus_genefuse = P_mmej_fus.add_mutually_exclusive_group(required=True)
-P_mmej_fus_genefuse.add_argument("--genefuse-json", help="Genefuse, json file")
-P_mmej_fus_genefuse.add_argument("--genefuse-html", help="Genefuse, html file")
-P_mmej_fus.add_argument("--lumpy-vcf", help="Genefuse, html file")
-P_mmej_fus.add_argument("--hmnfusion-json", help="HmnFusion, json file")
+P_mmej_fus_input = P_mmej_fus.add_mutually_exclusive_group(required=True)
+P_mmej_fus_input.add_argument("--genefuse-json", help="Genefuse, json file")
+P_mmej_fus_input.add_argument("--genefuse-html", help="Genefuse, html file")
+P_mmej_fus_input.add_argument("--lumpy-vcf", help="Genefuse, html file")
+P_mmej_fus_input.add_argument("--hmnfusion-json", help="HmnFusion, json file")
 P_mmej_fus.add_argument("--input-bam", help="Bam file")
 P_mmej_fus.add_argument("--input-reference", help="Reference, fasta file")
 P_mmej_fus.add_argument(
