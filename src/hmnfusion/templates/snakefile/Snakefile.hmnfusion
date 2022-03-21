@@ -1,0 +1,52 @@
+import os
+import tempfile
+
+############
+##  Args  ##
+############
+# Input sample
+INPUT_FORWARD_FASTQ = config.get("input_forward_fastq", "")
+INPUT_REVERSE_FASTQ = config.get("input_reverse_fastq", "")
+INPUT_SAMPLE_BAM = config.get("input_sample_bam", "")
+
+NAME = config.get("name", "")
+
+# Input bed
+INPUT_GENEFUSE_BED = config.get("input_genefuse_bed", "")
+INPUT_HMNFUSION_BED = config.get("input_hmnfusion_bed", "")
+INPUT_LUMPY_BED = config.get("input_lumpy_bed", "")
+
+# Input ref
+INPUT_REFERENCE_FASTA = config.get("input_reference_fasta", "")
+
+# output
+OUTPUT_HMNFUSION_VCF = config.get("output_hmnfusion_vcf", "")
+
+# GeneFuse & Lumpy
+GENEFUSE = config.get("genefuse", "")
+GENEFUSE_FMT = config.get("genefuse_fmt", "")
+LUMPY = config.get("lumpy", "")
+
+THREADS_GENEFUSE = config.get("threads_genefuse", 1)
+
+# tmp
+HMNFUSION_EXTRACTFUSION = os.path.join(
+    tempfile.gettempdir(), NAME + ".extractfusion.json"
+)
+LUMPY_DISCORDANT = os.path.join(tempfile.gettempdir(), NAME + ".lumpy.discordant.bam")
+LUMPY_SPLITTER = os.path.join(tempfile.gettempdir(), NAME + ".lumpy.splitter.bam")
+
+# Include File
+INCLUDE = []
+INCLUDE.append(OUTPUT_HMNFUSION_VCF)
+
+
+#############
+##  Rules  ##
+#############
+rule all:
+    input:
+        INCLUDE,
+
+
+include: "workflow.hmnfusion"
