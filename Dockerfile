@@ -27,7 +27,7 @@ RUN cd GeneFuse-0.6.1 && \
 # Lumpy
 RUN conda create -n lumpy-sv \
     -c bioconda -c conda-forge -c default \
-    lumpy-sv=0.2.14a openssl=1.0
+    lumpy-sv=0.3.1
 
 # HmnFusion
 COPY dist/*whl /opt/
