@@ -20,8 +20,12 @@ class TestFusion(unittest.TestCase):
         self.evidence_2 = Evidence.from_dict(self.evidence_2_d)
 
         self.fusion_2 = Fusion("genefuse")
-        self.fusion_2_region_first = Region("chr9", 50, "left")
-        self.fusion_2_region_second = Region("chr22", 100, "right")
+        self.fusion_2_region_first = Region(
+            chrom="chr9", position=50, orientation="left"
+        )
+        self.fusion_2_region_second = Region(
+            chrom="chr22", position=100, orientation="right"
+        )
 
         self.fusion_2.first = self.fusion_2_region_first
         self.fusion_2.second = self.fusion_2_region_second
@@ -43,8 +47,12 @@ class TestFusion(unittest.TestCase):
         self.evidence_3 = Evidence.from_dict(self.evidence_3_d)
 
         self.fusion_3 = Fusion()
-        self.fusion_3_region_first = Region("chr2", 500, "left")
-        self.fusion_3_region_second = Region("chr5", 2000, "right")
+        self.fusion_3_region_first = Region(
+            chrom="chr2", position=500, orientation="left"
+        )
+        self.fusion_3_region_second = Region(
+            chrom="chr5", position=2000, orientation="right"
+        )
 
         self.fusion_3.first = self.fusion_3_region_first
         self.fusion_3.second = self.fusion_3_region_second
@@ -75,9 +83,17 @@ class TestFusion(unittest.TestCase):
 
     def test_getters(self):
         """Test getters attributes"""
-        self.assertEqual(self.fusion_2.first, Region("chr9", 50, "left"))
-        self.assertEqual(self.fusion_2.second, Region("chr22", 100, "right"))
-        self.assertNotEqual(self.fusion_2.first, Region("chr22", 100, "right"))
+        self.assertEqual(
+            self.fusion_2.first, Region(chrom="chr9", position=50, orientation="left")
+        )
+        self.assertEqual(
+            self.fusion_2.second,
+            Region(chrom="chr22", position=100, orientation="right"),
+        )
+        self.assertNotEqual(
+            self.fusion_2.first,
+            Region(chrom="chr22", position=100, orientation="right"),
+        )
 
         self.assertEqual(self.fusion_2.evidence, self.evidence_2)
         self.assertEqual(self.fusion_2.number, 1)
@@ -145,11 +161,11 @@ class TestFusion(unittest.TestCase):
 
     def test_is_near(self):
         """Test is_near()"""
-        raf = Region("chr5", 2000, "right")
-        ras = Region("chr6", 2000, "left")
-        rbf = Region("chr5", 2500, "left")
-        rbs = Region("chr10", 20, "right")
-        rbs2 = Region("chr6", 2200, "left")
+        raf = Region(chrom="chr5", position=2000, orientation="right")
+        ras = Region(chrom="chr6", position=2000, orientation="left")
+        rbf = Region(chrom="chr5", position=2500, orientation="left")
+        rbs = Region(chrom="chr10", position=20, orientation="right")
+        rbs2 = Region(chrom="chr6", position=2200, orientation="left")
 
         # Check Chrom differents
         self.assertFalse(self.fusion_2.is_near(self.fusion_3, 10))
@@ -170,7 +186,7 @@ class TestFusion(unittest.TestCase):
     def test_is_same_chrom(self):
         """Test is_same_chrom()"""
         self.assertFalse(self.fusion_2.is_same_chrom())
-        self.fusion_2.second = Region("chr9", 10, "right")
+        self.fusion_2.second = Region(chrom="chr9", position=10, orientation="right")
         self.assertTrue(self.fusion_2.is_same_chrom())
 
     def test_set_region(self):

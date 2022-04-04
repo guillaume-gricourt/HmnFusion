@@ -40,7 +40,7 @@ def quantification(
         args += ["--input-hmnfusion-bed", bed]
         args += ["--name", sample.name]
         args += ["--output-hmnfusion-vcf", fd.name]
-
+        print(" ".join(args))
         ret = Main_test.launch(args)
         if ret.returncode > 0:
             print(ret.stderr)
@@ -51,7 +51,10 @@ def quantification(
             sim = filecmp.cmp(fd.name, sample.quantification)
         elif compare == CompareQuantification.vaf:
             res = find_vaf(fd.name)
+            print(sample.region)
+            print(res)
             theorical = find_vaf(sample.quantification)
+            print(theorical)
             sim = res == theorical
 
     # Clean up

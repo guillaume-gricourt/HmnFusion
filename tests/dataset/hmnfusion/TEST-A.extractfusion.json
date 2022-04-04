@@ -1,1 +1,366 @@
-{"data": [["consensus_interval", 500], ["inputs", {"genefuse": {"path": "TEST-A.genefuse.html", "format": "html"}, "lumpy": {"path": "TEST-A.lumpy.vcf", "format": "vcf"}}], ["software", {"name": "hmnfusion", "version": "0.6.1"}]], "directed": false, "multigraph": false, "elements": {"nodes": [{"data": {"fusion": {"first": {"orientation": "left", "chrom": "chr9", "position": 133597063}, "second": {"orientation": "right", "chrom": "chr22", "position": 23632540}, "evidence": {"raw": 159, "split": 0, "mate": 0, "clipped": 0, "depth": 0}, "number": 1, "is_consensus": false, "software": "genefuse"}, "level": 0, "is_consensus": false, "is_interest": false, "id": "1", "value": 1, "name": "1"}}, {"data": {"fusion": {"first": {"orientation": "left", "chrom": "chr22", "position": 23632544}, "second": {"orientation": "right", "chrom": "chr9", "position": 133597065}, "evidence": {"raw": 76, "split": 0, "mate": 0, "clipped": 0, "depth": 0}, "number": 2, "is_consensus": false, "software": "genefuse"}, "level": 0, "is_consensus": false, "is_interest": false, "id": "2", "value": 2, "name": "2"}}, {"data": {"fusion": {"first": {"orientation": "undefined", "chrom": "chr9", "position": 133597063}, "second": {"orientation": "undefined", "chrom": "chr22", "position": 23632540}, "evidence": {"raw": 257, "split": 0, "mate": 0, "clipped": 0, "depth": 0}, "number": 4, "is_consensus": false, "software": "lumpy"}, "level": 0, "is_consensus": false, "is_interest": false, "id": "4", "value": 4, "name": "4"}}, {"data": {"fusion": {"first": {"orientation": "undefined", "chrom": "chr9", "position": 133597062}, "second": {"orientation": "undefined", "chrom": "chr22", "position": 23632544}, "evidence": {"raw": 113, "split": 0, "mate": 0, "clipped": 0, "depth": 0}, "number": 5, "is_consensus": false, "software": "lumpy"}, "level": 0, "is_consensus": false, "is_interest": false, "id": "5", "value": 5, "name": "5"}}, {"data": {"fusion": {"first": {"orientation": "left", "chrom": "chr9", "position": 133597063}, "second": {"orientation": "right", "chrom": "chr22", "position": 23632540}, "evidence": {"raw": 159, "split": 0, "mate": 0, "clipped": 0, "depth": 0}, "number": 6, "is_consensus": true, "software": "genefuse"}, "level": 1, "is_consensus": true, "is_interest": false, "id": "6", "value": 6, "name": "6"}}, {"data": {"fusion": {"first": {"orientation": "undefined", "chrom": "chr9", "position": 133597063}, "second": {"orientation": "undefined", "chrom": "chr22", "position": 23632540}, "evidence": {"raw": 257, "split": 0, "mate": 0, "clipped": 0, "depth": 0}, "number": 7, "is_consensus": true, "software": "lumpy"}, "level": 1, "is_consensus": true, "is_interest": false, "id": "7", "value": 7, "name": "7"}}, {"data": {"fusion": {"first": {"orientation": "left", "chrom": "chr9", "position": 133597063}, "second": {"orientation": "right", "chrom": "chr22", "position": 23632540}, "evidence": {"raw": 159, "split": 0, "mate": 0, "clipped": 0, "depth": 0}, "number": 8, "is_consensus": true, "software": "genefuse"}, "level": 2, "is_consensus": true, "is_interest": true, "id": "8", "value": 8, "name": "8"}}], "edges": [{"data": {"source": 1, "target": 6}}, {"data": {"source": 2, "target": 6}}, {"data": {"source": 4, "target": 7}}, {"data": {"source": 5, "target": 7}}, {"data": {"source": 6, "target": 8}}, {"data": {"source": 7, "target": 8}}]}}
+{
+    "data": [
+        [
+            "consensus_interval",
+            500
+        ],
+        [
+            "inputs",
+            {
+                "genefuse": {
+                    "path": "TEST-A.genefuse.html",
+                    "format": "html"
+                },
+                "lumpy": {
+                    "path": "TEST-A.lumpy.vcf",
+                    "format": "vcf"
+                }
+            }
+        ],
+        [
+            "software",
+            {
+                "name": "hmnfusion",
+                "version": "0.6.1"
+            }
+        ]
+    ],
+    "directed": false,
+    "multigraph": false,
+    "elements": {
+        "nodes": [
+            {
+                "data": {
+                    "fusion": {
+                        "first": {
+                            "chrom": "chr9",
+                            "position": 133597063,
+                            "start": 0,
+                            "end": 0,
+                            "interval": 0,
+                            "sequence_reference": "",
+                            "sequence_sample": "",
+                            "orientation": "left"
+                        },
+                        "second": {
+                            "chrom": "chr22",
+                            "position": 23632540,
+                            "start": 0,
+                            "end": 0,
+                            "interval": 0,
+                            "sequence_reference": "",
+                            "sequence_sample": "",
+                            "orientation": "right"
+                        },
+                        "evidence": {
+                            "raw": 159,
+                            "split": 0,
+                            "mate": 0,
+                            "clipped": 0,
+                            "depth": 0
+                        },
+                        "number": 1,
+                        "is_consensus": false,
+                        "software": "genefuse"
+                    },
+                    "level": 0,
+                    "is_consensus": false,
+                    "is_interest": false,
+                    "id": "1",
+                    "value": 1,
+                    "name": "1"
+                }
+            },
+            {
+                "data": {
+                    "fusion": {
+                        "first": {
+                            "chrom": "chr22",
+                            "position": 23632544,
+                            "start": 0,
+                            "end": 0,
+                            "interval": 0,
+                            "sequence_reference": "",
+                            "sequence_sample": "",
+                            "orientation": "left"
+                        },
+                        "second": {
+                            "chrom": "chr9",
+                            "position": 133597065,
+                            "start": 0,
+                            "end": 0,
+                            "interval": 0,
+                            "sequence_reference": "",
+                            "sequence_sample": "",
+                            "orientation": "right"
+                        },
+                        "evidence": {
+                            "raw": 76,
+                            "split": 0,
+                            "mate": 0,
+                            "clipped": 0,
+                            "depth": 0
+                        },
+                        "number": 2,
+                        "is_consensus": false,
+                        "software": "genefuse"
+                    },
+                    "level": 0,
+                    "is_consensus": false,
+                    "is_interest": false,
+                    "id": "2",
+                    "value": 2,
+                    "name": "2"
+                }
+            },
+            {
+                "data": {
+                    "fusion": {
+                        "first": {
+                            "chrom": "chr9",
+                            "position": 133597063,
+                            "start": 0,
+                            "end": 0,
+                            "interval": 0,
+                            "sequence_reference": "",
+                            "sequence_sample": "",
+                            "orientation": "undefined"
+                        },
+                        "second": {
+                            "chrom": "chr22",
+                            "position": 23632540,
+                            "start": 0,
+                            "end": 0,
+                            "interval": 0,
+                            "sequence_reference": "",
+                            "sequence_sample": "",
+                            "orientation": "undefined"
+                        },
+                        "evidence": {
+                            "raw": 257,
+                            "split": 0,
+                            "mate": 0,
+                            "clipped": 0,
+                            "depth": 0
+                        },
+                        "number": 4,
+                        "is_consensus": false,
+                        "software": "lumpy"
+                    },
+                    "level": 0,
+                    "is_consensus": false,
+                    "is_interest": false,
+                    "id": "4",
+                    "value": 4,
+                    "name": "4"
+                }
+            },
+            {
+                "data": {
+                    "fusion": {
+                        "first": {
+                            "chrom": "chr9",
+                            "position": 133597062,
+                            "start": 0,
+                            "end": 0,
+                            "interval": 0,
+                            "sequence_reference": "",
+                            "sequence_sample": "",
+                            "orientation": "undefined"
+                        },
+                        "second": {
+                            "chrom": "chr22",
+                            "position": 23632544,
+                            "start": 0,
+                            "end": 0,
+                            "interval": 0,
+                            "sequence_reference": "",
+                            "sequence_sample": "",
+                            "orientation": "undefined"
+                        },
+                        "evidence": {
+                            "raw": 113,
+                            "split": 0,
+                            "mate": 0,
+                            "clipped": 0,
+                            "depth": 0
+                        },
+                        "number": 5,
+                        "is_consensus": false,
+                        "software": "lumpy"
+                    },
+                    "level": 0,
+                    "is_consensus": false,
+                    "is_interest": false,
+                    "id": "5",
+                    "value": 5,
+                    "name": "5"
+                }
+            },
+            {
+                "data": {
+                    "fusion": {
+                        "first": {
+                            "chrom": "chr9",
+                            "position": 133597063,
+                            "start": 0,
+                            "end": 0,
+                            "interval": 0,
+                            "sequence_reference": "",
+                            "sequence_sample": "",
+                            "orientation": "left"
+                        },
+                        "second": {
+                            "chrom": "chr22",
+                            "position": 23632540,
+                            "start": 0,
+                            "end": 0,
+                            "interval": 0,
+                            "sequence_reference": "",
+                            "sequence_sample": "",
+                            "orientation": "right"
+                        },
+                        "evidence": {
+                            "raw": 159,
+                            "split": 0,
+                            "mate": 0,
+                            "clipped": 0,
+                            "depth": 0
+                        },
+                        "number": 6,
+                        "is_consensus": true,
+                        "software": "genefuse"
+                    },
+                    "level": 1,
+                    "is_consensus": true,
+                    "is_interest": false,
+                    "id": "6",
+                    "value": 6,
+                    "name": "6"
+                }
+            },
+            {
+                "data": {
+                    "fusion": {
+                        "first": {
+                            "chrom": "chr9",
+                            "position": 133597063,
+                            "start": 0,
+                            "end": 0,
+                            "interval": 0,
+                            "sequence_reference": "",
+                            "sequence_sample": "",
+                            "orientation": "undefined"
+                        },
+                        "second": {
+                            "chrom": "chr22",
+                            "position": 23632540,
+                            "start": 0,
+                            "end": 0,
+                            "interval": 0,
+                            "sequence_reference": "",
+                            "sequence_sample": "",
+                            "orientation": "undefined"
+                        },
+                        "evidence": {
+                            "raw": 257,
+                            "split": 0,
+                            "mate": 0,
+                            "clipped": 0,
+                            "depth": 0
+                        },
+                        "number": 7,
+                        "is_consensus": true,
+                        "software": "lumpy"
+                    },
+                    "level": 1,
+                    "is_consensus": true,
+                    "is_interest": false,
+                    "id": "7",
+                    "value": 7,
+                    "name": "7"
+                }
+            },
+            {
+                "data": {
+                    "fusion": {
+                        "first": {
+                            "chrom": "chr9",
+                            "position": 133597063,
+                            "start": 0,
+                            "end": 0,
+                            "interval": 0,
+                            "sequence_reference": "",
+                            "sequence_sample": "",
+                            "orientation": "left"
+                        },
+                        "second": {
+                            "chrom": "chr22",
+                            "position": 23632540,
+                            "start": 0,
+                            "end": 0,
+                            "interval": 0,
+                            "sequence_reference": "",
+                            "sequence_sample": "",
+                            "orientation": "right"
+                        },
+                        "evidence": {
+                            "raw": 159,
+                            "split": 0,
+                            "mate": 0,
+                            "clipped": 0,
+                            "depth": 0
+                        },
+                        "number": 8,
+                        "is_consensus": true,
+                        "software": "genefuse"
+                    },
+                    "level": 2,
+                    "is_consensus": true,
+                    "is_interest": true,
+                    "id": "8",
+                    "value": 8,
+                    "name": "8"
+                }
+            }
+        ],
+        "edges": [
+            {
+                "data": {
+                    "source": 1,
+                    "target": 6
+                }
+            },
+            {
+                "data": {
+                    "source": 2,
+                    "target": 6
+                }
+            },
+            {
+                "data": {
+                    "source": 4,
+                    "target": 7
+                }
+            },
+            {
+                "data": {
+                    "source": 5,
+                    "target": 7
+                }
+            },
+            {
+                "data": {
+                    "source": 6,
+                    "target": 8
+                }
+            },
+            {
+                "data": {
+                    "source": 7,
+                    "target": 8
+                }
+            }
+        ]
+    }
+}
