@@ -30,7 +30,7 @@ RUN conda create -n lumpy-sv \
     lumpy-sv=0.3.1
 
 # HmnFusion
-COPY dist/*whl /opt/
+COPY *whl /opt/
 RUN pip install --no-cache-dir /opt/*whl
 
 ENTRYPOINT ["hmnfusion"]
