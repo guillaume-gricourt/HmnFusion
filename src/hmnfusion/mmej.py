@@ -182,7 +182,7 @@ def write(filename: str, df: pd.DataFrame) -> None:
 
     if df.empty:
         for header in df.columns:
-            df.at["no deletion found", header] = ""
+            df.at["no deletion found", header] = pd.NA
         writer = pd.ExcelWriter(filename)
         df.to_excel(writer, sheet_name="mmej")
         writer.save()
