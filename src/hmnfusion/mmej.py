@@ -27,7 +27,8 @@ def extract(finputs: List[str]) -> pd.DataFrame:
                 - "start": int, genomic coordinate
                 - "deletion": str, sequence
     """
-    df = pd.DataFrame()
+    df = pd.DataFrame(columns=["contig", "start", "deletion", "event"])
+    samples = set()
     for finput in finputs:
         vcf_in = pysam.VariantFile(finput)
         for record in vcf_in.fetch():
@@ -42,14 +43,19 @@ def extract(finputs: List[str]) -> pd.DataFrame:
                 region_id = hashlib.md5(region_name.encode("utf8")).hexdigest()
                 # Check if variant is already seen.
                 if region_id not in df.index:
-                    df.at[region_id, "event"] = "deletion"
                     df.at[region_id, "contig"] = record.contig
                     df.at[region_id, "start"] = record.pos + 1
                     df.at[region_id, "deletion"] = record.ref[1:].upper()
-
+                    df.at[region_id, "event"] = "deletion"
                 for sample in record.samples.keys():
                     df.at[region_id, sample] = True
-
+        for sample in vcf_in.header.samples:
+            samples.add(sample)
+    # if sample has no deletion
+    for sample in samples:
+        if sample not in df.columns:
+            df[sample] = False
+    # fmt
     df["start"] = df["start"].astype(int)
     return df
 
@@ -97,7 +103,10 @@ def signatures(freference: str, df: pd.DataFrame) -> pd.DataFrame:
 
         return mh_seq
 
-    df["mmej_sequence"] = df.apply(_signatures, axis=1, args=(freference,))
+    if df.empty:
+        df = df.reindex(df.columns.tolist() + ["mmej_sequence"], axis=1)
+    else:
+        df["mmej_sequence"] = df.apply(_signatures, axis=1, args=(freference,))
     return df
 
 
@@ -134,7 +143,10 @@ def conclude(df: pd.DataFrame) -> pd.DataFrame:
             res = "mmej signature"
         return res
 
-    df["mmej_conclusion"] = df.apply(_conclude, axis=1)
+    if df.empty:
+        df = df.reindex(df.columns.tolist() + ["mmej_conclusion"], axis=1)
+    else:
+        df["mmej_conclusion"] = df.apply(_conclude, axis=1)
     return df
 
 
@@ -165,8 +177,16 @@ def write(filename: str, df: pd.DataFrame) -> None:
         "mmej_sequence",
         "mmej_conclusion",
     ]
-    samples = [x for x in df.columns if x not in headers]
-    df = df[headers + samples]
+    samples = sorted([x for x in df.columns if x not in headers])
+    df = df.reindex(headers + samples, axis=1)
+
+    if df.empty:
+        for header in df.columns:
+            df.at["no deletion found", header] = ""
+        writer = pd.ExcelWriter(filename)
+        df.to_excel(writer, sheet_name="mmej")
+        writer.save()
+        return
 
     # Sort values.
     idx, *_ = zip(
@@ -179,6 +199,7 @@ def write(filename: str, df: pd.DataFrame) -> None:
 
     # Replace values.
     df = df.fillna(".")
+    df.replace({False: "."}, inplace=True)
     df.replace({True: "o"}, inplace=True)
 
     # Write output.
