@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 import re
 import shutil
 import subprocess
@@ -127,6 +128,28 @@ def check_bam_index(path: str) -> bool:
         return True
     except Exception:
         return False
+
+
+def check_fasta_index(path: str) -> bool:
+    """Build index file for a fasta file if not found.
+
+    Parameters
+    ----------
+    path: str
+        Path of the fasta file
+
+    Return
+    ------
+    bool
+        True if index is present or is written, False otherwise.
+    """
+    if os.path.isfile(path + ".fai"):
+        return True
+    try:
+        pysam.faidx(path)
+    except pysam.SamtoolsError:
+        return False
+    return True
 
 
 def find_executable(executable: str, msg: str = "") -> None:
