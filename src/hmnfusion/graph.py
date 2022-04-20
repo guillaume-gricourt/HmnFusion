@@ -248,9 +248,6 @@ class Graph(object):
                 ):
                     self._add_node_consensus(n_genefuse, n_lumpy, 2)
 
-    def select_node_interest(self):
-        return [x for x in self.graph.nodes if self.graph[x]["is_interest"]]
-
     def subset_graph(self, flag: fusion_flag.FusionFlag = 0) -> List[hmn_fusion.Fusion]:
         """Select fusions in the graph.
 
