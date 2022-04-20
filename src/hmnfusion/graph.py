@@ -251,6 +251,34 @@ class Graph(object):
     def select_node_interest(self):
         return [x for x in self.graph.nodes if self.graph[x]["is_interest"]]
 
+    def subset_graph(self, flag: fusion_flag.FusionFlag = 0) -> List[hmn_fusion.Fusion]:
+        """Select fusions in the graph.
+
+        Parameters
+        ----------
+        flag: FusionFlag
+            A combinaison of integer to select fusions
+
+        Return
+        ------
+        List[Fusion]:
+            Fusions selected
+        """
+        nodes = []
+        for node in self.graph.nodes:
+            if fusion_flag.FusionFlag.is_interest(flag) and node["is_interest"]:
+                nodes.append(node)
+            if fusion_flag.FusionFlag.is_consensus(flag) and node["is_consensus"]:
+                nodes.append(node)
+            if fusion_flag.FusionFlag.is_genefuse(flag) and node["fusion"].software == "genefuse":
+                nodes.append(node)
+            if fusion_flag.FusionFlag.is_hmnfusion(flag) and node["fusion"].software == "hmnfusion":
+                nodes.append(node)
+            if fusion_flag.FusionFlag.is_lumpy(flag) and node["fusion"].software == "lumpy":
+                nodes.append(node)
+        # Return fusions
+        return [self.graph.nodes[x]["fusion"] for x in nodes]
+
     def define_node_interest(self) -> int:
         """Set nodes in the graph if they are of interest
 
