@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import networkx as nx
 from hmnfusion import bed as hmn_bed
 from hmnfusion import fusion as hmn_fusion
+from hmnfusion import fusion_flag
 
 
 class Graph(object):
@@ -248,12 +249,12 @@ class Graph(object):
                 ):
                     self._add_node_consensus(n_genefuse, n_lumpy, 2)
 
-    def subset_graph(self, flag: fusion_flag.FusionFlag = 0) -> List[hmn_fusion.Fusion]:
+    def subset_graph(self, flag: int = 0) -> List[hmn_fusion.Fusion]:
         """Select fusions in the graph.
 
         Parameters
         ----------
-        flag: FusionFlag
+        flag: int
             A combinaison of integer to select fusions
 
         Return
@@ -267,11 +268,20 @@ class Graph(object):
                 nodes.append(node)
             if fusion_flag.FusionFlag.is_consensus(flag) and node["is_consensus"]:
                 nodes.append(node)
-            if fusion_flag.FusionFlag.is_genefuse(flag) and node["fusion"].software == "genefuse":
+            if (
+                fusion_flag.FusionFlag.is_genefuse(flag)
+                and node["fusion"].software == "genefuse"
+            ):
                 nodes.append(node)
-            if fusion_flag.FusionFlag.is_hmnfusion(flag) and node["fusion"].software == "hmnfusion":
+            if (
+                fusion_flag.FusionFlag.is_hmnfusion(flag)
+                and node["fusion"].software == "hmnfusion"
+            ):
                 nodes.append(node)
-            if fusion_flag.FusionFlag.is_lumpy(flag) and node["fusion"].software == "lumpy":
+            if (
+                fusion_flag.FusionFlag.is_lumpy(flag)
+                and node["fusion"].software == "lumpy"
+            ):
                 nodes.append(node)
         # Return fusions
         return [self.graph.nodes[x]["fusion"] for x in nodes]
