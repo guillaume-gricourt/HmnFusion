@@ -6,6 +6,7 @@ from collections import Counter
 from typing import Dict, Tuple
 
 import pysam
+from hmnfusion import utils
 
 
 class Region(object):
@@ -177,13 +178,30 @@ class Region(object):
             return length
         return 0
 
+    def get_middle(self) -> int:
+        """Return half of the interval
+
+        Raises
+        ------
+        ValueError
+            if length of the interval is not an even number
+
+        Return
+        ------
+        int
+            The half of the interval
+        """
+        if self.get_length() % 2 != 0:
+            raise ValueError("Length must be an even number")
+        return int(self.get_length() / 2)
+
     def format(self, fusion: bool = True) -> str:
         """Return a string representation of the object
 
         Parameters
         ----------
         fusion: bool (default: True)
-            if True, format as "<orientation> <chrom>:<position>"
+            if True, format as "<chrom>:<position>"
             else format as "<chrom>:<start>-<end>"
 
         Return
@@ -192,7 +210,7 @@ class Region(object):
             A string representation of the object.
         """
         if fusion:
-            return "%s %s:%s" % (self.orientation, self.chrom, self.position)
+            return "%s:%s" % (self.chrom, self.position)
         fmt = "%s:%s" % (self.chrom, self.get_start())
         end = self.get_end()
         if end > 0:
@@ -225,7 +243,11 @@ class Region(object):
         bool
             True if the Region information is set.
         """
-        self.sequence_reference = pysam.faidx(path, self.format(fusion=False))
+        rec = pysam.faidx(path, self.format(fusion=False))
+        rec = rec.splitlines()
+        sequence = "".join(rec[1:])
+        sequence = sequence.upper()
+        self.sequence_reference = sequence
 
     def set_sequence_sample(self, path: str) -> None:
         """Set sequence_sample attribute from a bam file. Create a consensus sequence in the interval of the region.
@@ -379,6 +401,7 @@ class Region(object):
                         fod.write(aseg)
                         stats["soft_clipped"] += 1
                         break
+        utils.check_bam_index(tmpfile.name)
         return tmpfile.name, stats
 
     @staticmethod
@@ -398,21 +421,23 @@ class Region(object):
             The consensus sequence.
         """
         alignment = pysam.AlignmentFile(path)
-        pos = 0
+        pos = region.get_start() - 1
         cons = ""
         for pcol in alignment.pileup(
+            truncate=True,
             region=region.format(fusion=False),
             max_depth=1000000,
             ignore_overlaps=False,
             ignore_orphans=False,
         ):
             pdepth = pcol.get_num_aligned()  # pileupcolumn.nsegments
-            if pdepth == 0:
-                cons += "N"
-                pos += 1
             while pos != pcol.reference_pos:
                 cons += "N"
                 pos += 1
+            if pdepth == 0:
+                cons += "N"
+                pos += 1
+                continue
             if pos != pcol.reference_pos:
                 raise ValueError(
                     "Shift between reference and pileup : ref %s pileup %s"
