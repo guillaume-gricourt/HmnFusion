@@ -125,7 +125,7 @@ class TestRegion(unittest.TestCase):
         self.assertEqual(self.r_a.format(fusion=False), "chr7:75-125")
         self.r_a.end = 0
         self.assertEqual(self.r_a.format(fusion=False), "chr7:75-125")
-        self.assertEqual(self.r_a.format(), "left chr7:100")
+        self.assertEqual(self.r_a.format(), "chr7:100")
 
     def test_is_init(self):
         """Test is_init()"""
