@@ -296,59 +296,85 @@ P_mmej_deletion.set_defaults(func=_cmd_mmej_deletion)
 def _cmd_mmej_fusion(args):
     """Identify MMEJ from fusion"""
     logging.info("Start analysis - MMEJ Fusion")
-    # Grep args.
-    fmt = ""
-    input_path = ""
-    if args.genefuse_json:
-        fmt = "genefuse_json"
-        input_path = args.genefuse_json
-    elif args.genefuse_html:
-        fmt = "genefuse_html"
-        input_path = args.genefuse_html
-    elif args.lumpy_vcf:
-        fmt = "lumpy_vcf"
-        input_path = args.lumpy_vcf
-    elif args.hmnfusion_json:
-        fmt = "hmnfusion_json"
-        input_path = args.hmnfusion_json
-
     # Check if all exists.
-    if not os.path.isfile(input_path):
-        utils.abort(AP, "File input doesn't exist : %s" % (input_path,))
-    if not os.path.isdir(os.path.dirname(os.path.abspath(args.output_xlsx))):
-        utils.abort(AP, "Outdir doesn't exist : %s" % (args.output_xlsx,))
+    if not os.path.isfile(args.input_hmnfusion_json):
+        utils.abort(AP, "File input doesn't exist: %s" % (args.input_hmnfusion_json,))
+    if not os.path.isfile(args.input_reference_fasta):
+        utils.abort(
+            AP, "File reference doesn't exist: %s" % (args.input_reference_fasta,)
+        )
+    if not os.path.isfile(args.input_sample_bam):
+        utils.abort(AP, "File bam doesn't exist: %s" % (args.input_sample_bam,))
+    if not os.path.isdir(os.path.dirname(os.path.abspath(args.output_hmnfusion_xlsx))):
+        utils.abort(AP, "Outdir doesn't exist: %s" % (args.output_hmnfusion_xlsx,))
+
+    if args.size_to_extract % 2 != 0:
+        utils.abort(
+            AP,
+            "Size_to_extract argument should be an even number: %s"
+            % (args.size_to_extract,),
+        )
+
+    # Init.
+    logging.info("Check index fasta reference")
+    utils.check_fasta_index(args.input_reference_fasta)
 
     # Run.
     logging.info("Load input file")
-    g = graph.Graph()
-    g = mmej_fusion.load_file(input_path, fmt, g)
+    g = extractfusion.read_hmnfusion_json(args.input_hmnfusion_json)
 
     # Subset.
-    fusions = mmej_fusion.subset_graph(g)
+    logging.info("Select fusion")
+    fusions = g.subset_graph(
+        include=args.fusion_include_flag, exclude=args.fusion_exclude_flag
+    )
 
     # Process fusion.
-    print("nb of fusion", len(fusions))
-    # for fusion in fusions[:1]:
-    # path_bam_filter = mmej_fusion.filter_sequence(path=args.input_bam, fus=fusion)
-    # path_bam_consensus = mmej_fusion.create_consensus(path_reference=args.input_reference, path_bam=path_bam_filter)
+    logging.info("Get mmej motif from %s fusions" % (len(fusions),))
+    dfs = []
+    for f in sorted(fusions):
+        f.set_mmej(
+            path_reference=args.input_reference_fasta,
+            path_bam=args.input_sample_bam,
+            interval=args.size_to_extract,
+        )
+        dfs.append(f.mmej_dataframe())
+
+    logging.info("Write fusions to output file")
+    mmej_fusion.write(filename=args.output_hmnfusion_xlsx, dfs=dfs)
+
     logging.info("End analysis - MMEJ Fusion")
 
 
 P_mmej_fusion = AP_subparsers.add_parser("mmej-fusion", help=_cmd_mmej_fusion.__doc__)
-P_mmej_fusion_input = P_mmej_fusion.add_mutually_exclusive_group(required=True)
-P_mmej_fusion_input.add_argument("--genefuse-json", help="Genefuse, json file")
-P_mmej_fusion_input.add_argument("--genefuse-html", help="Genefuse, html file")
-P_mmej_fusion_input.add_argument("--lumpy-vcf", help="Genefuse, html file")
-P_mmej_fusion_input.add_argument("--hmnfusion-json", help="HmnFusion, json file")
-P_mmej_fusion.add_argument("--input-bam", help="Bam file")
-P_mmej_fusion.add_argument("--input-reference", help="Reference, fasta file")
+P_mmej_fusion.add_argument(
+    "--input-hmnfusion-json", required=True, help="HmnFusion, json file"
+)
+P_mmej_fusion.add_argument("--input-sample-bam", required=True, help="Bam file")
+P_mmej_fusion.add_argument(
+    "--input-reference-fasta", required=True, help="Reference, fasta file"
+)
+P_mmej_fusion.add_argument(
+    "--fusion-include-flag",
+    default=8,
+    type=int,
+    help="Select fusions with fusion-flag",
+)
+P_mmej_fusion.add_argument(
+    "--fusion-exclude-flag",
+    default=7,
+    type=int,
+    help="Exclude fusions with fusion-flag",
+)
 P_mmej_fusion.add_argument(
     "--size-to-extract",
     type=int,
-    default=30,
-    help="Size of sequence to extract before and after the genomic coordinate",
+    default=60,
+    help="Size of sequence to extract before and after the genomic coordinate (even number)",
 )
-P_mmej_fusion.add_argument("--output-xlsx", help="Excel file output")
+P_mmej_fusion.add_argument(
+    "--output-hmnfusion-xlsx", required=True, help="Excel file output"
+)
 P_mmej_fusion.set_defaults(func=_cmd_mmej_fusion)
 
 
