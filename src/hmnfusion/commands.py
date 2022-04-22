@@ -8,6 +8,7 @@ from hmnfusion import bed as ibed
 from hmnfusion import (
     extractfusion,
     fusion,
+    fusion_flag,
     graph,
     mmej_deletion,
     mmej_fusion,
@@ -577,6 +578,30 @@ P_wkf_fusion.add_argument(
     help="Threads used",
 )
 P_wkf_fusion.set_defaults(func=_cmd_wkf_fusion)
+
+
+# fusion flag.
+def _cmd_fusion_flag(args):
+    """Show all fusion flag"""
+    # Reset logging
+    for handler in logging.root.handlers:
+        logging.root.removeHandler(handler)
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(message)s",
+    )
+    # Grep all attributes
+    values = []
+    for attr in dir(fusion_flag.FusionFlag):
+        if not attr.startswith("__"):
+            values.append((attr, fusion_flag.FusionFlag[attr].value))
+    # Print values
+    for value in sorted(values, key=lambda x: x[1]):
+        logging.info("%s\t%s" % (value[0], value[1]))
+
+
+P_fusion_flag = AP_subparsers.add_parser("fusion-flag", help=_cmd_fusion_flag.__doc__)
+P_fusion_flag.set_defaults(func=_cmd_fusion_flag)
 
 
 # Version.
