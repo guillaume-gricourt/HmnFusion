@@ -171,7 +171,7 @@ def find_executable(executable: str, msg: str = "") -> None:
         raise ExecutableNotFound(msg)
 
 
-def validate_name_sample(name: str) -> str:
+def validate_name_sample(name: str) -> bool:
     """Validate sample name to fit in VCF file (no space allowed)
 
     Parameters
@@ -179,16 +179,11 @@ def validate_name_sample(name: str) -> str:
     name: str
         Name to check
 
-    Raises
-    ------
-    ValueError
-        If the characters not allowed are in the string.
-
     Return
     ------
-    str
-        Name to check
+    bool
+        True if name is valid, False otherwise
     """
     if re.search(r"\s+", name):
-        raise ValueError("Space are not allowed")
-    return name
+        return False
+    return True

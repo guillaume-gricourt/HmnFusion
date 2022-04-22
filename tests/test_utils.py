@@ -11,10 +11,10 @@ class TestUtils(Main_test):
 
     def test_validate_name_sample(self):
         """Test validate_name_sample()"""
-        with self.assertRaises(ValueError):
-            utils.validate_name_sample("Test A")
-        with self.assertRaises(ValueError):
-            utils.validate_name_sample("Test	A")
+        self.assertTrue(utils.validate_name_sample("TestA"))
+        self.assertTrue(utils.validate_name_sample("Test-A"))
+        self.assertFalse(utils.validate_name_sample("Test A"))
+        self.assertFalse(utils.validate_name_sample("Test	A"))
 
     def test_check_fasta_index(self):
         """Test check_fasta_index()"""

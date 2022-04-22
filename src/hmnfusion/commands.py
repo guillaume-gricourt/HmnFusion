@@ -8,6 +8,7 @@ from hmnfusion import bed as ibed
 from hmnfusion import (
     extractfusion,
     fusion,
+    fusion_flag,
     graph,
     mmej_deletion,
     mmej_fusion,
@@ -107,7 +108,7 @@ P_efgg = P_extract_fusion.add_mutually_exclusive_group(required=True)
 P_efgg.add_argument("--input-genefuse-json", help="Genefuse, json file")
 P_efgg.add_argument("--input-genefuse-html", help="Genefuse, html file")
 P_extract_fusion.add_argument("--input-lumpy-vcf", required=True, help="Lumpy vcf file")
-P_extract_fusion.add_argument("--input-hmnfusion-bed", required=True, help="Bed file")
+P_extract_fusion.add_argument("--input-hmnfusion-bed", help="Bed file")
 P_extract_fusion.add_argument(
     "--consensus-interval",
     type=int,
@@ -196,6 +197,9 @@ def _cmd_quantification(args):
             % (params["clipped"]["interval"], params["clipped"]["count"])
         )
         params["clipped"]["count"] = params["clipped"]["interval"]
+
+    if not utils.validate_name_sample(args.name):
+        logging.warning("Name sample is not valid: %s" % (args.name,))
 
     # Parsing bed file.
     logging.info("Parsing bed file")
@@ -408,6 +412,9 @@ def _cmd_wkf_hmnfusion(args):
     if not os.path.isdir(os.path.dirname(os.path.abspath(args.output_hmnfusion_vcf))):
         utils.abort(AP, "Outdir doesn't exist : %s" % (args.output_hmnfusion_vcf,))
 
+    if not utils.validate_name_sample(args.name):
+        logging.warning("Name sample is not valid: %s" % (args.name,))
+
     # Run.
     logging.info("Run Worflow HmnFusion")
     config = {
@@ -501,6 +508,9 @@ def _cmd_wkf_fusion(args):
     if not os.path.isdir(os.path.dirname(os.path.abspath(args.output_lumpy_vcf))):
         utils.abort(AP, "Outdir doesn't exist : %s" % (args.output_lumpy_vcf,))
 
+    if not utils.validate_name_sample(args.name):
+        logging.warning("Name sample is not valid: %s" % (args.name,))
+
     # Threads
     threads_genefuse = 1
     if args.threads > 1:
@@ -568,6 +578,30 @@ P_wkf_fusion.add_argument(
     help="Threads used",
 )
 P_wkf_fusion.set_defaults(func=_cmd_wkf_fusion)
+
+
+# fusion flag.
+def _cmd_fusion_flag(args):
+    """Show all fusion flag"""
+    # Reset logging
+    for handler in logging.root.handlers:
+        logging.root.removeHandler(handler)
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(message)s",
+    )
+    # Grep all attributes
+    values = []
+    for attr in dir(fusion_flag.FusionFlag):
+        if not attr.startswith("__"):
+            values.append((attr, fusion_flag.FusionFlag[attr].value))
+    # Print values
+    for value in sorted(values, key=lambda x: x[1]):
+        logging.info("%s\t%s" % (value[0], value[1]))
+
+
+P_fusion_flag = AP_subparsers.add_parser("fusion-flag", help=_cmd_fusion_flag.__doc__)
+P_fusion_flag.set_defaults(func=_cmd_fusion_flag)
 
 
 # Version.
