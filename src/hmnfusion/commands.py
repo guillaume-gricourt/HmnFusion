@@ -197,6 +197,9 @@ def _cmd_quantification(args):
         )
         params["clipped"]["count"] = params["clipped"]["interval"]
 
+    if not utils.validate_name_sample(args.name):
+        logging.warning("Name sample is not valid: %s" % (args.name,))
+
     # Parsing bed file.
     logging.info("Parsing bed file")
     bed = ibed.Bed.from_bed(args.input_hmnfusion_bed)
@@ -408,6 +411,9 @@ def _cmd_wkf_hmnfusion(args):
     if not os.path.isdir(os.path.dirname(os.path.abspath(args.output_hmnfusion_vcf))):
         utils.abort(AP, "Outdir doesn't exist : %s" % (args.output_hmnfusion_vcf,))
 
+    if not utils.validate_name_sample(args.name):
+        logging.warning("Name sample is not valid: %s" % (args.name,))
+
     # Run.
     logging.info("Run Worflow HmnFusion")
     config = {
@@ -500,6 +506,9 @@ def _cmd_wkf_fusion(args):
         utils.abort(AP, "Outdir doesn't exist : %s" % (args.output_genefuse_html,))
     if not os.path.isdir(os.path.dirname(os.path.abspath(args.output_lumpy_vcf))):
         utils.abort(AP, "Outdir doesn't exist : %s" % (args.output_lumpy_vcf,))
+
+    if not utils.validate_name_sample(args.name):
+        logging.warning("Name sample is not valid: %s" % (args.name,))
 
     # Threads
     threads_genefuse = 1
