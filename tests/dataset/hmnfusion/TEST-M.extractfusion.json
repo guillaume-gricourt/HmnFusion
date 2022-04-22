@@ -61,7 +61,8 @@
                         },
                         "number": 1,
                         "is_consensus": false,
-                        "software": "genefuse"
+                        "software": "genefuse",
+                        "mmej": ""
                     },
                     "level": 0,
                     "is_consensus": false,
@@ -103,7 +104,8 @@
                         },
                         "number": 2,
                         "is_consensus": false,
-                        "software": "genefuse"
+                        "software": "genefuse",
+                        "mmej": ""
                     },
                     "level": 0,
                     "is_consensus": false,
@@ -145,7 +147,8 @@
                         },
                         "number": 3,
                         "is_consensus": false,
-                        "software": "genefuse"
+                        "software": "genefuse",
+                        "mmej": ""
                     },
                     "level": 0,
                     "is_consensus": false,
@@ -187,7 +190,8 @@
                         },
                         "number": 4,
                         "is_consensus": false,
-                        "software": "lumpy"
+                        "software": "lumpy",
+                        "mmej": ""
                     },
                     "level": 0,
                     "is_consensus": false,
@@ -229,7 +233,8 @@
                         },
                         "number": 5,
                         "is_consensus": false,
-                        "software": "lumpy"
+                        "software": "lumpy",
+                        "mmej": ""
                     },
                     "level": 0,
                     "is_consensus": false,
@@ -271,7 +276,8 @@
                         },
                         "number": 6,
                         "is_consensus": true,
-                        "software": "genefuse"
+                        "software": "genefuse",
+                        "mmej": ""
                     },
                     "level": 1,
                     "is_consensus": true,
@@ -313,7 +319,8 @@
                         },
                         "number": 7,
                         "is_consensus": true,
-                        "software": "lumpy"
+                        "software": "lumpy",
+                        "mmej": ""
                     },
                     "level": 1,
                     "is_consensus": true,
@@ -355,7 +362,8 @@
                         },
                         "number": 8,
                         "is_consensus": true,
-                        "software": "genefuse"
+                        "software": "genefuse",
+                        "mmej": ""
                     },
                     "level": 2,
                     "is_consensus": true,

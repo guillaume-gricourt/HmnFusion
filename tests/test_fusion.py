@@ -32,6 +32,7 @@ class TestFusion(unittest.TestCase):
         self.fusion_2.evidence = self.evidence_2
         self.fusion_2.number = 1
         self.fusion_2.is_consensus = False
+        self.fusion_2.mmej = "ATCG"
 
         self.fusion_2_dict = dict(
             first=self.fusion_2_region_first.to_dict(),
@@ -40,6 +41,7 @@ class TestFusion(unittest.TestCase):
             number=1,
             is_consensus=False,
             software="genefuse",
+            mmej="ATCG",
         )
 
         # Three3
@@ -68,6 +70,7 @@ class TestFusion(unittest.TestCase):
             number=2,
             is_consensus=True,
             software="lumpy",
+            mmej="",
         )
 
     def test_init(self):
@@ -78,6 +81,7 @@ class TestFusion(unittest.TestCase):
         self.assertEqual(self.fusion_1.evidence, Evidence())
         self.assertEqual(self.fusion_1.number, 0)
         self.assertEqual(self.fusion_1.software, __app_name__)
+        self.assertEqual(self.fusion_1.mmej, "")
         # With args.
         self.assertEqual(self.fusion_2.software, "genefuse")
 
@@ -99,6 +103,7 @@ class TestFusion(unittest.TestCase):
         self.assertEqual(self.fusion_2.number, 1)
         self.assertFalse(self.fusion_2.is_consensus)
         self.assertEqual(self.fusion_2.software, "genefuse")
+        self.assertEqual(self.fusion_2.mmej, "ATCG")
 
     def test_setters(self):
         """Test setters attributes"""
@@ -120,6 +125,9 @@ class TestFusion(unittest.TestCase):
 
         self.fusion_2.software = self.fusion_3.software
         self.assertEqual(self.fusion_2.software, self.fusion_3.software)
+
+        self.fusion_2.mmej = self.fusion_3.mmej
+        self.assertEqual(self.fusion_2.mmej, self.fusion_3.mmej)
 
     def test_update(self):
         """Test update(self)"""
