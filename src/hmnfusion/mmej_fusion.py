@@ -1,14 +1,13 @@
-import hashlib
 from typing import List
 
 import pandas as pd
-import pysam
-from natsort import natsorted
 from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.dimensions import ColumnDimension, DimensionHolder
 
 
-def write(filename: str, dfs: List[pd.DataFrame], sheet_name: str = "mmej_fusion") -> None:
+def write(
+    filename: str, dfs: List[pd.DataFrame], sheet_name: str = "mmej_fusion"
+) -> None:
     """Write dataframe to a file.
     Parameters
     ----------
