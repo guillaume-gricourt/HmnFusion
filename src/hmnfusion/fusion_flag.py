@@ -22,6 +22,7 @@ class FusionFlag(enum.IntEnum):
     -------
     No constructor
     """
+
     INTEREST = 1
     CONSENSUS_PRIMARY = 2
     CONSENSUS_SECONDARY = 4
@@ -43,7 +44,9 @@ class FusionFlag(enum.IntEnum):
 
     @classmethod
     def is_consensus(cls, flag: int) -> bool:
-        return cls.is_consensus_primary(flag=flag) or cls.is_consensus_secondary(flag=flag)
+        return cls.is_consensus_primary(flag=flag) or cls.is_consensus_secondary(
+            flag=flag
+        )
 
     @classmethod
     def is_genefuse(cls, flag: int) -> bool:
