@@ -2,6 +2,7 @@ import copy
 from json import JSONEncoder
 from typing import Any, Dict
 
+import pandas as pd
 from hmnfusion import _version
 from hmnfusion import evidence as hmn_evidence
 from hmnfusion import region
@@ -24,7 +25,8 @@ class Fusion:
         True if the fusion is built from others.
     software: str
         Name of the software from the fusion is built.
-
+    mmej: str
+        MMEJ sequence
     Methods
     -------
     __init__(software:str = name of the app)
@@ -38,6 +40,7 @@ class Fusion:
         self._number = 0
         self._is_consensus = False
         self._software = software
+        self._mmej = ""
 
     # Getters Setters
     @property
@@ -87,6 +90,14 @@ class Fusion:
     @software.setter
     def software(self, software: str) -> None:
         self._software = software
+
+    @property
+    def mmej(self) -> str:
+        return self._mmej
+
+    @mmej.setter
+    def mmej(self, mmej: str) -> None:
+        self._mmej = mmej
 
     # Others
     def update(self, other: "Fusion") -> None:
@@ -199,6 +210,74 @@ class Fusion:
         self._first = self._second
         self.second = tmp
 
+    def set_mmej(self, path_reference: str, path_bam: str, interval: int = 60) -> None:
+        """Set mmej attribute
+
+        Parameters
+        ----------
+        path_reference: str
+            Path of the reference fasta file
+        path_bam: str
+            Path of the sample bam
+        interval: int (default=60)
+            Interval to consider a consensus to detect mmej sequence
+
+        Return
+        ------
+        None
+        """
+        # Interval
+        self.first.interval = interval
+        self.second.interval = interval
+        # Get sequence reference
+        self.first.set_sequence_reference(path_reference)
+        self.second.set_sequence_reference(path_reference)
+        # Get sequence sample
+        self.first.set_sequence_sample(path_bam)
+        self.second.set_sequence_sample(path_bam)
+        # Aggregate results
+        sample = self.first.split_sequence(reference=False)[0]
+        ref_first = self.first.split_sequence()[0]
+        ref_second = self.second.split_sequence()[0]
+        for s, rf, rs in zip(sample[::-1], ref_first[::-1], ref_second[::-1]):
+            if s == rf == rs:
+                self.mmej += s
+            else:
+                break
+        sample = self.first.split_sequence(reference=False)[1]
+        ref_first = self.first.split_sequence()[1]
+        ref_second = self.second.split_sequence()[1]
+        for s, rf, rs in zip(sample, ref_first, ref_second):
+            if s == rf == rs:
+                self.mmej += s
+            else:
+                break
+
+    def mmej_dataframe(self, separator: str = " | ") -> pd.DataFrame:
+        """Represent mmej from fusion
+
+        Parameters
+        ----------
+        separator: str (default: " | ")
+            Separator characters
+
+        Return
+        ------
+        pd.DataFrame
+            Formatting data
+        """
+        df = pd.DataFrame()
+        col = self.first.format() + separator + self.second.format()
+        df.at["reference left", col] = separator.join(self.first.split_sequence())
+        df.at["reference right", col] = separator.join(self.second.split_sequence())
+        df.at["sample", col] = (
+            self.first.split_sequence(reference=False)[0]
+            + separator
+            + self.second.split_sequence(reference=False)[1]
+        )
+        df.at["mmej", col] = self.mmej
+        return df
+
     # Import Export
     def to_dict(self) -> Dict[Any, Any]:
         """Export object as a dict.
@@ -215,6 +294,7 @@ class Fusion:
             number=self.number,
             is_consensus=self.is_consensus,
             software=self.software,
+            mmej=self.mmej,
         )
 
     @classmethod
@@ -238,6 +318,7 @@ class Fusion:
         f.number = data.get("number", 0)
         f.is_consensus = data.get("is_consensus", False)
         f.software = data.get("software", "")
+        f.mmej = data.get("mmej", "")
         return f
 
     # Meta functions
