@@ -3,7 +3,7 @@ import os
 import re
 import tempfile
 from collections import Counter
-from typing import Dict, Tuple
+from typing import Dict, List, Tuple
 
 import pysam
 from hmnfusion import utils
@@ -216,6 +216,26 @@ class Region(object):
         if end > 0:
             fmt += "-%s" % (end,)
         return fmt
+
+    def split_sequence(self, reference: bool = True) -> List[str]:
+        """Return a string representation of the sequence
+
+        Parameters
+        ----------
+        reference: bool (default: True)
+            if True, format sequence_reference attribute, sequence_sample otherwise
+
+        Return
+        ------
+        str
+            A string formatting
+        """
+        seq = self.sequence_sample
+        if reference:
+            seq = self.sequence_reference
+        seq_a = seq[: self.get_middle() + 1]
+        seq_b = seq[self.get_middle() + 1 :]
+        return [seq_a, seq_b]
 
     def is_init(self) -> bool:
         """Check if a Region is initialized.
