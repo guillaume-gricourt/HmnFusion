@@ -107,7 +107,7 @@ P_efgg = P_extract_fusion.add_mutually_exclusive_group(required=True)
 P_efgg.add_argument("--input-genefuse-json", help="Genefuse, json file")
 P_efgg.add_argument("--input-genefuse-html", help="Genefuse, html file")
 P_extract_fusion.add_argument("--input-lumpy-vcf", required=True, help="Lumpy vcf file")
-P_extract_fusion.add_argument("--input-hmnfusion-bed", required=True, help="Bed file")
+P_extract_fusion.add_argument("--input-hmnfusion-bed", help="Bed file")
 P_extract_fusion.add_argument(
     "--consensus-interval",
     type=int,
