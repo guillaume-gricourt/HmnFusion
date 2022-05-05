@@ -1,0 +1,117 @@
+##fileformat=VCFv4.0
+##contig=<ID=chrM,length=16571>
+##contig=<ID=chr1,length=249250621>
+##contig=<ID=chr2,length=243199373>
+##contig=<ID=chr3,length=198022430>
+##contig=<ID=chr4,length=191154276>
+##contig=<ID=chr5,length=180915260>
+##contig=<ID=chr6,length=171115067>
+##contig=<ID=chr7,length=159138663>
+##contig=<ID=chr8,length=146364022>
+##contig=<ID=chr9,length=141213431>
+##contig=<ID=chr10,length=135534747>
+##contig=<ID=chr11,length=135006516>
+##contig=<ID=chr12,length=133851895>
+##contig=<ID=chr13,length=115169878>
+##contig=<ID=chr14,length=107349540>
+##contig=<ID=chr15,length=102531392>
+##contig=<ID=chr16,length=90354753>
+##contig=<ID=chr17,length=81195210>
+##contig=<ID=chr18,length=78077248>
+##contig=<ID=chr19,length=59128983>
+##contig=<ID=chr20,length=63025520>
+##contig=<ID=chr21,length=48129895>
+##contig=<ID=chr22,length=51304566>
+##contig=<ID=chrX,length=155270560>
+##contig=<ID=chrY,length=59373566>
+##FILTER=<ID=PASS,Description="All filters passed">
+##FILTER=<ID=FAIL,Description="At least one filter failed">
+##INFO=<ID=VAR,Number=1,Type=String,Description="Type of the variant ie. SNV, MNV, INS, DEL, INV or CSV">
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+##FORMAT=<ID=VAR,Number=1,Type=String,Description="ALT is likely (L) or probably (P) subclonal (SC), heterozygous (HE) or homozygous (HO)">
+##FORMAT=<ID=BKG,Number=1,Type=String,Description="ALT is likely (L) or probably (P) clean (CL) or noisy (NO)">
+##FORMAT=<ID=TRC,Number=1,Type=Integer,Description="Total #reads covering the variant site">
+##FORMAT=<ID=RRC,Number=3,Type=Integer,Description="#reads supporting the REF allele onto the (+) and (-) strand, and total #REF reads">
+##FORMAT=<ID=ARC,Number=3,Type=Integer,Description="#reads supporting the ALT allele onto the (+) and (-) strand, and total #ALT reads">
+##FORMAT=<ID=BRC,Number=1,Type=Integer,Description="#reads supporting neither REF nor ALT alleles">
+##FORMAT=<ID=ARR,Number=1,Type=Float,Description="ALT allele ratio (%)">
+##FORMAT=<ID=BRR,Number=1,Type=Float,Description="Background read ratio ie. BRC/TRC (%)">
+##FORMAT=<ID=BRE,Number=1,Type=Float,Description="Background read enrichment ie. BRR/(BRR+ARR) (%)">
+##FORMAT=<ID=SBP,Number=1,Type=Float,Description="Estimated strand bias p-value">
+##FORMAT=<ID=SBM,Number=1,Type=Float,Description="Estimated strand bias TS-metric">
+##FORMAT=<ID=LOW,Number=1,Type=Integer,Description="ARR is GT (resp. LE) 0.5% (0 resp. 1)">
+##SnpEffVersion="4.3t (build 2019-04-25 09:31), by Pablo Cingolani"
+##SnpEffCmd="SnpEff  -i vcf -o vcf -csvStats P1.csv GRCh37.p13.RefSeq P1.vcf "
+##INFO=<ID=ANN,Number=.,Type=String,Description="Functional annotations: 'Allele | Annotation | Annotation_Impact | Gene_Name | Gene_ID | Feature_Type | Feature_ID | Transcript_BioType | Rank | HGVS.c | HGVS.p | cDNA.pos / cDNA.length | CDS.pos / CDS.length | AA.pos / AA.length | Distance | ERRORS / WARNINGS / INFO' ">
+##INFO=<ID=LOF,Number=.,Type=String,Description="Predicted loss of function effects for this variant. Format: 'Gene_Name | Gene_ID | Number_of_transcripts_in_gene | Percent_of_transcripts_affected'">
+##INFO=<ID=NMD,Number=.,Type=String,Description="Predicted nonsense mediated decay effects for this variant. Format: 'Gene_Name | Gene_ID | Number_of_transcripts_in_gene | Percent_of_transcripts_affected'">
+##SnpSiftVersion="SnpSift 4.3t (build 2019-04-25 09:31), by Pablo Cingolani"
+##SnpSiftCmd="SnpSift DbNsfp -collapse -f SIFT_score,SIFT_pred,Polyphen2_HDIV_score,Polyphen2_HDIV_pred,Polyphen2_HVAR_score,Polyphen2_HVAR_pred,LRT_score,LRT_pred,MutationTaster_score,MutationTaster_pred,FATHMM_score,FATHMM_pred,MetaSVM_score,MetaSVM_pred,MetaLR_score,MetaLR_pred,PROVEAN_score,PROVEAN_pred,CADD_raw,CADD_phred,GERP++_NR,GERP++_RS, P1.vcf"
+##INFO=<ID=dbNSFP_PROVEAN_score,Number=A,Type=Float,Description="Field 'PROVEAN_score' from dbNSFP">
+##INFO=<ID=dbNSFP_GERP___RS,Number=A,Type=Float,Description="Field 'GERP++_RS' from dbNSFP">
+##INFO=<ID=dbNSFP_GERP___NR,Number=A,Type=Float,Description="Field 'GERP++_NR' from dbNSFP">
+##INFO=<ID=dbNSFP_SIFT_score,Number=A,Type=Float,Description="Field 'SIFT_score' from dbNSFP">
+##INFO=<ID=dbNSFP_Polyphen2_HVAR_score,Number=A,Type=Float,Description="Field 'Polyphen2_HVAR_score' from dbNSFP">
+##INFO=<ID=dbNSFP_MetaLR_score,Number=A,Type=Float,Description="Field 'MetaLR_score' from dbNSFP">
+##INFO=<ID=dbNSFP_Polyphen2_HDIV_score,Number=A,Type=Float,Description="Field 'Polyphen2_HDIV_score' from dbNSFP">
+##INFO=<ID=dbNSFP_LRT_pred,Number=A,Type=Character,Description="Field 'LRT_pred' from dbNSFP">
+##INFO=<ID=dbNSFP_PROVEAN_pred,Number=A,Type=Character,Description="Field 'PROVEAN_pred' from dbNSFP">
+##INFO=<ID=dbNSFP_MetaSVM_score,Number=A,Type=Float,Description="Field 'MetaSVM_score' from dbNSFP">
+##INFO=<ID=dbNSFP_CADD_phred,Number=A,Type=Float,Description="Field 'CADD_phred' from dbNSFP">
+##INFO=<ID=dbNSFP_Polyphen2_HDIV_pred,Number=A,Type=Character,Description="Field 'Polyphen2_HDIV_pred' from dbNSFP">
+##INFO=<ID=dbNSFP_FATHMM_score,Number=A,Type=Float,Description="Field 'FATHMM_score' from dbNSFP">
+##INFO=<ID=dbNSFP_MutationTaster_score,Number=A,Type=Float,Description="Field 'MutationTaster_score' from dbNSFP">
+##INFO=<ID=dbNSFP_MetaSVM_pred,Number=A,Type=Character,Description="Field 'MetaSVM_pred' from dbNSFP">
+##INFO=<ID=dbNSFP_MutationTaster_pred,Number=A,Type=Character,Description="Field 'MutationTaster_pred' from dbNSFP">
+##INFO=<ID=dbNSFP_FATHMM_pred,Number=A,Type=Character,Description="Field 'FATHMM_pred' from dbNSFP">
+##INFO=<ID=dbNSFP_Polyphen2_HVAR_pred,Number=A,Type=Character,Description="Field 'Polyphen2_HVAR_pred' from dbNSFP">
+##INFO=<ID=dbNSFP_MetaLR_pred,Number=A,Type=Character,Description="Field 'MetaLR_pred' from dbNSFP">
+##INFO=<ID=dbNSFP_SIFT_pred,Number=A,Type=Character,Description="Field 'SIFT_pred' from dbNSFP">
+##INFO=<ID=dbNSFP_LRT_score,Number=A,Type=Float,Description="Field 'LRT_score' from dbNSFP">
+##INFO=<ID=dbNSFP_CADD_raw,Number=A,Type=Float,Description="Field 'CADD_raw' from dbNSFP">
+##SnpSiftCmd="SnpSift Annotate -noId -tabix -name kg_ -info AF,EAS_AF,EUR_AF,AFR_AF,AMR_AF,SAS_AF /GRCh37/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5b.20130502.sites.vcf.gz P1.vcf"
+##INFO=<ID=kg_AMR_AF,Number=A,Type=Float,Description="Allele frequency in the AMR populations calculated from AC and AN, in the range (0,1)">
+##INFO=<ID=kg_AF,Number=A,Type=Float,Description="Estimated allele frequency in the range (0,1)">
+##INFO=<ID=kg_AFR_AF,Number=A,Type=Float,Description="Allele frequency in the AFR populations calculated from AC and AN, in the range (0,1)">
+##INFO=<ID=kg_EAS_AF,Number=A,Type=Float,Description="Allele frequency in the EAS populations calculated from AC and AN, in the range (0,1)">
+##INFO=<ID=kg_EUR_AF,Number=A,Type=Float,Description="Allele frequency in the EUR populations calculated from AC and AN, in the range (0,1)">
+##INFO=<ID=kg_SAS_AF,Number=A,Type=Float,Description="Allele frequency in the SAS populations calculated from AC and AN, in the range (0,1)">
+##SnpSiftCmd="SnpSift Annotate -noId -tabix -name gnomAD_exomes_ -info AF,AF_AFR,AF_AMR,AF_ASJ,AF_EAS,AF_FIN,AF_NFE,AF_OTH,AF_SAS /GRCh37/gnomad.exomes.r2.0.2.sites.monoallelic.vcf.gz -"
+##INFO=<ID=gnomAD_exomes_AF_FIN,Number=A,Type=Float,Description="Allele Frequency among Finnish genotypes, for each ALT allele, in the same order as listed">
+##INFO=<ID=gnomAD_exomes_AF,Number=A,Type=Float,Description="Allele Frequency among genotypes, for each ALT allele, in the same order as listed">
+##INFO=<ID=gnomAD_exomes_AF_SAS,Number=A,Type=Float,Description="Allele Frequency among South Asian genotypes, for each ALT allele, in the same order as listed">
+##INFO=<ID=gnomAD_exomes_AF_AMR,Number=A,Type=Float,Description="Allele Frequency among Admixed American genotypes, for each ALT allele, in the same order as listed">
+##INFO=<ID=gnomAD_exomes_AF_NFE,Number=A,Type=Float,Description="Allele Frequency among Non-Finnish European genotypes, for each ALT allele, in the same order as listed">
+##INFO=<ID=gnomAD_exomes_AF_EAS,Number=A,Type=Float,Description="Allele Frequency among East Asian genotypes, for each ALT allele, in the same order as listed">
+##INFO=<ID=gnomAD_exomes_AF_OTH,Number=A,Type=Float,Description="Allele Frequency among Other (population not assigned) genotypes, for each ALT allele, in the same order as listed">
+##INFO=<ID=gnomAD_exomes_AF_AFR,Number=A,Type=Float,Description="Allele Frequency among African/African American genotypes, for each ALT allele, in the same order as listed">
+##INFO=<ID=gnomAD_exomes_AF_ASJ,Number=A,Type=Float,Description="Allele Frequency among Ashkenazi Jewish genotypes, for each ALT allele, in the same order as listed">
+##SnpSiftCmd="SnpSift Annotate -noId -tabix -name gnomAD_genomes_ -info AF,AF_AFR,AF_AMR,AF_ASJ,AF_EAS,AF_FIN,AF_NFE,AF_OTH,AF_SAS /GRCh37/gnomad.genomes.r2.0.2.sites.monoallelic.vcf.gz -"
+##INFO=<ID=gnomAD_genomes_AF_FIN,Number=A,Type=Float,Description="Allele Frequency among Finnish genotypes, for each ALT allele, in the same order as listed">
+##INFO=<ID=gnomAD_genomes_AF,Number=A,Type=Float,Description="Allele Frequency among genotypes, for each ALT allele, in the same order as listed">
+##INFO=<ID=gnomAD_genomes_AF_AMR,Number=A,Type=Float,Description="Allele Frequency among Admixed American genotypes, for each ALT allele, in the same order as listed">
+##INFO=<ID=gnomAD_genomes_AF_NFE,Number=A,Type=Float,Description="Allele Frequency among Non-Finnish European genotypes, for each ALT allele, in the same order as listed">
+##INFO=<ID=gnomAD_genomes_AF_EAS,Number=A,Type=Float,Description="Allele Frequency among East Asian genotypes, for each ALT allele, in the same order as listed">
+##INFO=<ID=gnomAD_genomes_AF_OTH,Number=A,Type=Float,Description="Allele Frequency among Other (population not assigned) genotypes, for each ALT allele, in the same order as listed">
+##INFO=<ID=gnomAD_genomes_AF_AFR,Number=A,Type=Float,Description="Allele Frequency among African/African American genotypes, for each ALT allele, in the same order as listed">
+##INFO=<ID=gnomAD_genomes_AF_ASJ,Number=A,Type=Float,Description="Allele Frequency among Ashkenazi Jewish genotypes, for each ALT allele, in the same order as listed">
+##SnpSiftCmd="SnpSift Annotate -noId -tabix -name clinvar_ -info ALLELEID,CLNSIG,CLNREVSTAT /GRCh37/clinvar_20180401.vcf.gz -"
+##INFO=<ID=clinvar_ALLELEID,Number=1,Type=Integer,Description="the ClinVar Allele ID">
+##INFO=<ID=clinvar_CLNSIG,Number=.,Type=String,Description="Clinical significance for this single variant">
+##INFO=<ID=clinvar_CLNREVSTAT,Number=.,Type=String,Description="ClinVar review status for the Variation ID">
+##SnpSiftCmd="SnpSift Annotate -noId -tabix -name dbsnp_ -info RS /GRCh37/All_20170710.vcf.gz -"
+##INFO=<ID=dbsnp_RS,Number=1,Type=Integer,Description="dbSNP ID (i.e. rs number)">
+##SnpSiftCmd="SnpSift Annotate -noId -tabix -name cosmic_coding_ -info ID /GRCh37/CosmicCodingMuts_transform.vcf.gz -"
+##INFO=<ID=cosmic_coding_ID,Number=1,Type=String,Description="The cosmic mutation id">
+##SnpSiftCmd="SnpSift Annotate -noId -tabix -name cosmic_noncoding_ -info ID /GRCh37/CosmicNonCodingVariants_transform.vcf.gz -"
+##INFO=<ID=cosmic_noncoding_ID,Number=1,Type=String,Description="The cosmic non coding variant id">
+##SnpSiftCmd="SnpSift Annotate -noId -tabix -name dbscsnv_ -info ADA_SCORE,RF_SCORE /hg19/dbscsnv1.0.vcf.gz -"
+##INFO=<ID=dbscsnv_ADA_SCORE,Number=A,Type=Float,Description="AdaBoost prediction score">
+##INFO=<ID=dbscsnv_RF_SCORE,Number=A,Type=Float,Description="RandomForest prediction score">
+##SnpSiftCmd="SnpSift Annotate -noId -tabix -name spidex_ -info DPSI_MAX_TISSUE,DPSI_ZSCORE /hg19/hg19_spidex.vcf.gz -"
+##INFO=<ID=spidex_DPSI_ZSCORE,Number=1,Type=Float,Description="This is the z-score of dpsi_max_tissue relative to the distribution of dPSI that are due to common SNPs.">
+##INFO=<ID=spidex_DPSI_MAX_TISSUE,Number=1,Type=Float,Description="The delta PSI. This is the predicted change in percent-inclusion due to the variant, reported as the maximum across tissues (in percent).">
+##INFO=<ID=PhastCons,Number=1,Type=Float,Description="PhastCons conservation score">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	P1
+chr17	49	.	CT	C	.	FAIL	VAR=DEL;ANN=C|intron_variant|MODIFIER|TP53|TP53|transcript|NM_000546.5|protein_coding|6/10|c.673-71delA||||||,C|intron_variant|MODIFIER|TP53|TP53|transcript|NM_001126115.1|protein_coding|2/6|c.277-71delA||||||,C|intron_variant|MODIFIER|TP53|TP53|transcript|NM_001126116.1|protein_coding|2/7|c.277-71delA||||||,C|intron_variant|MODIFIER|TP53|TP53|transcript|NM_001126117.1|protein_coding|2/7|c.277-71delA||||||,C|intron_variant|MODIFIER|TP53|TP53|transcript|NM_001276697.1|protein_coding|2/6|c.196-71delA||||||,C|intron_variant|MODIFIER|TP53|TP53|transcript|NM_001276698.1|protein_coding|2/7|c.196-71delA||||||,C|intron_variant|MODIFIER|TP53|TP53|transcript|NM_001276699.1|protein_coding|2/7|c.196-71delA||||||,C|intron_variant|MODIFIER|TP53|TP53|transcript|NM_001126112.2|protein_coding|6/10|c.673-71delA||||||,C|intron_variant|MODIFIER|TP53|TP53|transcript|NM_001126113.2|protein_coding|6/11|c.673-71delA||||||,C|intron_variant|MODIFIER|TP53|TP53|transcript|NM_001126114.2|protein_coding|6/11|c.673-71delA||||||,C|intron_variant|MODIFIER|TP53|TP53|transcript|NM_001126118.1|protein_coding|5/9|c.556-71delA||||||,C|intron_variant|MODIFIER|TP53|TP53|transcript|NM_001276695.1|protein_coding|6/11|c.556-71delA||||||,C|intron_variant|MODIFIER|TP53|TP53|transcript|NM_001276696.1|protein_coding|6/11|c.556-71delA||||||,C|intron_variant|MODIFIER|TP53|TP53|transcript|NM_001276760.1|protein_coding|6/10|c.556-71delA||||||,C|intron_variant|MODIFIER|TP53|TP53|transcript|NM_001276761.1|protein_coding|6/10|c.556-71delA||||||,C|intron_variant|MODIFIER|TP53|TP53|transcript|XM_005256778.1|protein_coding|7/11|c.613-71delA||||||;dbsnp_RS=752774596;cosmic_noncoding_ID=COSN23867547;PhastCons=0.079	GT:VAR:BKG:TRC:RRC:ARC:BRC:ARR:BRR:BRE:SBP:SBM:LOW	0/0:PSC:PNO:645:354,176,530:53,22,75:40:11.62791:6.20155:34.78261:0.59917:0.54499:0
+chr17	52	.	CTTT	C	.	FAIL	VAR=DEL;ANN=C|5_prime_UTR_variant|MODIFIER|TP53|TP53|transcript|NM_001126115.1|protein_coding|1/7|c.-181_-179delAAA|||||179|,C|5_prime_UTR_variant|MODIFIER|TP53|TP53|transcript|NM_001126116.1|protein_coding|1/8|c.-181_-179delAAA|||||179|,C|5_prime_UTR_variant|MODIFIER|TP53|TP53|transcript|NM_001126117.1|protein_coding|1/8|c.-181_-179delAAA|||||179|,C|5_prime_UTR_variant|MODIFIER|TP53|TP53|transcript|NM_001276697.1|protein_coding|1/7|c.-262_-260delAAA|||||260|,C|5_prime_UTR_variant|MODIFIER|TP53|TP53|transcript|NM_001276698.1|protein_coding|1/8|c.-262_-260delAAA|||||260|,C|5_prime_UTR_variant|MODIFIER|TP53|TP53|transcript|NM_001276699.1|protein_coding|1/8|c.-262_-260delAAA|||||260|,C|intron_variant|MODIFIER|TP53|TP53|transcript|NM_000546.5|protein_coding|4/10|c.376-160_376-158delAAA||||||,C|intron_variant|MODIFIER|TP53|TP53|transcript|NM_001126112.2|protein_coding|4/10|c.376-160_376-158delAAA||||||,C|intron_variant|MODIFIER|TP53|TP53|transcript|NM_001126113.2|protein_coding|4/11|c.376-160_376-158delAAA||||||,C|intron_variant|MODIFIER|TP53|TP53|transcript|NM_001126114.2|protein_coding|4/11|c.376-160_376-158delAAA||||||,C|intron_variant|MODIFIER|TP53|TP53|transcript|NM_001126118.1|protein_coding|3/9|c.259-160_259-158delAAA||||||,C|intron_variant|MODIFIER|TP53|TP53|transcript|NM_001276695.1|protein_coding|4/11|c.259-160_259-158delAAA||||||,C|intron_variant|MODIFIER|TP53|TP53|transcript|NM_001276696.1|protein_coding|4/11|c.259-160_259-158delAAA||||||,C|intron_variant|MODIFIER|TP53|TP53|transcript|NM_001276760.1|protein_coding|4/10|c.259-160_259-158delAAA||||||,C|intron_variant|MODIFIER|TP53|TP53|transcript|NM_001276761.1|protein_coding|4/10|c.259-160_259-158delAAA||||||,C|intron_variant|MODIFIER|TP53|TP53|transcript|XM_005256778.1|protein_coding|5/11|c.316-160_316-158delAAA||||||;dbsnp_RS=141204613,752947053,5819162;PhastCons=0.002	GT:VAR:BKG:TRC:RRC:ARC:BRC:ARR:BRR:BRE:SBP:SBM:LOW	0/1:PHE:PNO:352:124,49,173:60,52,112:67:31.81818:19.03409:37.43017:0.00230:0.68683:0

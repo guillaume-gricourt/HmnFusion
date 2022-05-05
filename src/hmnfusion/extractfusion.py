@@ -30,11 +30,19 @@ def parse_genefuse_label(label: str) -> fusion.Fusion:
     sleft, sright = label.split("___")
     m = re.search(RE_GENEFUSE_LABEL, sleft)
     if m:
-        r = region.Region(m.group(1), int(m.group(2)), "left")
+        r = region.Region(
+            chrom=m.group(1),
+            position=int(m.group(2)),
+            orientation="left",
+        )
         f.set_region(r)
     m = re.search(RE_GENEFUSE_LABEL, sright)
     if m:
-        r = region.Region(m.group(1), int(m.group(2)), "right")
+        r = region.Region(
+            chrom=m.group(1),
+            position=int(m.group(2)),
+            orientation="right",
+        )
         f.set_region(r)
     # Evidence.
     mev = re.search(RE_GENEFUSE_TOTAL, label)
@@ -162,7 +170,10 @@ def read_lumpy_vcf(graph: graph.Graph, flumpy: str) -> None:
 
         # Build fusion.
         f = fusion.Fusion("lumpy")
-        r = region.Region(record.chrom, int(record.pos) - 1)
+        r = region.Region(
+            chrom=record.chrom,
+            position=int(record.pos) - 1,
+        )
         f.set_region(r)
 
         alt = record.alts[0]
@@ -171,7 +182,10 @@ def read_lumpy_vcf(graph: graph.Graph, flumpy: str) -> None:
         if m:
             alt_chrom = m.group(1)
             alt_pos = int(m.group(2)) - 1
-        r = region.Region(alt_chrom, alt_pos)
+        r = region.Region(
+            chrom=alt_chrom,
+            position=alt_pos,
+        )
         f.set_region(r)
 
         evidence = 0

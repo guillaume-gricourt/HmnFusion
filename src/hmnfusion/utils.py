@@ -1,5 +1,7 @@
+import enum
 import json
 import logging
+import os
 import re
 import shutil
 import subprocess
@@ -23,6 +25,11 @@ class ExecutableNotFound(Exception):
             return "ExecutableNotFound, {0}".format(self.message)
         else:
             return "ExecutableNotFound"
+
+
+class EnumNoValue(enum.Enum):
+    def __repr__(self):
+        return "<%s.%s>" % (self.__class__.__name__, self.name)
 
 
 def abort(parser, msg: str = ""):
@@ -130,6 +137,28 @@ def check_bam_index(path: str) -> bool:
         return False
 
 
+def check_fasta_index(path: str) -> bool:
+    """Build index file for a fasta file if not found.
+
+    Parameters
+    ----------
+    path: str
+        Path of the fasta file
+
+    Return
+    ------
+    bool
+        True if index is present or is written, False otherwise.
+    """
+    if os.path.isfile(path + ".fai"):
+        return True
+    try:
+        pysam.faidx(path)
+    except pysam.SamtoolsError:
+        return False
+    return True
+
+
 def find_executable(executable: str, msg: str = "") -> None:
     """Find an executable in the path and raise an error if not found.
 
@@ -149,7 +178,7 @@ def find_executable(executable: str, msg: str = "") -> None:
         raise ExecutableNotFound(msg)
 
 
-def validate_name_sample(name: str) -> str:
+def validate_name_sample(name: str) -> bool:
     """Validate sample name to fit in VCF file (no space allowed)
 
     Parameters
@@ -157,75 +186,11 @@ def validate_name_sample(name: str) -> str:
     name: str
         Name to check
 
-    Raises
-    ------
-    ValueError
-        If the characters not allowed are in the string.
-
     Return
     ------
-    str
-        Name to check
+    bool
+        True if name is valid, False otherwise
     """
     if re.search(r"\s+", name):
-        raise ValueError("Space are not allowed")
-    return name
-
-
-def bam_to_fastq(path: str, compress: int = 4, threads: int = 1) -> Tuple[str, str]:
-    """Convert a bam to two fastq files.
-
-    Parameters
-    ----------
-    path: str
-        Path to the bam file
-    compress: int (default: 4)
-        Level of compress fastq file, 0 is disable
-    threads: int (default: 1)
-        Number of threads to use
-
-    Return
-    ------
-    Tuple[str, str]
-        Path of the fastq files: forward & revers
-    """
-    main_args = ["--threads", str(threads)]
-    # Sort bam.
-    tmp_sort = tempfile.NamedTemporaryFile(suffix=".bam")
-    args = main_args + ["-n", "-o", tmp_sort.name, path]
-    pysam.sort(*args)
-    # Fixmate bam.
-    tmp_fixmate = tempfile.NamedTemporaryFile(suffix=".bam")
-    args = main_args + [tmp_sort.name, tmp_fixmate.name]
-    pysam.fixmate(*args)
-    # Label file.
-    suffixes = ["R{0}", "fastq"]
-    if compress > 0:
-        suffixes.append("gz")
-    label_suffixes = "." + ".".join(suffixes)
-    tmp_fq_fwd = tempfile.NamedTemporaryFile(
-        suffix=label_suffixes.format("1"), delete=False
-    )
-    tmp_fq_rev = tempfile.NamedTemporaryFile(
-        suffix=label_suffixes.format("2"), delete=False
-    )
-    # Convert to fastq.
-    args = main_args + [
-        "-c",
-        str(compress),
-        "-f",
-        "1",
-        "-F",
-        "0x900",
-        "-1",
-        tmp_fq_fwd.name,
-        "-2",
-        tmp_fq_rev.name,
-        tmp_fixmate.name,
-    ]
-    pysam.fastq(*args)
-    # Clean up.
-    tmp_sort.close()
-    tmp_fixmate.close()
-
-    return tmp_fq_fwd.name, tmp_fq_rev.name
+        return False
+    return True

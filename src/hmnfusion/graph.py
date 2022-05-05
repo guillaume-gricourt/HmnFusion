@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import networkx as nx
 from hmnfusion import bed as hmn_bed
 from hmnfusion import fusion as hmn_fusion
+from hmnfusion import fusion_flag
 
 
 class Graph(object):
@@ -248,8 +249,83 @@ class Graph(object):
                 ):
                     self._add_node_consensus(n_genefuse, n_lumpy, 2)
 
-    def select_node_interest(self):
-        return [x for x in self.graph.nodes if self.graph[x]["is_interest"]]
+    def subset_graph(
+        self, include: int = 0, exclude: int = 0
+    ) -> List[hmn_fusion.Fusion]:
+        """Select fusions in the graph.
+
+        Parameters
+        ----------
+        include: int
+            Flag number, combinaison of integer to select fusions
+        exclude: int
+            Flag number, combinaison of integer to exclude fusions
+
+        Return
+        ------
+        List[Fusion]:
+            Fusions selected
+        """
+        nodes = []
+        for node in self.graph.nodes:
+            if (
+                fusion_flag.FusionFlag.is_interest(include)
+                and self.graph.nodes[node]["is_interest"]
+            ):
+                nodes.append(node)
+            if (
+                fusion_flag.FusionFlag.is_consensus(include)
+                and self.graph.nodes[node]["is_consensus"]
+            ):
+                nodes.append(node)
+            if (
+                fusion_flag.FusionFlag.is_genefuse(include)
+                and self.graph.nodes[node]["fusion"].software == "genefuse"
+            ):
+                nodes.append(node)
+            if (
+                fusion_flag.FusionFlag.is_hmnfusion(include)
+                and self.graph.nodes[node]["fusion"].software == "hmnfusion"
+            ):
+                nodes.append(node)
+            if (
+                fusion_flag.FusionFlag.is_lumpy(include)
+                and self.graph.nodes[node]["fusion"].software == "lumpy"
+            ):
+                nodes.append(node)
+        nodes_exclude = []
+        if exclude > 0:
+            for node in self.graph.nodes:
+                if (
+                    fusion_flag.FusionFlag.is_interest(exclude)
+                    and self.graph.nodes[node]["is_interest"]
+                ):
+                    nodes_exclude.append(node)
+                if (
+                    fusion_flag.FusionFlag.is_consensus(exclude)
+                    and self.graph.nodes[node]["is_consensus"]
+                ):
+                    nodes_exclude.append(node)
+                if (
+                    fusion_flag.FusionFlag.is_genefuse(exclude)
+                    and self.graph.nodes[node]["fusion"].software == "genefuse"
+                ):
+                    nodes_exclude.append(node)
+                if (
+                    fusion_flag.FusionFlag.is_hmnfusion(exclude)
+                    and self.graph.nodes[node]["fusion"].software == "hmnfusion"
+                ):
+                    nodes_exclude.append(node)
+                if (
+                    fusion_flag.FusionFlag.is_lumpy(exclude)
+                    and self.graph.nodes[node]["fusion"].software == "lumpy"
+                ):
+                    nodes_exclude.append(node)
+        for node in nodes_exclude:
+            if node in nodes:
+                nodes.remove(node)
+        # Return fusions
+        return [self.graph.nodes[x]["fusion"] for x in nodes]
 
     def define_node_interest(self) -> int:
         """Set nodes in the graph if they are of interest

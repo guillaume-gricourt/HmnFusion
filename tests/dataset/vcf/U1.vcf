@@ -1,0 +1,15 @@
+##fileformat=VCFv4.0
+##fileDate=20220426
+##source=HmnFusion-MmejDeletion-Test
+##contig=<ID=chr1,length=249250621>
+##contig=<ID=chr19,length=59128983>
+##INFO=<ID=NS,Number=1,Type=Integer,Description="Number of Samples With Data">
+##INFO=<ID=DP,Number=1,Type=Integer,Description="Total Depth">
+##FILTER=<ID=PASS,Description="All filters passed">
+##FILTER=<ID=q10,Description="Quality below 10">
+##FILTER=<ID=s50,Description="Less than 50% of samples have data">
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Read Depth">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	sample1
+chr1	4	.	CTGAGGC	C	47	PASS	NS=1;DP=7	GT:DP	0|1:7
+chr19	4	.	GCC	G	32	PASS	NS=1;DP=8	GT:DP	0|1:8

@@ -24,7 +24,9 @@ class Main_test(unittest.TestCase):
     dataset_path = os.path.join(os.path.dirname(__file__), "dataset")
     # Sample.
     fastq_path = os.path.join(dataset_path, "fastq")
+    ref_path = os.path.join(dataset_path, "ref")
     bam_path = os.path.join(dataset_path, "bam")
+    vcf_path = os.path.join(dataset_path, "vcf")
     hmnfusion_path = os.path.join(dataset_path, "hmnfusion")
     genefuse_path = os.path.join(dataset_path, "genefuse")
     lumpy_path = os.path.join(dataset_path, "lumpy")
@@ -68,6 +70,18 @@ class Main_test(unittest.TestCase):
         quantification=os.path.join(hmnfusion_path, "TEST-P.quantification.vcf"),
         region="chr22:23632550",
     )
+
+    # mmej-deletion
+    ref_mmej = os.path.join(ref_path, "mmej.fasta")
+    n1_vcf = os.path.join(vcf_path, "N1.vcf")
+    n2_vcf = os.path.join(vcf_path, "N2.vcf")
+    p1_vcf = os.path.join(vcf_path, "P1.vcf")
+    p2_vcf = os.path.join(vcf_path, "P2.vcf")
+    u1_vcf = os.path.join(vcf_path, "U1.vcf")
+    u2_vcf = os.path.join(vcf_path, "U2.vcf")
+    mmej_deletion_n1 = os.path.join(hmnfusion_path, "N1.mmej-deletion.xlsx")
+    mmej_deletion_n1n2 = os.path.join(hmnfusion_path, "N1N2.mmej-deletion.xlsx")
+    mmej_deletion_n1p1p2 = os.path.join(hmnfusion_path, "N1P1P2.mmej-deletion.xlsx")
 
     # Auxiliary.
     bed_bcr_path = os.path.join(dataset_path, "bed", "bcr.bed")

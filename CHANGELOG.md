@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.0.3](https://github.com/guillaume-gricourt/HmnFusion/tree/1.0.3) (2022-04-13)
+
+[Full Changelog](https://github.com/guillaume-gricourt/HmnFusion/compare/1.0.2...1.0.3)
+
+## [1.0.2](https://github.com/guillaume-gricourt/HmnFusion/tree/1.0.2) (2022-04-13)
+
+[Full Changelog](https://github.com/guillaume-gricourt/HmnFusion/compare/1.0.1...1.0.2)
+
+## [1.0.1](https://github.com/guillaume-gricourt/HmnFusion/tree/1.0.1) (2022-03-21)
+
+[Full Changelog](https://github.com/guillaume-gricourt/HmnFusion/compare/1.0.0...1.0.1)
+
 ## [1.0.0](https://github.com/guillaume-gricourt/HmnFusion/tree/1.0.0) (2022-03-16)
 
 [Full Changelog](https://github.com/guillaume-gricourt/HmnFusion/compare/0.8.0...1.0.0)
