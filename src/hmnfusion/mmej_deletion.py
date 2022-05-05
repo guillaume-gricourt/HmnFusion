@@ -3,222 +3,420 @@ from typing import List
 
 import pandas as pd
 import pysam
+from hmnfusion.utils import EnumNoValue
 from natsort import natsorted
 from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.dimensions import ColumnDimension, DimensionHolder
 
 
-def extract(finputs: List[str]) -> pd.DataFrame:
-    """Extract event of interest from vcf input files
+class Conclude(EnumNoValue):
+    """Conclude is an Enum class to represent conclusion about the mmej sequence found"""
 
-    Parameters
+    UNINITIALIZED = ""
+    AMBIGUOUS = "alignment ambiguous"
+    UNCLEAR = "no clear signature"
+    VALID = "mmej signature"
+
+
+class Value(object):
+    """Value store a record corresponding to one Point of a MmejDeletion
+
+    Attributes
     ----------
-    finputs: List[str]
-        A list of path of VCF files
+    id: str
+        The id of the object
+    contig: str
+        Contig id
+    start: int
+        Start of the deletion
+    deletion: str
+        Sequence corresponding to the deletion found in the sample
+    sequence: str
+        Sequence corresponding to the mmej
 
-    Return
-    ------
-    pd.DataFrame
-        Return a dataframe with:
-            - index: region_id formatted as "<contig> <genomic coordinate> <base reference> <base alternative"
-            - columns:
-                - "event": str (deletion)
-                - "contig": str, contig name
-                - "start": int, genomic coordinate
-                - "deletion": str, sequence
-    """
-    df = pd.DataFrame(columns=["contig", "start", "deletion", "event"])
-    samples = set()
-    for finput in finputs:
-        vcf_in = pysam.VariantFile(finput)
-        for record in vcf_in.fetch():
-            # Check if variant is a deletion.
-            if len(record.ref) > len(record.alts[0]):
-                region_name = "%s %s %s %s" % (
-                    record.contig,
-                    record.pos,
-                    record.ref,
-                    record.alts[0],
-                )
-                region_id = hashlib.md5(region_name.encode("utf8")).hexdigest()
-                # Check if variant is already seen.
-                if region_id not in df.index:
-                    df.at[region_id, "contig"] = record.contig
-                    df.at[region_id, "start"] = record.pos + 1
-                    df.at[region_id, "deletion"] = record.ref[1:].upper()
-                    df.at[region_id, "event"] = "deletion"
-                for sample in record.samples.keys():
-                    df.at[region_id, sample] = True
-        for sample in vcf_in.header.samples:
-            samples.add(sample)
-    # if sample has no deletion
-    for sample in samples:
-        if sample not in df.columns:
-            df[sample] = False
-    # fmt
-    df["start"] = df["start"].astype(int)
-    return df
-
-
-def signatures(freference: str, df: pd.DataFrame) -> pd.DataFrame:
-    """Identify MH motif from event
-
-    Parameters
-    ----------
-    freference: str
-        Path of the reference file (fasta format expected)
-    df: pd.DataFrame
-        A dataframe built from VCF files
-
-    Return
-    ------
-    pd.DataFrame
-        The df dataframe with a supplementary column "mmej_sequence" (str)
-
-    See also
-    --------
-    extract()
+    Methods
+    -------
+    __init__(id="", position="", start=0, deletion="", sequence="")
+        Construct an object. All arguments are optional.
     """
 
-    def _signatures(x, freference):
-        len_deletion = len(x["deletion"])
-        start = int(x["start"])
-        region = "%s:%s-%s" % (x["contig"], start, start + (2 * len_deletion))
-        faidx = pysam.faidx(freference, region, split_lines=True)
+    def __init__(
+        self,
+        id: str = "",
+        contig: str = "",
+        start: int = 0,
+        deletion: str = "",
+        sequence: str = "",
+    ) -> None:
+        self.id = id
+        self.contig = contig
+        self.start = int(start)
+        self.deletion = deletion
+        self.sequence = sequence
+
+    def get_conclusion(self) -> Conclude:
+        """Build conclusion based on the sequence and deletion attributes
+
+        Return
+        ------
+        Conclude
+            The appropriate conclusion
+        """
+        len_deletion = len(self.deletion)
+        len_mh = len(self.sequence)
+        # if len_deletion <= 1 or len_mh <= 1:
+        # pass
+        if len_deletion == len_mh:
+            return Conclude.AMBIGUOUS
+        elif len_deletion > 1 and len_mh < 5:
+            return Conclude.UNCLEAR
+        elif len_deletion > 1 and len_mh >= 5:
+            return Conclude.VALID
+        return Conclude.UNINITIALIZED
+
+    def set_sequence(self, path: str) -> None:
+        """Set the sequence attribute
+
+        Parameters
+        ----------
+        path: str
+            Path of the fasta reference to extract the information
+
+        Return
+        ------
+        None
+        """
+        len_deletion = len(self.deletion)
+        faidx = pysam.faidx(path, self.to_region(), split_lines=True)
         seq = "".join(faidx[1:]).upper()
 
         left = seq[:len_deletion]
         right = seq[len_deletion:]
 
-        assert x["deletion"] == left
+        assert self.deletion == left
 
-        mh_len, mh_seq = 0, ""
+        mh_len = 0
         for i in range(len_deletion + 1):
             motif = left[:i]
             if right.startswith(motif):
                 mh_len = i
-                mh_seq = motif
+                self.sequence = motif
             if i > mh_len:
                 break
 
-        return mh_seq
+    @classmethod
+    def from_record(cls, record: pysam.VariantRecord) -> "Value":
+        """Build a Value object from a pysam.VariantRecord
 
-    if df.empty:
-        df = df.reindex(df.columns.tolist() + ["mmej_sequence"], axis=1)
-    else:
-        df["mmej_sequence"] = df.apply(_signatures, axis=1, args=(freference,))
-    return df
+        Parameters
+        ----------
+        record: pysam.VariantRecord
+            An object to transform
+
+        Return
+        ------
+        Value
+            The novel object
+        """
+        record_name = "%s %s %s %s" % (
+            record.contig,
+            record.pos,
+            record.ref,
+            record.alts[0],
+        )
+        record_id = hashlib.md5(record_name.encode("utf8")).hexdigest()
+        return Value(
+            id=record_id,
+            contig=record.contig,
+            start=record.pos + 1,
+            deletion=record.ref[1:].upper(),
+        )
+
+    def to_dataframe(self) -> pd.DataFrame:
+        """Convert the value object to a dataframe
+
+        Return
+        ------
+        pd.DataFrame
+            A dataframe with five columns:
+                - contig
+                - start
+                - deletion
+                - sequence
+                - conclusion
+            and one index:
+                - id of the object
+        """
+        return pd.DataFrame(
+            {
+                "contig": self.contig,
+                "start": self.start,
+                "deletion": self.deletion,
+                "sequence": self.sequence,
+                "conclusion": self.get_conclusion().value,
+            },
+            index=[self.id],
+        )
+
+    def to_region(self) -> str:
+        """Convert a Value object into a region string
+
+        Return
+        ------
+        str
+            The formatting region
+        """
+        return "%s:%s-%s" % (
+            self.contig,
+            self.start,
+            self.start + (2 * len(self.deletion)),
+        )
+
+    # Meta functions
+    def __key(self):
+        return (
+            self.id,
+            self.contig,
+            self.start,
+            self.deletion,
+            self.sequence,
+        )
+
+    def __hash__(self):
+        return hash(self.__key())
+
+    def __eq__(self, other: object):
+        if isinstance(other, Value):
+            return self.__key() == other.__key()
+        return NotImplemented
 
 
-def conclude(df: pd.DataFrame) -> pd.DataFrame:
-    """Conclude about the presens of MMEJ signature
+class MmejDeletion(object):
+    """MmejDeletion is a class to deal for deletion mmej
 
-    Parameters
+    Attributes
     ----------
-    df: pd.DataFrame
-        A dataframe with "mmej_sequence" column
+    name: str
+        The name of the sample
+    values: List[Value]
+        List of records
 
-    Return
-    ------
-    pd.DataFrame
-        The df dataframe with a supplementary column "mmej_conclusion" (str)
-
-    See also
-    --------
-    extract()
-    signatures()
+    Methods
+    -------
+    __init__(name, values)
+        Construct an object. Name is required.
     """
 
-    def _conclude(x):
-        res = ""
-        len_deletion = len(x["deletion"])
-        len_mh = len(x["mmej_sequence"])
-        if len_deletion <= 1 or len_mh <= 1:
-            res = "."
-        elif len_deletion == len_mh:
-            res = "alignment ambiguous"
-        elif len_deletion > 1 and len_mh < 5:
-            res = "no clear signature"
-        elif len_deletion > 1 and len_mh >= 5:
-            res = "mmej signature"
-        return res
+    # Be careful, if you use an empty list as default args
+    # it would be shared between objects
+    def __init__(
+        self,
+        name: str,
+        values: List[Value],
+    ) -> None:
+        self.name = name
+        self.values = values
 
-    if df.empty:
-        df = df.reindex(df.columns.tolist() + ["mmej_conclusion"], axis=1)
-    else:
-        df["mmej_conclusion"] = df.apply(_conclude, axis=1)
-    return df
+    @property
+    def empty(self) -> bool:
+        if len(self.values) > 0:
+            return False
+        return True
 
+    @classmethod
+    def build_empty_dataframe(cls, name: str) -> pd.DataFrame:
+        """Construct an empty dataframe
 
-def write(filename: str, df: pd.DataFrame) -> None:
-    """Write dataframe to a file.
-    Parameters
-    ----------
-    filename: str
-        Path of an output file (xlsx, excel format)
-    df: pd.DataFrame
-        A dataframe to write
+        Parameters
+        ----------
+        name: str
+            Name of one column to add to the header
 
-    Return
-    ------
-    None
+        Return
+        ------
+        pd.DataFrame
+            A dataframe with five columns:
+                - contig
+                - start
+                - deletion
+                - sequence
+                - conclusion
+            and one index:
+                - id of the object
+        """
+        return pd.DataFrame(
+            columns=["contig", "start", "deletion", "sequence", "conclusion", name]
+        )
 
-    See also
-    --------
-    extract()
-    signatures()
-    conclude()
-    """
-    headers = [
-        "contig",
-        "start",
-        "deletion",
-        "event",
-        "mmej_sequence",
-        "mmej_conclusion",
-    ]
-    samples = sorted([x for x in df.columns if x not in headers])
-    df = df.reindex(headers + samples, axis=1)
+    def get_value_ids(self) -> List[str]:
+        """Return all ids of record
 
-    if df.empty:
-        for header in df.columns:
-            df.at["no deletion found", header] = pd.NA
-        writer = pd.ExcelWriter(filename)
-        df.to_excel(writer, sheet_name="mmej")
+        Return
+        ------
+        List[str]
+            All ids in the records
+        """
+        return [x.id for x in self.values]
+
+    def set_value_sequence(self, path: str) -> None:
+        """Apply set_sequence for each value
+
+        Parameters
+        ----------
+        path: str
+
+        Return
+        ------
+        None
+
+        See Also
+        --------
+        Value().set_sequence()
+        """
+        for value in self.values:
+            value.set_sequence(path=path)
+
+    @classmethod
+    def from_vcf(cls, path: str) -> List["MmejDeletion"]:
+        """Load an object MmejDeletion from a VCF file
+
+        Parameters
+        ----------
+        path: str
+            Path of the VCF file
+
+        Return
+        ------
+        List[MmejDeletion]
+            Return a list of objects, because a VCF file should contained one or more samples
+        """
+        # Init
+        data = {}
+        vcf_in = pysam.VariantFile(path)
+        # Populate samples
+        for sample in vcf_in.header.samples:
+            data[sample] = cls(name=sample, values=[])
+
+        # Loop over recors
+        for record in vcf_in.fetch():
+            # Check if variant is a deletion.
+            if len(record.ref) > len(record.alts[0]):
+                value = Value.from_record(record)
+                for sample, variant_record_sample in record.samples.items():
+                    initialized = set([0])
+                    for field in variant_record_sample.values():
+                        if field not in [(None,), None]:
+                            initialized.add(1)
+                    if (
+                        len(initialized) > 1
+                        and value.id not in data[sample].get_value_ids()
+                    ):
+                        data[sample].values.append(value)
+        return list(data.values())
+
+    @classmethod
+    def to_dataframe(cls, mmej_deletions: List["MmejDeletion"]) -> pd.DataFrame:
+        """Export a List of this object to a dataframe
+
+        Parameters
+        ----------
+        mmej_deletions: List[MmejDeletion]
+            A list of object to represent
+
+        Return
+        ------
+        pd.DataFrame
+            A dataframe
+        """
+        df = pd.DataFrame()
+        # Samples
+        mmej_deletions = natsorted(mmej_deletions, key=lambda x: x.name)
+        # Populate index
+        for mmej_del in mmej_deletions:
+            if mmej_del.empty:
+                df = pd.concat([df, cls.build_empty_dataframe(name=mmej_del.name)])
+                continue
+            for value in mmej_del.values:
+                df = pd.concat([df, value.to_dataframe()])
+        if df.empty:
+            return df
+        df = df[~df.index.duplicated(keep="first")]
+        # Sort values.
+        idx, *_ = zip(
+            *natsorted(
+                zip(df.index, df.contig, df.start, df.deletion),
+                key=lambda x: (x[1], x[2], x[3]),
+            )
+        )
+        df = df.loc[list(idx)]
+        # Populate by samples
+        for mmej_del in mmej_deletions:
+            for value in mmej_del.values:
+                df.at[value.id, mmej_del.name] = "o"
+        df = df.fillna(pd.NA)
+        return df
+
+    @classmethod
+    def to_excel(
+        cls,
+        path: str,
+        mmej_deletions: List["MmejDeletion"],
+        sheet_name: str = "mmej_deletion",
+    ) -> None:
+        """Write MmejDeletion objects to an excel file
+
+        Parameters
+        ----------
+        path: str
+            Path of an output file (xlsx, excel format)
+        mmej_deletions: List[MmejDeletion]
+            A list of the MmejDeletion to write
+
+        Return
+        ------
+        None
+        """
+        df = cls.to_dataframe(mmej_deletions)
+        writer = pd.ExcelWriter(path)
+
+        if df.empty:
+            for header in df.columns:
+                df.at["no deletion found", header] = pd.NA
+            df.to_excel(writer, sheet_name=sheet_name)
+            writer.save()
+            return
+
+        # Write output.
+        df.to_excel(writer, index=False, sheet_name=sheet_name)
+        ws = writer.sheets[sheet_name]  # pull worksheet object
+
+        # Adjust width.
+        dim_holder = DimensionHolder(worksheet=ws)
+        for ix, col in enumerate(ws.columns):
+            col_nb = ix + 1
+            lengths = []
+            for cell in col:
+                if cell.value is not None:
+                    lengths.append(len(str(cell.value)))
+            length = max(lengths) + 6
+            dim_holder[get_column_letter(col_nb)] = ColumnDimension(
+                ws, min=col_nb, max=col_nb, width=length
+            )
+        ws.column_dimensions = dim_holder
+
         writer.save()
-        return
 
-    # Sort values.
-    idx, *_ = zip(
-        *natsorted(
-            zip(df.index, df.contig, df.start, df.deletion, df.event),
-            key=lambda x: (x[1], x[2], x[3], x[4]),
+    # Meta functions
+    def __key(self):
+        return (
+            self.name,
+            self.values,
         )
-    )
-    df = df.loc[list(idx)]
 
-    # Replace values.
-    df = df.fillna(".")
-    df.replace({False: "."}, inplace=True)
-    df.replace({True: "o"}, inplace=True)
+    def __hash__(self):
+        return hash(self.__key())
 
-    # Write output.
-    writer = pd.ExcelWriter(filename)
-    df.to_excel(writer, index=False, sheet_name="mmej")
-    ws = writer.sheets["mmej"]  # pull worksheet object
-
-    # Adjust width.
-    dim_holder = DimensionHolder(worksheet=ws)
-    for ix, col in enumerate(ws.columns):
-        col_nb = ix + 1
-        lengths = []
-        for cell in col:
-            if cell.value is not None:
-                lengths.append(len(str(cell.value)))
-        length = max(lengths) + 6
-        dim_holder[get_column_letter(col_nb)] = ColumnDimension(
-            ws, min=col_nb, max=col_nb, width=length
-        )
-    ws.column_dimensions = dim_holder
-
-    writer.save()
+    def __eq__(self, other: object):
+        if isinstance(other, MmejDeletion):
+            return self.__key() == other.__key()
+        return NotImplemented

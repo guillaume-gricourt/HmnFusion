@@ -43,7 +43,7 @@ class Test_software(Main_test):
             )
         )
 
-    def test_mmej_positivie(self):
+    def test_mmej_positive(self):
         self.assertTrue(
             mmej_deletion(
                 ref=self.ref_mmej,

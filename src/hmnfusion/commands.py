@@ -262,27 +262,35 @@ def _cmd_mmej_deletion(args):
     # Grep args.
     for finput in args.input_sample_vcf:
         if not os.path.isfile(finput):
-            utils.abort(AP, 'Vcf file doesn"t exist : %s' % (finput,))
+            utils.abort(AP, 'Vcf file doesn"t exist: %s' % (finput,))
     if not os.path.isfile(args.input_reference_fasta):
         utils.abort(
-            AP, 'Reference file doesn"t exist : %s' % (args.input_reference_fasta,)
+            AP, 'Reference file doesn"t exist: %s' % (args.input_reference_fasta,)
         )
     if not os.path.isdir(os.path.dirname(os.path.abspath(args.output_hmnfusion_xlsx))):
-        utils.abort(AP, 'Outdir doesn"t exist : %s' % (args.output_hmnfusion_xlsx,))
+        utils.abort(AP, 'Outdir doesn"t exist: %s' % (args.output_hmnfusion_xlsx,))
 
     # Run.
+    logging.info("Check index fasta reference")
+    if not utils.check_fasta_index(args.input_reference_fasta):
+        utils.abort(
+            'Index of fasta file doesn"t exist: %s' % (args.input_reference_fasta,)
+        )
+
     logging.info("Extract events from files")
-    df = mmej_deletion.extract(args.input_sample_vcf)
+    mmej_deletions = []
+    for vcf_file in args.input_sample_vcf:
+        mmej_deletions.extend(mmej_deletion.MmejDeletion.from_vcf(path=vcf_file))
 
     logging.info("Caracterize events with reference file")
-    df = mmej_deletion.signatures(args.input_reference_fasta, df)
-
-    logging.info("MMEJ signatures significance")
-    df = mmej_deletion.conclude(df)
+    for mmej_del in mmej_deletions:
+        mmej_del.set_value_sequence(path=args.input_reference_fasta)
 
     logging.info("Write output")
-    mmej_deletion.write(args.output_hmnfusion_xlsx, df)
-
+    mmej_deletion.MmejDeletion.to_excel(
+        path=args.output_hmnfusion_xlsx,
+        mmej_deletions=mmej_deletions,
+    )
     logging.info("Analysis is finished")
 
 
@@ -320,8 +328,12 @@ def _cmd_mmej_fusion(args):
         )
 
     # Init.
-    logging.info("Check index fasta reference")
     utils.check_fasta_index(args.input_reference_fasta)
+    logging.info("Check index fasta reference")
+    if not utils.check_fasta_index(args.input_reference_fasta):
+        utils.abort(
+            'Index of fasta file doesn"t exist: %s' % (args.input_reference_fasta,)
+        )
 
     # Run.
     logging.info("Load input file")

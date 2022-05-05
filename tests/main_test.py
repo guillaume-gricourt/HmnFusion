@@ -69,6 +69,8 @@ class Main_test(unittest.TestCase):
     n2_vcf = os.path.join(vcf_path, "N2.vcf")
     p1_vcf = os.path.join(vcf_path, "P1.vcf")
     p2_vcf = os.path.join(vcf_path, "P2.vcf")
+    u1_vcf = os.path.join(vcf_path, "U1.vcf")
+    u2_vcf = os.path.join(vcf_path, "U2.vcf")
     mmej_deletion_n1 = os.path.join(hmnfusion_path, "N1.mmej-deletion.xlsx")
     mmej_deletion_n1n2 = os.path.join(hmnfusion_path, "N1N2.mmej-deletion.xlsx")
     mmej_deletion_n1p1p2 = os.path.join(hmnfusion_path, "N1P1P2.mmej-deletion.xlsx")

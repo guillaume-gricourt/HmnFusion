@@ -1,3 +1,4 @@
+import enum
 import json
 import logging
 import os
@@ -23,6 +24,11 @@ class ExecutableNotFound(Exception):
             return "ExecutableNotFound, {0}".format(self.message)
         else:
             return "ExecutableNotFound"
+
+
+class EnumNoValue(enum.Enum):
+    def __repr__(self):
+        return "<%s.%s>" % (self.__class__.__name__, self.name)
 
 
 def abort(parser, msg: str = ""):
