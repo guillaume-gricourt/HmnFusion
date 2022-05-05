@@ -46,8 +46,9 @@ class TestUtils(Main_test):
         a, b = utils.bam_to_fastq(path=self.sample_m.bam)
         self.assertTrue(a.endswith(".fastq.gz"))
         self.assertTrue(b.endswith(".fastq.gz"))
-        self.assertTrue(filecmp.cmp(a, self.sample_m.fastq[0] + ".gz"))
-        self.assertTrue(filecmp.cmp(b, self.sample_m.fastq[1] + ".gz"))
+
+        self.assertTrue(Main_test.compare_file_gz(a, self.sample_m.fastq[0] + ".gz"))
+        self.assertTrue(Main_test.compare_file_gz(b, self.sample_m.fastq[1] + ".gz"))
         os.remove(a)
         os.remove(b)
 

@@ -1,3 +1,5 @@
+import gzip
+import hashlib
 import os
 import subprocess
 import unittest
@@ -93,3 +95,12 @@ class Main_test(unittest.TestCase):
             args = args.split()
         ret = subprocess.run(args, capture_output=True, encoding="utf8")
         return ret
+
+    @classmethod
+    def compare_file_gz(cls, a: str, b: str) -> bool:
+        # https://stackoverflow.com/questions/31027268
+        fa = hashlib.sha256(gzip.open(a, "rb").read()).digest()
+        fb = hashlib.sha256(gzip.open(b, "rb").read()).digest()
+        if fa == fb:
+            return True
+        return False
