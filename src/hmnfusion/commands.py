@@ -272,17 +272,19 @@ def _cmd_mmej_deletion(args):
 
     # Run.
     logging.info("Extract events from files")
-    df = mmej_deletion.extract(args.input_sample_vcf)
+    mmej_deletions = []
+    for vcf_file in args.input_sample_vcf:
+        mmej_deletions.extend(mmej_deletion.MmejDeletion.from_vcf(path=vcf_file))
 
     logging.info("Caracterize events with reference file")
-    df = mmej_deletion.signatures(args.input_reference_fasta, df)
-
-    logging.info("MMEJ signatures significance")
-    df = mmej_deletion.conclude(df)
+    for mmej_del in mmej_deletions:
+        mmej_del.set_value_sequence(path=args.input_reference_fasta)
 
     logging.info("Write output")
-    mmej_deletion.write(args.output_hmnfusion_xlsx, df)
-
+    mmej_deletion.MmejDeletion.to_excel(
+        path=args.output_hmnfusion_xlsx,
+        mmej_deletions=mmej_deletions,
+    )
     logging.info("Analysis is finished")
 
 
