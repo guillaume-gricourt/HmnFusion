@@ -195,6 +195,7 @@ def validate_name_sample(name: str) -> bool:
         return False
     return True
 
+
 def bam_to_fastq(path: str, compress: int = 4, threads: int = 1) -> Tuple[str, str]:
     """Convert a bam to two fastq files.
 
@@ -210,7 +211,7 @@ def bam_to_fastq(path: str, compress: int = 4, threads: int = 1) -> Tuple[str, s
     Return
     ------
     Tuple[str, str]
-        Path of the fastq files: forward & revers
+        Path of the fastq files: forward & reverse
     """
     main_args = ["--threads", str(threads)]
     # Sort bam.
@@ -237,9 +238,9 @@ def bam_to_fastq(path: str, compress: int = 4, threads: int = 1) -> Tuple[str, s
         "-c",
         str(compress),
         "-f",
-        "1",
+        "0x1",
         "-F",
-        "0x900",
+        "0x1000",
         "-1",
         tmp_fq_fwd.name,
         "-2",
