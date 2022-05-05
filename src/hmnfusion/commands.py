@@ -262,15 +262,21 @@ def _cmd_mmej_deletion(args):
     # Grep args.
     for finput in args.input_sample_vcf:
         if not os.path.isfile(finput):
-            utils.abort(AP, 'Vcf file doesn"t exist : %s' % (finput,))
+            utils.abort(AP, 'Vcf file doesn"t exist: %s' % (finput,))
     if not os.path.isfile(args.input_reference_fasta):
         utils.abort(
-            AP, 'Reference file doesn"t exist : %s' % (args.input_reference_fasta,)
+            AP, 'Reference file doesn"t exist: %s' % (args.input_reference_fasta,)
         )
     if not os.path.isdir(os.path.dirname(os.path.abspath(args.output_hmnfusion_xlsx))):
-        utils.abort(AP, 'Outdir doesn"t exist : %s' % (args.output_hmnfusion_xlsx,))
+        utils.abort(AP, 'Outdir doesn"t exist: %s' % (args.output_hmnfusion_xlsx,))
 
     # Run.
+    logging.info("Check index fasta reference")
+    if not utils.check_fasta_index(args.input_reference_fasta):
+        utils.abort(
+            'Index of fasta file doesn"t exist: %s' % (args.input_reference_fasta,)
+        )
+
     logging.info("Extract events from files")
     mmej_deletions = []
     for vcf_file in args.input_sample_vcf:
@@ -322,8 +328,12 @@ def _cmd_mmej_fusion(args):
         )
 
     # Init.
-    logging.info("Check index fasta reference")
     utils.check_fasta_index(args.input_reference_fasta)
+    logging.info("Check index fasta reference")
+    if not utils.check_fasta_index(args.input_reference_fasta):
+        utils.abort(
+            'Index of fasta file doesn"t exist: %s' % (args.input_reference_fasta,)
+        )
 
     # Run.
     logging.info("Load input file")
