@@ -1,15 +1,14 @@
 import tempfile
 import unittest
 
-import pysam
 import numpy as np
 import pandas as pd
+import pysam
 from hmnfusion import mmej_deletion
 from main_test import Main_test
 
 
 class TestMmejDeletionMain(Main_test):
-
     @classmethod
     def load_records(cls, path: str):
         vcf_in = pysam.VariantFile(path)
@@ -28,7 +27,7 @@ class TestMmejDeletionMain(Main_test):
             id="927f1d86b6d899d163efdb245b9aca67",
             contig="chr19",
             start=5,
-            deletion="TGA"
+            deletion="TGA",
         )
         self.value_1_df = pd.DataFrame(
             {
@@ -36,7 +35,7 @@ class TestMmejDeletionMain(Main_test):
                 "start": 5,
                 "deletion": "TGAGGC",
                 "sequence": "TGAGGC",
-                "conclusion": "alignment ambiguous"
+                "conclusion": "alignment ambiguous",
             },
             index=["86ad494080bc9c322a639d3de922e958"],
         )
@@ -46,7 +45,7 @@ class TestMmejDeletionMain(Main_test):
                 "start": 5,
                 "deletion": "TGA",
                 "sequence": "",
-                "conclusion": "no clear signature"
+                "conclusion": "no clear signature",
             },
             index=["927f1d86b6d899d163efdb245b9aca67"],
         )
@@ -70,10 +69,26 @@ class TestMmejDeletionMain(Main_test):
         self.mmej_deletion_u2_df = pd.concat([self.value_1_df, self.value_2_df])
         self.mmej_deletion_u2_df["sample1"] = ["o", "o"]
         self.mmej_deletion_u2_df["sample2"] = ["o", pd.NA]
-        self.mmej_deletion_u2_df_xlsx = self.mmej_deletion_u2_df.replace({pd.NA: np.nan, "": np.nan})
+        self.mmej_deletion_u2_df_xlsx = self.mmej_deletion_u2_df.replace(
+            {pd.NA: np.nan, "": np.nan}
+        )
         self.mmej_deletion_u2_df_xlsx.reset_index(inplace=True, drop=True)
-        self.mmej_deletion_empty_df = pd.DataFrame(columns=["contig", "start", "deletion", "sequence", "conclusion", "N1"])
-        self.mmej_deletion_empty_df_xlsx = pd.DataFrame({"Unnamed: 0": "no deletion found", "contig": np.nan, "start": np.nan, "deletion": np.nan, "sequence": np.nan, "conclusion": np.nan, "N1": np.nan}, index=[0])
+        self.mmej_deletion_empty_df = pd.DataFrame(
+            columns=["contig", "start", "deletion", "sequence", "conclusion", "N1"]
+        )
+        self.mmej_deletion_empty_df_xlsx = pd.DataFrame(
+            {
+                "Unnamed: 0": "no deletion found",
+                "contig": np.nan,
+                "start": np.nan,
+                "deletion": np.nan,
+                "sequence": np.nan,
+                "conclusion": np.nan,
+                "N1": np.nan,
+            },
+            index=[0],
+        )
+
 
 class TestConclude(Main_test):
     """Test Conclude object"""
@@ -143,9 +158,7 @@ class TestValue(TestMmejDeletionMain):
     def test_to_dataframe(self):
         """Test to_dataframe()"""
         self.value_1.set_sequence(path=self.ref_mmej)
-        self.assertTrue(
-            self.value_1.to_dataframe().equals(self.value_1_df)
-        )
+        self.assertTrue(self.value_1.to_dataframe().equals(self.value_1_df))
 
     def test_to_region(self):
         """Test to_region()"""
@@ -176,14 +189,27 @@ class TestMmejDeletion(TestMmejDeletionMain):
 
     def test_build_empty_dataframe(self):
         """Test build_empty_dataframe"""
-        self.assertTrue(mmej_deletion.MmejDeletion.build_empty_dataframe(name="test").equals(pd.DataFrame(columns=["contig", "start", "deletion", "sequence", "conclusion", "test"])))
+        self.assertTrue(
+            mmej_deletion.MmejDeletion.build_empty_dataframe(name="test").equals(
+                pd.DataFrame(
+                    columns=[
+                        "contig",
+                        "start",
+                        "deletion",
+                        "sequence",
+                        "conclusion",
+                        "test",
+                    ]
+                )
+            )
+        )
 
     def test_get_value_ids(self):
         """Test get_value_ids()"""
         self.assertEqual(self.mmej_deletion_u0.get_value_ids(), [])
         self.assertEqual(
-                self.mmej_deletion_u2_s1.get_value_ids(),
-                ["86ad494080bc9c322a639d3de922e958", "927f1d86b6d899d163efdb245b9aca67"],
+            self.mmej_deletion_u2_s1.get_value_ids(),
+            ["86ad494080bc9c322a639d3de922e958", "927f1d86b6d899d163efdb245b9aca67"],
         )
 
     def test_set_value_sequence(self):
@@ -228,7 +254,9 @@ class TestMmejDeletion(TestMmejDeletionMain):
         for m in mmej_deletions:
             m.set_value_sequence(path=self.ref_mmej)
         with tempfile.NamedTemporaryFile(suffix=".xlsx") as fod:
-            mmej_deletion.MmejDeletion.to_excel(path=fod.name, mmej_deletions=mmej_deletions)
+            mmej_deletion.MmejDeletion.to_excel(
+                path=fod.name, mmej_deletions=mmej_deletions
+            )
             df = pd.read_excel(fod.name)
         self.assertTrue(self.mmej_deletion_empty_df_xlsx.equals(df))
         # Filled
@@ -236,7 +264,9 @@ class TestMmejDeletion(TestMmejDeletionMain):
         for m in mmej_deletions:
             m.set_value_sequence(path=self.ref_mmej)
         with tempfile.NamedTemporaryFile(suffix=".xlsx") as fod:
-            mmej_deletion.MmejDeletion.to_excel(path=fod.name, mmej_deletions=mmej_deletions)
+            mmej_deletion.MmejDeletion.to_excel(
+                path=fod.name, mmej_deletions=mmej_deletions
+            )
             df = pd.read_excel(fod.name)
         self.assertTrue(self.mmej_deletion_u2_df_xlsx.equals(df))
 
