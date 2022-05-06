@@ -44,12 +44,12 @@ class TestBed(Main_test):
         bed.df = self.bed_a_df
 
         # Test 1
-        region = Region("1", 8, "left")
+        region = Region(chrom="1", position=8, orientation="left")
         sel = bed.df.apply(Bed.select_bed, axis=1, args=(region,))
         self.assertEqual(sel.sum(), 1)
 
         # Test 2
-        region = Region("1", 2, "left")
+        region = Region(chrom="1", position=2, orientation="left")
         sel = bed.df.apply(Bed.select_bed, axis=1, args=(region,))
         self.assertEqual(sel.sum(), 0)
 

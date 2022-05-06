@@ -8,8 +8,11 @@ from hmnfusion import bed as ibed
 from hmnfusion import (
     extractfusion,
     fusion,
+    fusion_flag,
     graph,
-    mmej,
+    install_software,
+    mmej_deletion,
+    mmej_fusion,
     quantification,
     region,
     utils,
@@ -106,7 +109,7 @@ P_efgg = P_extract_fusion.add_mutually_exclusive_group(required=True)
 P_efgg.add_argument("--input-genefuse-json", help="Genefuse, json file")
 P_efgg.add_argument("--input-genefuse-html", help="Genefuse, html file")
 P_extract_fusion.add_argument("--input-lumpy-vcf", required=True, help="Lumpy vcf file")
-P_extract_fusion.add_argument("--input-hmnfusion-bed", required=True, help="Bed file")
+P_extract_fusion.add_argument("--input-hmnfusion-bed", help="Bed file")
 P_extract_fusion.add_argument(
     "--consensus-interval",
     type=int,
@@ -196,6 +199,9 @@ def _cmd_quantification(args):
         )
         params["clipped"]["count"] = params["clipped"]["interval"]
 
+    if not utils.validate_name_sample(args.name):
+        logging.warning("Name sample is not valid: %s" % (args.name,))
+
     # Parsing bed file.
     logging.info("Parsing bed file")
     bed = ibed.Bed.from_bed(args.input_hmnfusion_bed)
@@ -205,11 +211,8 @@ def _cmd_quantification(args):
     g = graph.Graph()
     if args.region:
         fus = fusion.Fusion()
-        reg = region.Region(
-            finputs["region"].split(":")[0],
-            finputs["region"].split(":")[1].split("-")[0],
-        )
-        fus.set_region(reg)
+        r = region.Region.from_str(finputs["region"])
+        fus.set_region(r)
         fus.evidence.raw = 0
         g.add_node(fus, 0, False, True)
     elif args.input_hmnfusion_json:
@@ -260,37 +263,136 @@ def _cmd_mmej_deletion(args):
     # Grep args.
     for finput in args.input_sample_vcf:
         if not os.path.isfile(finput):
-            utils.abort(AP, 'Vcf file doesn"t exist : %s' % (finput,))
+            utils.abort(AP, 'Vcf file doesn"t exist: %s' % (finput,))
     if not os.path.isfile(args.input_reference_fasta):
         utils.abort(
-            AP, 'Reference file doesn"t exist : %s' % (args.input_reference_fasta,)
+            AP, 'Reference file doesn"t exist: %s' % (args.input_reference_fasta,)
         )
     if not os.path.isdir(os.path.dirname(os.path.abspath(args.output_hmnfusion_xlsx))):
-        utils.abort(AP, 'Outdir doesn"t exist : %s' % (args.output_hmnfusion_xlsx,))
+        utils.abort(AP, 'Outdir doesn"t exist: %s' % (args.output_hmnfusion_xlsx,))
 
     # Run.
+    logging.info("Check index fasta reference")
+    if not utils.check_fasta_index(args.input_reference_fasta):
+        utils.abort(
+            'Index of fasta file doesn"t exist: %s' % (args.input_reference_fasta,)
+        )
+
     logging.info("Extract events from files")
-    df = mmej.extract(args.input_sample_vcf)
+    mmej_deletions = []
+    for vcf_file in args.input_sample_vcf:
+        mmej_deletions.extend(mmej_deletion.MmejDeletion.from_vcf(path=vcf_file))
 
     logging.info("Caracterize events with reference file")
-    df = mmej.signatures(args.input_reference_fasta, df)
-
-    logging.info("MMEJ signatures significance")
-    df = mmej.conclude(df)
+    for mmej_del in mmej_deletions:
+        mmej_del.set_value_sequence(path=args.input_reference_fasta)
 
     logging.info("Write output")
-    mmej.write(args.output_hmnfusion_xlsx, df)
-
+    mmej_deletion.MmejDeletion.to_excel(
+        path=args.output_hmnfusion_xlsx,
+        mmej_deletions=mmej_deletions,
+    )
     logging.info("Analysis is finished")
 
 
-P_mmej = AP_subparsers.add_parser("mmej-deletion", help=_cmd_mmej_deletion.__doc__)
-P_mmej.add_argument("--input-sample-vcf", nargs="+", help="Vcf file")
-P_mmej.add_argument(
+P_mmej_deletion = AP_subparsers.add_parser(
+    "mmej-deletion", help=_cmd_mmej_deletion.__doc__
+)
+P_mmej_deletion.add_argument("--input-sample-vcf", nargs="+", help="Vcf file")
+P_mmej_deletion.add_argument(
     "--input-reference-fasta", required=True, help="Genome of reference"
 )
-P_mmej.add_argument("--output-hmnfusion-xlsx", help="Output file")
-P_mmej.set_defaults(func=_cmd_mmej_deletion)
+P_mmej_deletion.add_argument("--output-hmnfusion-xlsx", help="Output file")
+P_mmej_deletion.set_defaults(func=_cmd_mmej_deletion)
+
+
+def _cmd_mmej_fusion(args):
+    """Identify MMEJ from fusion"""
+    logging.info("Start analysis - MMEJ Fusion")
+    # Check if all exists.
+    if not os.path.isfile(args.input_hmnfusion_json):
+        utils.abort(AP, "File input doesn't exist: %s" % (args.input_hmnfusion_json,))
+    if not os.path.isfile(args.input_reference_fasta):
+        utils.abort(
+            AP, "File reference doesn't exist: %s" % (args.input_reference_fasta,)
+        )
+    if not os.path.isfile(args.input_sample_bam):
+        utils.abort(AP, "File bam doesn't exist: %s" % (args.input_sample_bam,))
+    if not os.path.isdir(os.path.dirname(os.path.abspath(args.output_hmnfusion_xlsx))):
+        utils.abort(AP, "Outdir doesn't exist: %s" % (args.output_hmnfusion_xlsx,))
+
+    if args.size_to_extract % 2 != 0:
+        utils.abort(
+            AP,
+            "Size_to_extract argument should be an even number: %s"
+            % (args.size_to_extract,),
+        )
+
+    # Init.
+    utils.check_fasta_index(args.input_reference_fasta)
+    logging.info("Check index fasta reference")
+    if not utils.check_fasta_index(args.input_reference_fasta):
+        utils.abort(
+            'Index of fasta file doesn"t exist: %s' % (args.input_reference_fasta,)
+        )
+
+    # Run.
+    logging.info("Load input file")
+    g = extractfusion.read_hmnfusion_json(args.input_hmnfusion_json)
+
+    # Subset.
+    logging.info("Select fusion")
+    fusions = g.subset_graph(
+        include=args.fusion_include_flag, exclude=args.fusion_exclude_flag
+    )
+
+    # Process fusion.
+    logging.info("Get mmej motif from %s fusions" % (len(fusions),))
+    dfs = []
+    for f in sorted(fusions):
+        f.set_mmej(
+            path_reference=args.input_reference_fasta,
+            path_bam=args.input_sample_bam,
+            interval=args.size_to_extract,
+        )
+        dfs.append(f.mmej_dataframe())
+
+    logging.info("Write fusions to output file")
+    mmej_fusion.write(filename=args.output_hmnfusion_xlsx, dfs=dfs)
+
+    logging.info("End analysis - MMEJ Fusion")
+
+
+P_mmej_fusion = AP_subparsers.add_parser("mmej-fusion", help=_cmd_mmej_fusion.__doc__)
+P_mmej_fusion.add_argument(
+    "--input-hmnfusion-json", required=True, help="HmnFusion, json file"
+)
+P_mmej_fusion.add_argument("--input-sample-bam", required=True, help="Bam file")
+P_mmej_fusion.add_argument(
+    "--input-reference-fasta", required=True, help="Reference, fasta file"
+)
+P_mmej_fusion.add_argument(
+    "--fusion-include-flag",
+    default=8,
+    type=int,
+    help="Select fusions with fusion-flag",
+)
+P_mmej_fusion.add_argument(
+    "--fusion-exclude-flag",
+    default=7,
+    type=int,
+    help="Exclude fusions with fusion-flag",
+)
+P_mmej_fusion.add_argument(
+    "--size-to-extract",
+    type=int,
+    default=60,
+    help="Size of sequence to extract before and after the genomic coordinate (even number)",
+)
+P_mmej_fusion.add_argument(
+    "--output-hmnfusion-xlsx", required=True, help="Excel file output"
+)
+P_mmej_fusion.set_defaults(func=_cmd_mmej_fusion)
 
 
 def _cmd_wkf_hmnfusion(args):
@@ -322,6 +424,9 @@ def _cmd_wkf_hmnfusion(args):
         )
     if not os.path.isdir(os.path.dirname(os.path.abspath(args.output_hmnfusion_vcf))):
         utils.abort(AP, "Outdir doesn't exist : %s" % (args.output_hmnfusion_vcf,))
+
+    if not utils.validate_name_sample(args.name):
+        logging.warning("Name sample is not valid: %s" % (args.name,))
 
     # Run.
     logging.info("Run Worflow HmnFusion")
@@ -367,20 +472,24 @@ def _cmd_wkf_fusion(args):
     """Worflow to detect & quantify fusions with Genefuse, Lumpy and HmnFusion"""
     logging.info("Start - Worfklow Fusion")
     # Args.
-    if not os.path.isfile(args.input_forward_fastq):
-        utils.abort(
-            AP, "File Fastq Forward doesn't exist : %s" % (args.input_forward_fastq,)
-        )
-    if not os.path.isfile(args.input_reverse_fastq):
-        utils.abort(
-            AP, "File Fastq Reverse doesn't exist : %s" % (args.input_reverse_fastq,)
-        )
     if not os.path.isfile(args.input_sample_bam):
         utils.abort(AP, "File bam doesn't exist : %s" % (args.input_sample_bam,))
     if not utils.check_bam_index(args.input_sample_bam):
         utils.abort(
             AP, "Input alignment file must be in BAM format, index could not be build"
         )
+
+    input_forward_fastq = args.input_forward_fastq
+    input_reverse_fastq = args.input_reverse_fastq
+    is_convert_bam = False
+    if (
+        input_forward_fastq is None
+        or not os.path.isfile(input_forward_fastq)
+        or input_reverse_fastq is None
+        or not os.path.isfile(input_reverse_fastq)
+    ):
+        is_convert_bam = True
+
     input_hmnfusion_bed = args.input_hmnfusion_bed
     if input_hmnfusion_bed is None or not os.path.isfile(input_hmnfusion_bed):
         logging.warning("Use default hmnfusion bed")
@@ -416,16 +525,25 @@ def _cmd_wkf_fusion(args):
     if not os.path.isdir(os.path.dirname(os.path.abspath(args.output_lumpy_vcf))):
         utils.abort(AP, "Outdir doesn't exist : %s" % (args.output_lumpy_vcf,))
 
+    if not utils.validate_name_sample(args.name):
+        logging.warning("Name sample is not valid: %s" % (args.name,))
+
     # Threads
     threads_genefuse = 1
     if args.threads > 1:
         threads_genefuse = math.ceil(args.threads * 0.8)
 
     # Run.
+    if is_convert_bam:
+        logging.info("Convert bam to fastq")
+        input_forward_fastq, input_reverse_fastq = utils.bam_to_fastq(
+            path=args.input_sample_bam, threads=args.threads
+        )
+
     logging.info("Run Workflow Fusion")
     config = {
-        "input_forward_fastq": args.input_forward_fastq,
-        "input_reverse_fastq": args.input_reverse_fastq,
+        "input_forward_fastq": input_forward_fastq,
+        "input_reverse_fastq": input_reverse_fastq,
         "input_sample_bam": args.input_sample_bam,
         "name": args.name,
         "input_genefuse_bed": input_genefuse_bed,
@@ -451,12 +569,8 @@ def _cmd_wkf_fusion(args):
 
 
 P_wkf_fusion = AP_subparsers.add_parser("workflow-fusion", help=_cmd_wkf_fusion.__doc__)
-P_wkf_fusion.add_argument(
-    "--input-forward-fastq", required=True, help="Fastq file forward"
-)
-P_wkf_fusion.add_argument(
-    "--input-reverse-fastq", required=True, help="Fastq file reverse"
-)
+P_wkf_fusion.add_argument("--input-forward-fastq", help="Fastq file forward")
+P_wkf_fusion.add_argument("--input-reverse-fastq", help="Fastq file reverse")
 P_wkf_fusion.add_argument("--input-sample-bam", required=True, help="Bam file")
 P_wkf_fusion.add_argument("--input-genefuse-bed", help="Genefuse bed file")
 P_wkf_fusion.add_argument("--input-lumpy-bed", help="Lumpy bed file")
@@ -483,6 +597,68 @@ P_wkf_fusion.add_argument(
     help="Threads used",
 )
 P_wkf_fusion.set_defaults(func=_cmd_wkf_fusion)
+
+
+# Installation software.
+def _cmd_install_software(args):
+    """Install all softwares"""
+    logging.info("Start - install-software")
+
+    logging.info("Check if software required are installed")
+    if not install_software.InstallSoftware.required():
+        utils.abort("Failed")
+    if args.uninstall:
+        if not install_software.InstallSoftware.uninstall_genefuse():
+            logging.warning("GeneFuse could not be uninstall")
+        if not install_software.InstallSoftware.uninstall_lumpy():
+            logging.warning("Lumpy could not be uninstall")
+    else:
+        path = install_software.InstallSoftware.get_path_folder()
+        if path is None:
+            utils.abort(
+                "No folder in the path could not be written, change user to more level privileges"
+            )
+        if not install_software.InstallSoftware.install_genefuse(path=path):
+            utils.abort("Failed")
+        if not install_software.InstallSoftware.install_lumpy():
+            utils.abort("Failed")
+
+    logging.info("End - install-software")
+
+
+P_install_software = AP_subparsers.add_parser(
+    "install-software", help=_cmd_install_software.__doc__
+)
+P_install_software.add_argument(
+    "--uninstall",
+    action="store_true",
+    help="Remove GeneFuse & lumpy-sv conda environment",
+)
+P_install_software.set_defaults(func=_cmd_install_software)
+
+
+# fusion flag.
+def _cmd_fusion_flag(args):
+    """Show all fusion flag"""
+    # Reset logging
+    for handler in logging.root.handlers:
+        logging.root.removeHandler(handler)
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(message)s",
+    )
+    # Grep all attributes
+    values = []
+    for attr in dir(fusion_flag.FusionFlag):
+        if not attr.startswith("__"):
+            values.append((attr, fusion_flag.FusionFlag[attr].value))
+    # Print values
+    for value in sorted(values, key=lambda x: x[1]):
+        logging.info("%s\t%s" % (value[0], value[1]))
+
+
+P_fusion_flag = AP_subparsers.add_parser("fusion-flag", help=_cmd_fusion_flag.__doc__)
+P_fusion_flag.set_defaults(func=_cmd_fusion_flag)
 
 
 # Version.
