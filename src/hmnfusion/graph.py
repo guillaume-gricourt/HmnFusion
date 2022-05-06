@@ -1,12 +1,14 @@
 import copy
 import itertools
-from typing import Dict, List
+import json
+from typing import Any, Dict, List
 
 import matplotlib.pyplot as plt
 import networkx as nx
+from hmnfusion import _version
 from hmnfusion import bed as hmn_bed
 from hmnfusion import fusion as hmn_fusion
-from hmnfusion import fusion_flag
+from hmnfusion import fusion_flag, utils
 
 
 class Graph(object):
@@ -460,6 +462,55 @@ class Graph(object):
                 g.graph.nodes[n]["fusion"]
             )
         return g
+
+    def to_json(self, path: str, metadata: Dict[Any, Any] = None) -> None:
+        """Write graph to a JSON file.
+
+        Parameters
+        -----------
+        path: str
+            A path from a JSON file.
+        metadata: dict (default: {})
+            Some metadata
+
+        Return
+        ------
+        None
+
+        See also
+        --------
+        from_json()
+        """
+        if metadata is None:
+            metadata = dict()
+        metadata["software"] = dict(
+            name=_version.__app_name__, version=_version.__version__
+        )
+        self.update_graph_metadata(metadata)
+        # Write
+        with open(path, "w") as fod:
+            json.dump(self.to_dict(), fod, cls=hmn_fusion.FusionEncoder)
+
+    @classmethod
+    def from_json(cls, path: str) -> "Graph":
+        """Read a JSON file built with the extractfusion command.
+
+        Parameters
+        -----------
+        path: str
+            A path from a JSON file.
+
+        Return
+        ------
+        graph.Graph
+            A novel object
+
+        See also
+        --------
+        to_json()
+        """
+        data = utils.read_json(path)
+        return cls.from_dict(data)
 
     def to_plot(self, path: str) -> None:
         """Plot graph to a file.

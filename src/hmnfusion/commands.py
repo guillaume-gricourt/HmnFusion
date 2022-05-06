@@ -98,7 +98,7 @@ def _cmd_extract_fusion(args):
     # Write output.
     if foutput:
         logging.info("Write output")
-        extractfusion.write_hmnfusion_json(foutput, finputs, g)
+        g.to_json(path=foutput, metadata=dict(finputs=finputs))
     logging.info("Analysis is finished")
 
 
@@ -216,7 +216,7 @@ def _cmd_quantification(args):
         fus.evidence.raw = 0
         g.add_node(fus, 0, False, True)
     elif args.input_hmnfusion_json:
-        g = extractfusion.read_hmnfusion_json(finputs["hmnfusion_json"])
+        g = graph.Graph.from_json(finputs["hmnfusion_json"])
 
     # Process
     logging.info("Calcul VAF fusion")
@@ -338,7 +338,7 @@ def _cmd_mmej_fusion(args):
 
     # Run.
     logging.info("Load input file")
-    g = extractfusion.read_hmnfusion_json(args.input_hmnfusion_json)
+    g = graph.Graph.from_json(args.input_hmnfusion_json)
 
     # Subset.
     logging.info("Select fusion")
