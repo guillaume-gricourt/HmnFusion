@@ -1,8 +1,8 @@
 import logging
+import os
 import shutil
 import stat
 import tempfile
-import os
 from typing import Optional
 
 from hmnfusion import utils
@@ -22,7 +22,10 @@ class InstallSoftware(object):
     SOFTWARE_REQUIRED: List[str]
         all software names required
     """
-    GENEFUSE_URL = "https://github.com/OpenGene/GeneFuse/archive/refs/tags/v0.6.1.tar.gz"
+
+    GENEFUSE_URL = (
+        "https://github.com/OpenGene/GeneFuse/archive/refs/tags/v0.6.1.tar.gz"
+    )
     LUMPY_VERSION = "0.3.1"
     LUMPY_ENV_NAME = "lumpy-sv"
     SOFTWARE_REQUIRED = [
@@ -83,12 +86,23 @@ class InstallSoftware(object):
             logging.warning("GeneFuse is already in the PATH")
             return True
         tmpdir = tempfile.TemporaryDirectory()
-        args = ["wget", cls.GENEFUSE_URL, "-O", os.path.join(tmpdir.name, "GeneFuse.tar.gz")]
+        args = [
+            "wget",
+            cls.GENEFUSE_URL,
+            "-O",
+            os.path.join(tmpdir.name, "GeneFuse.tar.gz"),
+        ]
         ret = utils.cmdline(args)
-        if ret.returncode > 0 :
+        if ret.returncode > 0:
             logging.error("Could not download GeneFuse")
             return False
-        args = ["tar", "-xf", os.path.join(tmpdir.name, "GeneFuse.tar.gz"), "-C", tmpdir.name]
+        args = [
+            "tar",
+            "-xf",
+            os.path.join(tmpdir.name, "GeneFuse.tar.gz"),
+            "-C",
+            tmpdir.name,
+        ]
         ret = utils.cmdline(args)
         if ret.returncode > 0:
             logging.error("Could not deflate GeneFuse.tar.gz")
@@ -154,7 +168,9 @@ class InstallSoftware(object):
             True if install is done, False otherwise
         """
         if cls.check_env_conda(name=cls.LUMPY_ENV_NAME):
-            logging.warning("Environment 'lumpy-sv' already exists, install could not be done")
+            logging.warning(
+                "Environment 'lumpy-sv' already exists, install could not be done"
+            )
             return True
         args = [
             "conda",

@@ -24,6 +24,14 @@ class Test_install_software(unittest.TestCase):
     def test_lumpy(self):
         """Test lumpy install/uninstall"""
         self.assertTrue(install_software.InstallSoftware.install_lumpy())
-        self.assertTrue(install_software.InstallSoftware.check_env_conda(name=install_software.InstallSoftware.LUMPY_ENV_NAME))
+        self.assertTrue(
+            install_software.InstallSoftware.check_env_conda(
+                name=install_software.InstallSoftware.LUMPY_ENV_NAME
+            )
+        )
         self.assertTrue(install_software.InstallSoftware.uninstall_lumpy())
-        self.assertFalse(install_software.InstallSoftware.check_env_conda(name=install_software.InstallSoftware.LUMPY_ENV_NAME))
+        self.assertFalse(
+            install_software.InstallSoftware.check_env_conda(
+                name=install_software.InstallSoftware.LUMPY_ENV_NAME
+            )
+        )

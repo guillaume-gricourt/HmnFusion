@@ -12,7 +12,11 @@ class Test_InstallSoftware(unittest.TestCase):
         # Check uninstall
         ret = utils.cmdline(["genefuse", "--help"])
         self.assertEqual(ret.returncode, 0)
-        self.assertTrue(install_software.InstallSoftware.check_env_conda(name=install_software.InstallSoftware.LUMPY_ENV_NAME))
+        self.assertTrue(
+            install_software.InstallSoftware.check_env_conda(
+                name=install_software.InstallSoftware.LUMPY_ENV_NAME
+            )
+        )
         # Uninstall
         args += ["--uninstall"]
         ret = utils.cmdline(args)
@@ -20,4 +24,8 @@ class Test_InstallSoftware(unittest.TestCase):
         # Check uninstall
         with self.assertRaises(utils.ExecutableNotFound):
             utils.find_executable(name="genefuse")
-        self.assertFalse(install_software.InstallSoftware.check_env_conda(name=install_software.InstallSoftware.LUMPY_ENV_NAME))
+        self.assertFalse(
+            install_software.InstallSoftware.check_env_conda(
+                name=install_software.InstallSoftware.LUMPY_ENV_NAME
+            )
+        )
