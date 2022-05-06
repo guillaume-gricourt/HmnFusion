@@ -87,27 +87,27 @@ def update_list(li: List[object], indexes: List[int]) -> List[object]:
     return li
 
 
-def cmdline(args: List[str], logger: logging.Logger = logging.getLogger()) -> int:
+def cmdline(args: List[str], show_output: bool = True) -> subprocess.CompletedProcess:
     """Run a command line.
 
     Parameters
     ----------
     args: List[str]
         A list of argument
-    logger: logging.Logger (default: logging.getLogger())
-        A logger object
+    show_output: bool (default: True)
+        Output command line
 
     Return
     ------
-    int
-        Return code from the comand line
+    subprocess.CompletedProcess
+        Return result obtained with subprocess
     """
     ret = subprocess.run(args, capture_output=True, encoding="utf8")
-    if ret.stdout is not None:
+    if show_output and ret.stdout is not None:
         logging.info(ret.stdout)
-    if ret.stderr is not None:
+    if show_output and ret.stderr is not None:
         logging.warning(ret.stderr)
-    return ret.returncode
+    return ret
 
 
 def check_bam_index(path: str) -> bool:
@@ -159,23 +159,32 @@ def check_fasta_index(path: str) -> bool:
     return True
 
 
-def find_executable(executable: str, msg: str = "") -> None:
-    """Find an executable in the path and raise an error if not found.
+def find_executable(name: str, toraise: bool = True) -> bool:
+    """Find an executable in the PATH and raise an error if not found.
 
     Parameters
     ----------
-    executable: str
+    name: str
         Name of the executable
-    msg: str (default: executable name)
-        Message to throw in the error
+    toraise: bool (default: True)
+        Raise an error, otherwise return False
+
+    Raises
+    ------
+    ExecutableNotFound
+        If name is not in the PATH
+
     Return
     ------
-    None
+    bool
+        True if executable is found
     """
-    if shutil.which(executable) is None:
-        if msg == "":
-            msg = executable
-        raise ExecutableNotFound(msg)
+    if shutil.which(name) is None:
+        if toraise:
+            raise ExecutableNotFound(name)
+        else:
+            return False
+    return True
 
 
 def validate_name_sample(name: str) -> bool:
@@ -240,7 +249,7 @@ def bam_to_fastq(path: str, compress: int = 4, threads: int = 1) -> Tuple[str, s
         "-f",
         "0x1",
         "-F",
-        "0x1000",
+        "0x900",
         "-1",
         tmp_fq_fwd.name,
         "-2",
