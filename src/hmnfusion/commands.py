@@ -127,34 +127,22 @@ def _cmd_quantification(args):
 
     # Check if all exists.
     logging.info("Check args")
-    finputs = {}
-    foutput = args.output_hmnfusion_vcf
-    finputs["output"] = foutput
-    if args.input_hmnfusion_json:
-        finputs["hmnfusion_json"] = args.input_hmnfusion_json
-        if not os.path.isfile(finputs["hmnfusion_json"]):
-            utils.abort(
-                AP,
-                "HmnFusion Json file doesn't exist : %s" % (finputs["hmnfusion_json"],),
-            )
-    if args.region:
-        if not region.Region.check_region(args.region):
-            utils.abort(
-                AP,
-                "Region format is not well formated. \
-                Required <chrom>:<position>",
-            )
-        finputs["region"] = args.region
-
-    finputs["alignment"] = {}
-    finputs["alignment"]["path"] = args.input_sample_bam
-    finputs["alignment"]["mode"] = "rb"
-    if not os.path.isfile(finputs["alignment"]["path"]):
+    if args.input_hmnfusion_json and not os.path.isfile(args.input_hmnfusion_json):
         utils.abort(
             AP,
-            "Input alignment file doesn't exist : %s" % (finputs["alignment"]["path"],),
+            "HmnFusion Json file doesn't exist : %s" % (args.input_hmnfusion_json,),
         )
-    if not utils.check_bam_index(finputs["alignment"]["path"]):
+    if args.region and not region.Region.check_region(args.region):
+        utils.abort(
+            AP,
+            "Region format is not well formated. Required <chrom>:<position>",
+        )
+    if not os.path.isfile(args.input_sample_bam):
+        utils.abort(
+            AP,
+            "Input alignment file doesn't exist : %s" % (args.input_sample_bam,),
+        )
+    if not utils.check_bam_index(args.input_sample_bam):
         utils.abort(
             AP, "Input alignment file must be in BAM format, index could not be build"
         )
@@ -167,14 +155,24 @@ def _cmd_quantification(args):
             "bed",
             "hmnfusion.bed",
         )
-    finputs["bed"] = bed_hmnfusion
-    if not os.path.isdir(os.path.dirname(os.path.abspath(finputs["output"]))):
-        utils.abort(AP, "Outdir doesn't exist : %s" % (finputs["output"],))
+    if args.output_hmnfusion_vcf:
+        if not os.path.isdir(
+            os.path.dirname(os.path.abspath(args.output_hmnfusion_vcf))
+        ):
+            utils.abort(AP, "Outdir doesn't exists: %s" % (args.output_hmnfusion_vcf,))
+        if not os.path.isfile(args.output_hmnfusion_vcf):
+            utils.abort(AP, "Can not overwrite: %s" % (args.output_hmnfusion_vcf,))
+    if args.output_hmnfusion_json:
+        if not os.path.isdir(
+            os.path.dirname(os.path.abspath(args.output_hmnfusion_json))
+        ):
+            utils.abort(AP, "Outdir doesn't exists: %s" % (args.output_hmnfusion_json,))
+        if not os.path.isfile(args.output_hmnfusion_json):
+            utils.abort(AP, "Can not overwrite: %s" % (args.output_hmnfusion_json,))
 
+    # Init.
     params = dict(
-        falignment=dict(
-            path=finputs["alignment"]["path"], mode=finputs["alignment"]["mode"]
-        ),
+        falignment=dict(path=args.input_sample_bam, mode="rb"),
         clipped=dict(count=args.baseclipped_count, interval=args.baseclipped_interval),
     )
 
@@ -204,28 +202,32 @@ def _cmd_quantification(args):
 
     # Parsing bed file.
     logging.info("Parsing bed file")
-    bed = ibed.Bed.from_bed(args.input_hmnfusion_bed)
+    bed = ibed.Bed.from_bed(bed_hmnfusion)
 
     # Parsing fusions.
     logging.info("Get region")
     g = graph.Graph()
     if args.region:
         fus = fusion.Fusion()
-        r = region.Region.from_str(finputs["region"])
+        r = region.Region.from_str(args.region)
         fus.set_region(r)
         fus.evidence.raw = 0
         g.add_node(fus, 0, False, True)
     elif args.input_hmnfusion_json:
-        g = graph.Graph.from_json(finputs["hmnfusion_json"])
+        g = graph.Graph.from_json(args.input_hmnfusion_json)
 
     # Process
     logging.info("Calcul VAF fusion")
     quantification.run(params, bed, g)
 
     # Write output.
-    if foutput:
-        logging.info("Write output")
-        quantification.write(foutput, args.name, g)
+    if args.output_hmnfusion_vcf:
+        logging.info("Write output vcf")
+        quantification.write(args.output_hmnfusion_vcf, args.name, g)
+    if args.output_hmnfusion_json:
+        logging.info("Write output vcf")
+        g.to_json(path=args.output_hmnfusion_json, metadata=dict(name=args.name))
+
     logging.info("Analysis is finished")
 
 
@@ -253,6 +255,7 @@ P_quantification.add_argument(
     help="Number of base hard/soft-clipped bases to count in interval (pb)",
 )
 P_quantification.add_argument("--output-hmnfusion-vcf", help="Vcf file output")
+P_quantification.add_argument("--output-hmnfusion-json", help="Json file output")
 P_quantification.set_defaults(func=_cmd_quantification)
 
 
@@ -358,7 +361,7 @@ def _cmd_mmej_fusion(args):
         dfs.append(f.mmej_dataframe())
 
     logging.info("Write fusions to output file")
-    mmej_fusion.write(filename=args.output_hmnfusion_xlsx, dfs=dfs)
+    mmej_fusion.MmejFusion.to_excel(path=args.output_hmnfusion_xlsx, dfs=dfs)
 
     logging.info("End analysis - MMEJ Fusion")
 
