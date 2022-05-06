@@ -10,6 +10,7 @@ from hmnfusion import (
     fusion,
     fusion_flag,
     graph,
+    install_software,
     mmej_deletion,
     mmej_fusion,
     quantification,
@@ -596,6 +597,44 @@ P_wkf_fusion.add_argument(
     help="Threads used",
 )
 P_wkf_fusion.set_defaults(func=_cmd_wkf_fusion)
+
+
+# Installation software.
+def _cmd_install_software(args):
+    """Install all softwares"""
+    logging.info("Start - install-software")
+
+    logging.info("Check if software required are installed")
+    if not install_software.InstallSoftware.required():
+        utils.abort("Failed")
+    if args.uninstall:
+        if not install_software.InstallSoftware.uninstall_genefuse():
+            logging.warning("GeneFuse could not be uninstall")
+        if not install_software.InstallSoftware.uninstall_lumpy():
+            logging.warning("Lumpy could not be uninstall")
+    else:
+        path = install_software.InstallSoftware.get_path_folder()
+        if path is None:
+            utils.abort(
+                "No folder in the path could not be written, change user to more level privileges"
+            )
+        if not install_software.InstallSoftware.install_genefuse(path=path):
+            utils.abort("Failed")
+        if not install_software.InstallSoftware.install_lumpy():
+            utils.abort("Failed")
+
+    logging.info("End - install-software")
+
+
+P_install_software = AP_subparsers.add_parser(
+    "install-software", help=_cmd_install_software.__doc__
+)
+P_install_software.add_argument(
+    "--uninstall",
+    action="store_true",
+    help="Remove GeneFuse & lumpy-sv conda environment",
+)
+P_install_software.set_defaults(func=_cmd_install_software)
 
 
 # fusion flag.
