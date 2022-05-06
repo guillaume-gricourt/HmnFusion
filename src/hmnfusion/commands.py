@@ -10,6 +10,7 @@ from hmnfusion import (
     fusion,
     fusion_flag,
     graph,
+    install_software,
     mmej_deletion,
     mmej_fusion,
     quantification,
@@ -471,20 +472,24 @@ def _cmd_wkf_fusion(args):
     """Worflow to detect & quantify fusions with Genefuse, Lumpy and HmnFusion"""
     logging.info("Start - Worfklow Fusion")
     # Args.
-    if not os.path.isfile(args.input_forward_fastq):
-        utils.abort(
-            AP, "File Fastq Forward doesn't exist : %s" % (args.input_forward_fastq,)
-        )
-    if not os.path.isfile(args.input_reverse_fastq):
-        utils.abort(
-            AP, "File Fastq Reverse doesn't exist : %s" % (args.input_reverse_fastq,)
-        )
     if not os.path.isfile(args.input_sample_bam):
         utils.abort(AP, "File bam doesn't exist : %s" % (args.input_sample_bam,))
     if not utils.check_bam_index(args.input_sample_bam):
         utils.abort(
             AP, "Input alignment file must be in BAM format, index could not be build"
         )
+
+    input_forward_fastq = args.input_forward_fastq
+    input_reverse_fastq = args.input_reverse_fastq
+    is_convert_bam = False
+    if (
+        input_forward_fastq is None
+        or not os.path.isfile(input_forward_fastq)
+        or input_reverse_fastq is None
+        or not os.path.isfile(input_reverse_fastq)
+    ):
+        is_convert_bam = True
+
     input_hmnfusion_bed = args.input_hmnfusion_bed
     if input_hmnfusion_bed is None or not os.path.isfile(input_hmnfusion_bed):
         logging.warning("Use default hmnfusion bed")
@@ -529,10 +534,16 @@ def _cmd_wkf_fusion(args):
         threads_genefuse = math.ceil(args.threads * 0.8)
 
     # Run.
+    if is_convert_bam:
+        logging.info("Convert bam to fastq")
+        input_forward_fastq, input_reverse_fastq = utils.bam_to_fastq(
+            path=args.input_sample_bam, threads=args.threads
+        )
+
     logging.info("Run Workflow Fusion")
     config = {
-        "input_forward_fastq": args.input_forward_fastq,
-        "input_reverse_fastq": args.input_reverse_fastq,
+        "input_forward_fastq": input_forward_fastq,
+        "input_reverse_fastq": input_reverse_fastq,
         "input_sample_bam": args.input_sample_bam,
         "name": args.name,
         "input_genefuse_bed": input_genefuse_bed,
@@ -558,12 +569,8 @@ def _cmd_wkf_fusion(args):
 
 
 P_wkf_fusion = AP_subparsers.add_parser("workflow-fusion", help=_cmd_wkf_fusion.__doc__)
-P_wkf_fusion.add_argument(
-    "--input-forward-fastq", required=True, help="Fastq file forward"
-)
-P_wkf_fusion.add_argument(
-    "--input-reverse-fastq", required=True, help="Fastq file reverse"
-)
+P_wkf_fusion.add_argument("--input-forward-fastq", help="Fastq file forward")
+P_wkf_fusion.add_argument("--input-reverse-fastq", help="Fastq file reverse")
 P_wkf_fusion.add_argument("--input-sample-bam", required=True, help="Bam file")
 P_wkf_fusion.add_argument("--input-genefuse-bed", help="Genefuse bed file")
 P_wkf_fusion.add_argument("--input-lumpy-bed", help="Lumpy bed file")
@@ -590,6 +597,44 @@ P_wkf_fusion.add_argument(
     help="Threads used",
 )
 P_wkf_fusion.set_defaults(func=_cmd_wkf_fusion)
+
+
+# Installation software.
+def _cmd_install_software(args):
+    """Install all softwares"""
+    logging.info("Start - install-software")
+
+    logging.info("Check if software required are installed")
+    if not install_software.InstallSoftware.required():
+        utils.abort("Failed")
+    if args.uninstall:
+        if not install_software.InstallSoftware.uninstall_genefuse():
+            logging.warning("GeneFuse could not be uninstall")
+        if not install_software.InstallSoftware.uninstall_lumpy():
+            logging.warning("Lumpy could not be uninstall")
+    else:
+        path = install_software.InstallSoftware.get_path_folder()
+        if path is None:
+            utils.abort(
+                "No folder in the path could not be written, change user to more level privileges"
+            )
+        if not install_software.InstallSoftware.install_genefuse(path=path):
+            utils.abort("Failed")
+        if not install_software.InstallSoftware.install_lumpy():
+            utils.abort("Failed")
+
+    logging.info("End - install-software")
+
+
+P_install_software = AP_subparsers.add_parser(
+    "install-software", help=_cmd_install_software.__doc__
+)
+P_install_software.add_argument(
+    "--uninstall",
+    action="store_true",
+    help="Remove GeneFuse & lumpy-sv conda environment",
+)
+P_install_software.set_defaults(func=_cmd_install_software)
 
 
 # fusion flag.

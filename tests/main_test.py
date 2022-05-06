@@ -1,3 +1,5 @@
+import gzip
+import hashlib
 import os
 import subprocess
 import unittest
@@ -9,6 +11,7 @@ class Main_test(unittest.TestCase):
         "Sample",
         [
             "name",
+            "fastq",
             "bam",
             "sam",
             "genefuse_json",
@@ -22,6 +25,7 @@ class Main_test(unittest.TestCase):
 
     dataset_path = os.path.join(os.path.dirname(__file__), "dataset")
     # Sample.
+    fastq_path = os.path.join(dataset_path, "fastq")
     ref_path = os.path.join(dataset_path, "ref")
     bam_path = os.path.join(dataset_path, "bam")
     vcf_path = os.path.join(dataset_path, "vcf")
@@ -31,6 +35,7 @@ class Main_test(unittest.TestCase):
 
     sample_a = Sample(
         name="TEST-A",
+        fastq="",
         bam=os.path.join(bam_path, "TEST-A.bam"),
         sam=os.path.join(bam_path, "TEST-A.sam"),
         genefuse_json="",
@@ -42,6 +47,10 @@ class Main_test(unittest.TestCase):
     )
     sample_m = Sample(
         name="TEST-M",
+        fastq=(
+            os.path.join(fastq_path, "TEST-M.R1.fastq"),
+            os.path.join(fastq_path, "TEST-M.R2.fastq"),
+        ),
         bam=os.path.join(bam_path, "TEST-M.bam"),
         sam="",
         genefuse_json=os.path.join(genefuse_path, "TEST-M.json"),
@@ -53,6 +62,7 @@ class Main_test(unittest.TestCase):
     )
     sample_p = Sample(
         name="TEST-P",
+        fastq="",
         bam=os.path.join(bam_path, "TEST-P.bam"),
         sam=os.path.join(bam_path, "TEST-P.sam"),
         genefuse_json=os.path.join(genefuse_path, "TEST-P.json"),
@@ -85,3 +95,12 @@ class Main_test(unittest.TestCase):
             args = args.split()
         ret = subprocess.run(args, capture_output=True, encoding="utf8")
         return ret
+
+    @classmethod
+    def compare_file_gz(cls, a: str, b: str) -> bool:
+        # https://stackoverflow.com/questions/31027268
+        fa = hashlib.sha256(gzip.open(a, "rb").read()).digest()
+        fb = hashlib.sha256(gzip.open(b, "rb").read()).digest()
+        if fa == fb:
+            return True
+        return False

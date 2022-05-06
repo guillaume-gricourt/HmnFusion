@@ -5,7 +5,8 @@ import os
 import re
 import shutil
 import subprocess
-from typing import Dict, List
+import tempfile
+from typing import Dict, List, Tuple
 
 import pysam
 
@@ -86,27 +87,27 @@ def update_list(li: List[object], indexes: List[int]) -> List[object]:
     return li
 
 
-def cmdline(args: List[str], logger: logging.Logger = logging.getLogger()) -> int:
+def cmdline(args: List[str], show_output: bool = True) -> subprocess.CompletedProcess:
     """Run a command line.
 
     Parameters
     ----------
     args: List[str]
         A list of argument
-    logger: logging.Logger (default: logging.getLogger())
-        A logger object
+    show_output: bool (default: True)
+        Output command line
 
     Return
     ------
-    int
-        Return code from the comand line
+    subprocess.CompletedProcess
+        Return result obtained with subprocess
     """
     ret = subprocess.run(args, capture_output=True, encoding="utf8")
-    if ret.stdout is not None:
+    if show_output and ret.stdout is not None:
         logging.info(ret.stdout)
-    if ret.stderr is not None:
+    if show_output and ret.stderr is not None:
         logging.warning(ret.stderr)
-    return ret.returncode
+    return ret
 
 
 def check_bam_index(path: str) -> bool:
@@ -158,23 +159,32 @@ def check_fasta_index(path: str) -> bool:
     return True
 
 
-def find_executable(executable: str, msg: str = "") -> None:
-    """Find an executable in the path and raise an error if not found.
+def find_executable(name: str, toraise: bool = True) -> bool:
+    """Find an executable in the PATH and raise an error if not found.
 
     Parameters
     ----------
-    executable: str
+    name: str
         Name of the executable
-    msg: str (default: executable name)
-        Message to throw in the error
+    toraise: bool (default: True)
+        Raise an error, otherwise return False
+
+    Raises
+    ------
+    ExecutableNotFound
+        If name is not in the PATH
+
     Return
     ------
-    None
+    bool
+        True if executable is found
     """
-    if shutil.which(executable) is None:
-        if msg == "":
-            msg = executable
-        raise ExecutableNotFound(msg)
+    if shutil.which(name) is None:
+        if toraise:
+            raise ExecutableNotFound(name)
+        else:
+            return False
+    return True
 
 
 def validate_name_sample(name: str) -> bool:
@@ -193,3 +203,62 @@ def validate_name_sample(name: str) -> bool:
     if re.search(r"\s+", name):
         return False
     return True
+
+
+def bam_to_fastq(path: str, compress: int = 4, threads: int = 1) -> Tuple[str, str]:
+    """Convert a bam to two fastq files.
+
+    Parameters
+    ----------
+    path: str
+        Path to the bam file
+    compress: int (default: 4)
+        Level of compress fastq file, 0 is disable
+    threads: int (default: 1)
+        Number of threads to use
+
+    Return
+    ------
+    Tuple[str, str]
+        Path of the fastq files: forward & reverse
+    """
+    main_args = ["--threads", str(threads)]
+    # Sort bam.
+    tmp_sort = tempfile.NamedTemporaryFile(suffix=".bam")
+    args = main_args + ["-n", "-o", tmp_sort.name, path]
+    pysam.sort(*args)
+    # Fixmate bam.
+    tmp_fixmate = tempfile.NamedTemporaryFile(suffix=".bam")
+    args = main_args + [tmp_sort.name, tmp_fixmate.name]
+    pysam.fixmate(*args)
+    # Label file.
+    suffixes = ["R{0}", "fastq"]
+    if compress > 0:
+        suffixes.append("gz")
+    label_suffixes = "." + ".".join(suffixes)
+    tmp_fq_fwd = tempfile.NamedTemporaryFile(
+        suffix=label_suffixes.format("1"), delete=False
+    )
+    tmp_fq_rev = tempfile.NamedTemporaryFile(
+        suffix=label_suffixes.format("2"), delete=False
+    )
+    # Convert to fastq.
+    args = main_args + [
+        "-c",
+        str(compress),
+        "-f",
+        "0x1",
+        "-F",
+        "0x900",
+        "-1",
+        tmp_fq_fwd.name,
+        "-2",
+        tmp_fq_rev.name,
+        tmp_fixmate.name,
+    ]
+    pysam.fastq(*args)
+    # Clean up.
+    tmp_sort.close()
+    tmp_fixmate.close()
+
+    return tmp_fq_fwd.name, tmp_fq_rev.name
