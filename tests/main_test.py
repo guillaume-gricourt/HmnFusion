@@ -19,6 +19,8 @@ class Main_test(unittest.TestCase):
             "lumpy",
             "extractfusion",
             "quantification",
+            "quantification_1_json",
+            "quantification_2_json",
             "region",
         ],
     )
@@ -43,6 +45,8 @@ class Main_test(unittest.TestCase):
         lumpy=os.path.join(lumpy_path, "TEST-A.vcf"),
         extractfusion=os.path.join(hmnfusion_path, "TEST-A.extractfusion.json"),
         quantification="",
+        quantification_1_json="",
+        quantification_2_json="",
         region="",
     )
     sample_m = Sample(
@@ -58,6 +62,10 @@ class Main_test(unittest.TestCase):
         lumpy=os.path.join(lumpy_path, "TEST-M.vcf"),
         extractfusion=os.path.join(hmnfusion_path, "TEST-M.extractfusion.json"),
         quantification=os.path.join(hmnfusion_path, "TEST-M.quantification.vcf"),
+        quantification_1_json=os.path.join(
+            hmnfusion_path, "TEST-M.1.quantification.json"
+        ),
+        quantification_2_json="",
         region="",
     )
     sample_p = Sample(
@@ -70,6 +78,12 @@ class Main_test(unittest.TestCase):
         lumpy=os.path.join(lumpy_path, "TEST-P.vcf"),
         extractfusion=os.path.join(hmnfusion_path, "TEST-P.extractfusion.json"),
         quantification=os.path.join(hmnfusion_path, "TEST-P.quantification.vcf"),
+        quantification_1_json=os.path.join(
+            hmnfusion_path, "TEST-P.1.quantification.json"
+        ),
+        quantification_2_json=os.path.join(
+            hmnfusion_path, "TEST-P.2.quantification.json"
+        ),
         region="chr22:23632550",
     )
 

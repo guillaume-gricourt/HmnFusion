@@ -1,8 +1,7 @@
-import json
 import re
 
 import bs4
-from hmnfusion import _version, fusion, graph, region, utils
+from hmnfusion import fusion, graph, region, utils
 from pysam import VariantFile
 
 RE_GENEFUSE_LABEL = re.compile(r"[+-](\w+):(\d+)")
@@ -218,55 +217,3 @@ def read_lumpy(graph: graph.Graph, filename: str, form: str = "vcf") -> None:
     """
     if form == "vcf":
         read_lumpy_vcf(graph, filename)
-
-
-# Input/Output.
-def read_hmnfusion_json(filename: str) -> graph.Graph:
-    """Read a JSON file built with the extractfusion command.
-
-    Parameters
-    -----------
-    filename: str
-        A path from a JSON file.
-
-    Return
-    ------
-    graph.Graph
-        A novel object
-
-    See also
-    --------
-    write_hmnfusion_json()
-    """
-    data = utils.read_json(filename)
-    return graph.Graph.from_dict(data)
-
-
-def write_hmnfusion_json(filename: str, finputs: dict, g: graph.Graph) -> None:
-    """Write fusions to a JSON file.
-
-    Parameters
-    -----------
-    filename: str
-        A path from a JSON file.
-    finputs: dict
-        Some metadata
-    graph: graph.Graph
-        A graph object
-
-    Return
-    ------
-    None
-
-    See also
-    --------
-    read_hmnfusion_json()
-    """
-    data = {}
-    data["inputs"] = finputs
-    data["software"] = dict(name=_version.__app_name__, version=_version.__version__)
-    g.update_graph_metadata(data)
-    data = g.to_dict()
-
-    with open(filename, "w") as fod:
-        json.dump(data, fod, cls=fusion.FusionEncoder)

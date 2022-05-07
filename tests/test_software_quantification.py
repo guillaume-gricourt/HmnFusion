@@ -1,5 +1,4 @@
 import filecmp
-import os
 import re
 import sys
 import tempfile
@@ -11,6 +10,11 @@ from main_test import Main_test
 class InputType(Enum):
     hmnfusion = 1
     region = 2
+
+
+class OutputFmt(Enum):
+    vcf = 1
+    json = 2
 
 
 class CompareQuantification(Enum):
@@ -28,9 +32,13 @@ def find_vaf(path: str):
 
 
 def quantification(
-    sample, bed: str, input_type: InputType, compare: CompareQuantification
+    sample,
+    bed: str,
+    output_fmt: OutputFmt,
+    input_type: InputType,
+    compare: CompareQuantification,
 ) -> bool:
-    with tempfile.NamedTemporaryFile(delete=False) as fd:
+    with tempfile.NamedTemporaryFile() as fd:
         args = ["hmnfusion", "quantification"]
         if input_type == InputType.hmnfusion:
             args += ["--input-hmnfusion-json", sample.extractfusion]
@@ -39,7 +47,10 @@ def quantification(
         args += ["--input-sample-bam", sample.bam]
         args += ["--input-hmnfusion-bed", bed]
         args += ["--name", sample.name]
-        args += ["--output-hmnfusion-vcf", fd.name]
+        if output_fmt == OutputFmt.vcf:
+            args += ["--output-hmnfusion-vcf", fd.name]
+        elif output_fmt == OutputFmt.json:
+            args += ["--output-hmnfusion-json", fd.name]
         print(" ".join(args))
         ret = Main_test.launch(args)
         if ret.returncode > 0:
@@ -47,26 +58,28 @@ def quantification(
             print(ret.stdout)
             sys.exit(1)
 
-        if compare == CompareQuantification.files:
-            sim = filecmp.cmp(fd.name, sample.quantification)
-        elif compare == CompareQuantification.vaf:
-            res = find_vaf(fd.name)
-            print(sample.region)
-            print(res)
-            theorical = find_vaf(sample.quantification)
-            print(theorical)
-            sim = res == theorical
-
-    # Clean up
-    os.remove(fd.name)
+        if output_fmt == OutputFmt.vcf:
+            if compare == CompareQuantification.files:
+                sim = filecmp.cmp(fd.name, sample.quantification)
+            elif compare == CompareQuantification.vaf:
+                res = find_vaf(fd.name)
+                theorical = find_vaf(sample.quantification)
+                sim = res == theorical
+        elif output_fmt == OutputFmt.json:
+            if input_type == InputType.hmnfusion:
+                res = filecmp.cmp(fd.name, sample.quantification_1_json)
+            elif input_type == InputType.region:
+                res = filecmp.cmp(fd.name, sample.quantification_2_json)
+            sim = res
     return sim
 
 
 class Test_software(Main_test):
-    def test_quantification_hmnfusion(self):
+    def test_quantification_hmnfusion_vcf(self):
         sim = quantification(
             self.sample_m,
             self.bed_bcr_path,
+            OutputFmt.vcf,
             InputType.hmnfusion,
             CompareQuantification.files,
         )
@@ -74,15 +87,45 @@ class Test_software(Main_test):
         sim = quantification(
             self.sample_p,
             self.bed_bcr_path,
+            OutputFmt.vcf,
             InputType.hmnfusion,
             CompareQuantification.files,
         )
         self.assertTrue(sim)
 
-    def test_quantification_region(self):
+    def test_quantification_hmnfusion_json(self):
+        sim = quantification(
+            self.sample_m,
+            self.bed_bcr_path,
+            OutputFmt.json,
+            InputType.hmnfusion,
+            CompareQuantification.files,
+        )
+        self.assertTrue(sim)
         sim = quantification(
             self.sample_p,
             self.bed_bcr_path,
+            OutputFmt.json,
+            InputType.hmnfusion,
+            CompareQuantification.files,
+        )
+        self.assertTrue(sim)
+
+    def test_quantification_region_vcf(self):
+        sim = quantification(
+            self.sample_p,
+            self.bed_bcr_path,
+            OutputFmt.vcf,
+            InputType.region,
+            CompareQuantification.vaf,
+        )
+        self.assertTrue(sim)
+
+    def test_quantification_region_json(self):
+        sim = quantification(
+            self.sample_p,
+            self.bed_bcr_path,
+            OutputFmt.json,
             InputType.region,
             CompareQuantification.vaf,
         )
