@@ -98,7 +98,7 @@ def _cmd_extract_fusion(args):
     # Write output.
     if foutput:
         logging.info("Write output")
-        g.to_json(path=foutput, metadata=dict(finputs=finputs))
+        g.to_json(path=foutput, metadata=dict(finputs=finputs, step="extractfusion"))
     logging.info("Analysis is finished")
 
 
@@ -160,15 +160,11 @@ def _cmd_quantification(args):
             os.path.dirname(os.path.abspath(args.output_hmnfusion_vcf))
         ):
             utils.abort(AP, "Outdir doesn't exists: %s" % (args.output_hmnfusion_vcf,))
-        if not os.path.isfile(args.output_hmnfusion_vcf):
-            utils.abort(AP, "Can not overwrite: %s" % (args.output_hmnfusion_vcf,))
     if args.output_hmnfusion_json:
         if not os.path.isdir(
             os.path.dirname(os.path.abspath(args.output_hmnfusion_json))
         ):
             utils.abort(AP, "Outdir doesn't exists: %s" % (args.output_hmnfusion_json,))
-        if not os.path.isfile(args.output_hmnfusion_json):
-            utils.abort(AP, "Can not overwrite: %s" % (args.output_hmnfusion_json,))
 
     # Init.
     params = dict(
@@ -225,8 +221,11 @@ def _cmd_quantification(args):
         logging.info("Write output vcf")
         quantification.write(args.output_hmnfusion_vcf, args.name, g)
     if args.output_hmnfusion_json:
-        logging.info("Write output vcf")
-        g.to_json(path=args.output_hmnfusion_json, metadata=dict(name=args.name))
+        logging.info("Write output json")
+        g.to_json(
+            path=args.output_hmnfusion_json,
+            metadata=dict(name=args.name, step="quantification"),
+        )
 
     logging.info("Analysis is finished")
 
@@ -323,6 +322,11 @@ def _cmd_mmej_fusion(args):
         utils.abort(AP, "File bam doesn't exist: %s" % (args.input_sample_bam,))
     if not os.path.isdir(os.path.dirname(os.path.abspath(args.output_hmnfusion_xlsx))):
         utils.abort(AP, "Outdir doesn't exist: %s" % (args.output_hmnfusion_xlsx,))
+    if args.output_hmnfusion_json:
+        if not os.path.isdir(
+            os.path.dirname(os.path.abspath(args.output_hmnfusion_json))
+        ):
+            utils.abort(AP, "Outdir doesn't exist: %s" % (args.output_hmnfusion_json,))
 
     if args.size_to_extract % 2 != 0:
         utils.abort(
@@ -330,6 +334,8 @@ def _cmd_mmej_fusion(args):
             "Size_to_extract argument should be an even number: %s"
             % (args.size_to_extract,),
         )
+    if not utils.validate_name_sample(args.name):
+        logging.warning("Name sample is not valid: %s" % (args.name,))
 
     # Init.
     utils.check_fasta_index(args.input_reference_fasta)
@@ -362,7 +368,11 @@ def _cmd_mmej_fusion(args):
 
     logging.info("Write fusions to output file")
     mmej_fusion.MmejFusion.to_excel(path=args.output_hmnfusion_xlsx, dfs=dfs)
-
+    if args.output_hmnfusion_json:
+        g.to_json(
+            path=args.output_hmnfusion_json,
+            metadata=dict(name=args.name, step="mmej-fusion"),
+        )
     logging.info("End analysis - MMEJ Fusion")
 
 
@@ -392,9 +402,11 @@ P_mmej_fusion.add_argument(
     default=60,
     help="Size of sequence to extract before and after the genomic coordinate (even number)",
 )
+P_mmej_fusion.add_argument("--name", required=True, help="Name of sample")
 P_mmej_fusion.add_argument(
     "--output-hmnfusion-xlsx", required=True, help="Excel file output"
 )
+P_mmej_fusion.add_argument("--output-hmnfusion-json", help="Json file output")
 P_mmej_fusion.set_defaults(func=_cmd_mmej_fusion)
 
 
