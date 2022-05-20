@@ -5,20 +5,24 @@
 [![GitHub Super-Linter](https://github.com/guillaume-gricourt/HmnFusion/workflows/Tests/badge.svg)](https://github.com/marketplace/actions/super-linter)
 [![Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/guillaume-gricourt/5b62753442bc7c44ae2995299575af0a/raw/coverage.json)](code_coverage)  
 
-## Introduction
-A tool to aggregate results of fusion produced by Genefuse and Lumpy and calculate allelic frequency.  
-
 ## Getting Started
 
 ### Installing
+
 Install with `pip`
 ```bash
-pip install hmnfusion
+# Download from github
+wget https://github.com/guillaume-gricourt/HmnFusion/releases/download/1.1.0/pip.zip
+unzip pip.zip
+# Install
+pip install hmnfusion-1.1.0-py3-none-any.whl
+# Clean up
+rm pip.zip hmnfusion-1.1.0-py3-none-any.whl hmnfusion-1.1.0.tar.gz
 ```
 
 ### Running
 Software is available by
-<pre>HmnFusion <i>command</i> <i>options</i></pre>
+<pre>hmnfusion <i>command</i> <i>options</i></pre>
 
 ## Commands
 
