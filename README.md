@@ -123,7 +123,8 @@ docker run -it \
 
 ## Authors
 
-* **Guillaume Gricourt** - *Initial work*
+* **Guillaume Gricourt**  
+* **Dr. Ivan Sloma**  
 
 ## License
 
