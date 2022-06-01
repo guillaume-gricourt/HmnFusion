@@ -2,10 +2,12 @@ import argparse
 import logging
 import math
 import os
+import tempfile
 
 from hmnfusion import _version
 from hmnfusion import bed as ibed
 from hmnfusion import (
+    download_reference,
     extractfusion,
     fusion,
     fusion_flag,
@@ -410,6 +412,104 @@ P_mmej_fusion.add_argument("--output-hmnfusion-json", help="Json file output")
 P_mmej_fusion.set_defaults(func=_cmd_mmej_fusion)
 
 
+def _cmd_wkf_align(args):
+    """Worflow to build BAM files from FASTQ files"""
+    logging.info("Start - Worfklow Align")
+    # Args.
+    if not os.path.isfile(args.input_forward_fastq):
+        utils.abort(
+            AP, "File Fastq Forward doesn't exist : %s" % (args.input_forward_fastq,)
+        )
+    if not os.path.isfile(args.input_reverse_fastq):
+        utils.abort(
+            AP, "File Fastq Reverse doesn't exist : %s" % (args.input_reverse_fastq,)
+        )
+    input_config_json = args.input_config_json
+    if input_config_json is None or not os.path.isfile(input_config_json):
+        logging.warning("Use default config base")
+        input_config_json = os.path.join(
+            os.path.dirname(os.path.realpath(__file__)),
+            "templates",
+            "snakefile",
+            "config.align.json",
+        )
+    input_design_bed = args.input_design_bed
+    if input_design_bed is None or not os.path.isfile(input_design_bed):
+        logging.warning("Use default design bed")
+        input_design_bed = os.path.join(
+            os.path.dirname(os.path.realpath(__file__)),
+            "templates",
+            "bed",
+            "design.bed",
+        )
+
+    # Run.
+    logging.info("Load config file")
+    config = utils.read_json(path=input_config_json)
+    config_run = {
+        "run": {
+            "input_forward_fastq": args.input_forward_fastq,
+            "input_reverse_fastq": args.input_reverse_fastq,
+            "name": args.name,
+            "input_design_bed": input_design_bed,
+            "output_directory": args.output_directory,
+            "tmpdir": args.tmpdir,
+            "platform": args.platform,
+            "threads": args.threads,
+            "cores": args.threads * 2,
+        }
+    }
+    config.update(config_run)
+
+    logging.info("Run Worflow Align")
+    workflow.run(
+        snakefile=os.path.join(
+            os.path.dirname(os.path.realpath(__file__)),
+            "templates",
+            "snakefile",
+            "Snakefile.align",
+        ),
+        config=config,
+        cores=args.threads,
+    )
+    logging.info("End - Worfklow Align")
+
+
+P_wkf_align = AP_subparsers.add_parser("workflow-align", help=_cmd_wkf_align.__doc__)
+P_wkf_align.add_argument("--input-config-json", help="Input config file")
+P_wkf_align.add_argument(
+    "--input-forward-fastq", required=True, help="Fastq file forward"
+)
+P_wkf_align.add_argument(
+    "--input-reverse-fastq", required=True, help="Fastq file reverse"
+)
+P_wkf_align.add_argument("--name", required=True, help="Name of sample")
+P_wkf_align.add_argument("--input-design-bed", help="Design bed file")
+P_wkf_align.add_argument(
+    "--output-directory", required=True, help="Directory to output"
+)
+P_wkf_align.add_argument(
+    "--tmpdir",
+    default=tempfile.gettempdir(),
+    help="Directory used for temporary results",
+)
+P_wkf_align.add_argument(
+    "--platform",
+    type=str,
+    default="ILLUMINA",
+    help="Platform label to indicate into RGLINE of the BAM file",
+)
+P_wkf_align.add_argument(
+    "--threads",
+    type=int,
+    default=1,
+    choices=range(1, 7),
+    metavar="[1-6]",
+    help="Threads used",
+)
+P_wkf_align.set_defaults(func=_cmd_wkf_align)
+
+
 def _cmd_wkf_hmnfusion(args):
     """Worflow to run HmnFusion ExtractFusion & Quantification"""
     logging.info("Start - Worfklow HmnFusion")
@@ -674,6 +774,65 @@ def _cmd_fusion_flag(args):
 
 P_fusion_flag = AP_subparsers.add_parser("fusion-flag", help=_cmd_fusion_flag.__doc__)
 P_fusion_flag.set_defaults(func=_cmd_fusion_flag)
+
+
+def _cmd_download_zenodo(args):
+    """Download reference files from Zenodo"""
+    logging.info("Start - download-zenodo")
+    # Parse args.
+    output_directory = os.path.abspath(args.output_directory)
+    if not os.path.isdir(output_directory):
+        logging.warning("Create output-directory: %s" % (output_directory,))
+        os.makedirs(output_directory, exist_ok=True)
+    zenodo_id = args.input_zenodo_str
+    access_token = None
+    if args.input_token_str:
+        access_token = args.input_token_str
+    elif args.input_token_txt:
+        if not os.path.isfile(args.input_token_txt):
+            utils.abort(
+                AP, "File TokenAccess doesn't exist : %s" % (args.input_token_txt,)
+            )
+        access_token = download_reference.DownloadZenodo.load_token(
+            path=args.input_token_txt
+        )
+    params = dict()
+    if access_token:
+        params["access_token"] = access_token
+    # Init
+    dwl = download_reference.DownloadZenodo(id=zenodo_id, params=params)
+    # Grep data.
+    items = dwl.show_files()
+    for item in items:
+        logging.info("Process: %s" % (item["filename"],))
+        foutput = os.path.join(output_directory, item["filename"])
+        dwl.download_file(url=item["links"]["download"], path=foutput)
+        download_reference.DownloadZenodo.check_checksum(
+            checksum=item["checksum"], path=foutput
+        )
+
+    logging.info("End - download-zenodo")
+
+
+P_download_zenodo = AP_subparsers.add_parser(
+    "download-zenodo", help=_cmd_download_zenodo.__doc__
+)
+P_download_zenodo.add_argument(
+    "--input-zenodo-str", required=True, help="Id of Zenodo repository"
+)
+P_token = P_download_zenodo.add_mutually_exclusive_group(required=False)
+P_token.add_argument(
+    "--input-token-str",
+    help="Token string to access into repository with restricted access",
+)
+P_token.add_argument(
+    "--input-token-txt",
+    help="File with token to access into repository with restricted access",
+)
+P_download_zenodo.add_argument(
+    "--output-directory", required=True, help="Directory to write files"
+)
+P_download_zenodo.set_defaults(func=_cmd_download_zenodo)
 
 
 # Version.

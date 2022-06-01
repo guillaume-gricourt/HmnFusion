@@ -1,0 +1,172 @@
+# https://github.com/broadinstitute/gatk-docs/tree/master/gatk3-tutorials
+# Trimmer.
+rule sickle:
+    input:
+        r1=INPUT_FORWARD_FASTQ,
+        r2=INPUT_REVERSE_FASTQ,
+    output:
+        r1=temp(os.path.join(TMPDIR, NAME + "_R1_001.fastq.gz")),
+        r2=temp(os.path.join(TMPDIR, NAME + "_R2_001.fastq.gz")),
+        r3=temp(os.path.join(TMPDIR, NAME + "_R3_001.fastq.gz")),
+    params:
+        options=SOFT["sickle"]["options"],
+    conda:
+        "toolbox"
+    threads: THREADS
+    shell:
+        "sickle pe {params.options} -f {input.r1} -r {input.r2} -o {output.r1} -p {output.r2} -s {output.r3}"
+
+
+# "bbduk.sh threads={threads} in={input.r1} in2={input.r2} out={output.r1} out2={output.r2} ref={params.adaptaters} {params.options}"
+
+
+# Aligner.
+rule bwa_mem:
+    input:
+        r1=rules.sickle.output.r1,
+        r2=rules.sickle.output.r2,
+    output:
+        sam=temp(os.path.join(TMPDIR, NAME + ".sam")),
+    params:
+        ref=REF["genome"],
+        pl=PLATFORM,
+        sm=NAME,
+    conda:
+        "aligner"
+    threads: THREADS
+    shell:
+        """bwa mem -t {threads} -R '@RG\\tID:'{params.sm}'\\tSM:'{params.sm}'\\tPL:'{params.pl}'' {params.ref} {input.r1} {input.r2} > {output.sam}"""
+
+
+# Post-Process.
+rule samtools_sam_to_bam:
+    input:
+        sam=rules.bwa_mem.output.sam,
+    output:
+        bam=temp(os.path.join(TMPDIR, NAME + ".raw.bam")),
+    params:
+        options=SOFT["samtools_sam_to_bam"]["options"],
+    conda:
+        "toolbox"
+    threads: THREADS
+    shell:
+        "samtools view -@ {threads} {params.options} -o {output.bam} {input.sam}"
+
+
+rule samtools_sort:
+    input:
+        bam=rules.samtools_sam_to_bam.output.bam,
+    output:
+        bam=temp(os.path.join(TMPDIR, NAME + ".sort.bam")),
+    params:
+        options=SOFT["samtools_sort"]["options"],
+    conda:
+        "toolbox"
+    threads: THREADS
+    shell:
+        "samtools sort -@ {threads} {params.options} -o {output.bam} {input.bam}"
+
+
+rule samtools_index:
+    input:
+        bam=rules.samtools_sort.output.bam,
+    output:
+        bai=temp(os.path.join(TMPDIR, NAME + ".sort.bam.bai")),
+    params:
+        options=SOFT["samtools_index"]["options"],
+    conda:
+        "toolbox"
+    shell:
+        "samtools index {input.bam}"
+
+
+rule picard_markdup:
+    input:
+        bam=rules.samtools_sort.output.bam,
+        bai=rules.samtools_index.output.bai,
+    output:
+        bam=temp(os.path.join(TMPDIR, NAME + ".mark.bam")),
+        bai=temp(os.path.join(TMPDIR, NAME + ".mark.bai")),
+        metrics=temp(os.path.join(TMPDIR, NAME + ".mark.metrics.txt")),
+    params:
+        options=SOFT["picard_markdup"]["options"],
+    conda:
+        "toolbox"
+    shell:
+        "picard MarkDuplicates I={input.bam} O={output.bam} M={output.metrics} {params.options}"
+
+
+# Indel realigner
+rule gatk_realigner_target_creator:
+    input:
+        bam=rules.picard_markdup.output.bam,
+        bai=rules.picard_markdup.output.bai,
+    output:
+        intervals=temp(os.path.join(TMPDIR, NAME + "_target.intervals")),
+    params:
+        bed=INPUT_DESIGN_BED,
+        genome=REF["genome"],
+        known_indels=REF["known_indels"],
+        options=SOFT["gatk_realigner_target_creator"]["options"],
+    conda:
+        "toolbox"
+    threads: CORES
+    shell:
+        "gatk3 -T RealignerTargetCreator -nt {threads} -R {params.genome} -I {input.bam} -L {params.bed} --known {params.known_indels} -o {output.intervals} {params.options}"
+
+
+rule gatk_indel_realigner:
+    input:
+        bam=rules.picard_markdup.output.bam,
+        bai=rules.picard_markdup.output.bai,
+        intervals=rules.gatk_realigner_target_creator.output.intervals,
+    output:
+        bam=temp(os.path.join(TMPDIR, NAME + ".realigned.reads.bam")),
+        bai=temp(os.path.join(TMPDIR, NAME + ".realigned.reads.bai")),
+    params:
+        bed=INPUT_DESIGN_BED,
+        genome=REF["genome"],
+        known_indels=REF["known_indels"],
+        options=SOFT["gatk_indel_realigner"]["options"],
+    conda:
+        "toolbox"
+    shell:
+        "gatk3 -T IndelRealigner -R {params.genome} -I {input.bam} -targetIntervals {input.intervals} -known {params.known_indels} -o {output.bam} {params.options}"
+
+
+# Base recalibrator
+rule gatk_base_recalibrator:
+    input:
+        bam=rules.gatk_indel_realigner.output.bam,
+        bai=rules.gatk_indel_realigner.output.bai,
+    output:
+        txt=temp(os.path.join(TMPDIR, NAME + "_recal_data.table")),
+    params:
+        bed=INPUT_DESIGN_BED,
+        genome=REF["genome"],
+        known_indels=REF["known_indels"],
+        known_snps=REF["known_snps"],
+        options=SOFT["gatk_base_recalibrator"]["options"],
+    conda:
+        "toolbox"
+    threads: THREADS
+    shell:
+        "gatk3 -T BaseRecalibrator -nct {threads} -R {params.genome} -I {input.bam} -L {params.bed} --knownSites {params.known_indels} --knownSites {params.known_snps} -o {output.txt} {params.options}"
+
+
+rule gatk_print_reads:
+    input:
+        bam=rules.gatk_indel_realigner.output.bam,
+        bai=rules.gatk_indel_realigner.output.bai,
+        txt=rules.gatk_base_recalibrator.output.txt,
+    output:
+        bam=os.path.join(OUTDIR, NAME + ".bam"),
+        bai=os.path.join(OUTDIR, NAME + ".bai"),
+    params:
+        genome=REF["genome"],
+        options=SOFT["gatk_print_reads"]["options"],
+    conda:
+        "toolbox"
+    threads: CORES
+    shell:
+        "gatk3 -T PrintReads -nct {threads} -R {params.genome} -I {input.bam} -BQSR {input.txt} -o {output.bam} {params.options}"
