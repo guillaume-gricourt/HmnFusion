@@ -9,6 +9,9 @@ import tempfile
 from typing import Dict, List, Tuple
 
 import pysam
+from openpyxl.utils import get_column_letter
+from openpyxl.worksheet import worksheet
+from openpyxl.worksheet.dimensions import ColumnDimension, DimensionHolder
 
 
 class ExecutableNotFound(Exception):
@@ -262,3 +265,18 @@ def bam_to_fastq(path: str, compress: int = 4, threads: int = 1) -> Tuple[str, s
     tmp_fixmate.close()
 
     return tmp_fq_fwd.name, tmp_fq_rev.name
+
+
+def adjust_dim_worksheet(ws: worksheet.Worksheet) -> None:
+    dim_holder = DimensionHolder(worksheet=ws)
+    for ix, col in enumerate(ws.columns):
+        col_nb = ix + 1
+        lengths = []
+        for cell in col:
+            if cell.value is not None:
+                lengths.append(len(str(cell.value)))
+        length = max(lengths) + 6
+        dim_holder[get_column_letter(col_nb)] = ColumnDimension(
+            ws, min=col_nb, max=col_nb, width=length
+        )
+    ws.column_dimensions = dim_holder

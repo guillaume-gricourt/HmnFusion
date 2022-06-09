@@ -16,4 +16,5 @@ dependencies:
   - pysam
   - pytest
   - pyyaml
+  - requests
   - snakemake

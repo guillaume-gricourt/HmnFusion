@@ -3,13 +3,11 @@ from typing import List
 
 import pandas as pd
 import pysam
-from hmnfusion.utils import EnumNoValue
+from hmnfusion import utils
 from natsort import natsorted
-from openpyxl.utils import get_column_letter
-from openpyxl.worksheet.dimensions import ColumnDimension, DimensionHolder
 
 
-class Conclude(EnumNoValue):
+class Conclude(utils.EnumNoValue):
     """Conclude is an Enum class to represent conclusion about the mmej sequence found"""
 
     UNINITIALIZED = ""
@@ -389,21 +387,8 @@ class MmejDeletion(object):
         # Write output.
         df.to_excel(writer, index=False, sheet_name=sheet_name)
         ws = writer.sheets[sheet_name]  # pull worksheet object
-
         # Adjust width.
-        dim_holder = DimensionHolder(worksheet=ws)
-        for ix, col in enumerate(ws.columns):
-            col_nb = ix + 1
-            lengths = []
-            for cell in col:
-                if cell.value is not None:
-                    lengths.append(len(str(cell.value)))
-            length = max(lengths) + 6
-            dim_holder[get_column_letter(col_nb)] = ColumnDimension(
-                ws, min=col_nb, max=col_nb, width=length
-            )
-        ws.column_dimensions = dim_holder
-
+        utils.adjust_dim_worksheet(ws)
         writer.save()
 
     # Meta functions
