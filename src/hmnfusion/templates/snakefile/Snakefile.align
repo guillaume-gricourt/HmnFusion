@@ -1,0 +1,25 @@
+# Config base
+REF = config["ref"]
+SOFT = config["soft"]
+
+# Config real-time
+INPUT_FORWARD_FASTQ = config["run"]["input_forward_fastq"]
+INPUT_REVERSE_FASTQ = config["run"]["input_reverse_fastq"]
+NAME = config["run"]["name"]
+INPUT_DESIGN_BED = config["run"]["input_design_bed"]
+OUTDIR = config["run"]["output_directory"]
+TMPDIR = config["run"]["tmpdir"]
+PLATFORM = config["run"]["platform"]
+THREADS = config["run"]["threads"]
+CORES = config["run"]["cores"]
+
+INCLUDE = []
+INCLUDE.append(os.path.join(OUTDIR, NAME + ".bam"))
+INCLUDE.append(os.path.join(OUTDIR, NAME + ".bai"))
+
+# Rules.
+rule all:
+    input:
+        INCLUDE,
+
+include: "workflow.align"

@@ -1,0 +1,57 @@
+{
+    "ref" :
+        {
+            "genome": "/ref/hg19/ucsc.hg19.fasta",
+            "known_indels": "/ref/hg19/Mills_and_1000G_gold_standard.indels.hg19.sites.vcf.gz",
+            "known_snps":"/ref/hg19/dbsnp_138.hg19.vcf.gz",
+            "adapters": "/ref/hg19/adapters.fa",
+            "version": "hg19"
+        },
+    "soft" :
+        {
+            "bbduk":
+                {
+                    "options": "hdist=1 qtrim=rl trimq=20 tpe tbo"
+                },
+            "sickle":
+                {
+                    "options": "-t sanger -g -q 20 -l 20"
+                },
+            "bwa_mem":
+                {
+                    "options": "-M"
+                },
+            "samtools_sam_to_bam":
+                {
+                    "options": "-Sbh"
+                },
+            "samtools_sort" :
+                {
+                    "options" : ""
+                },
+            "picard_markdup":
+                {
+                    "options": "VALIDATION_STRINGENCY=SILENT REMOVE_DUPLICATES=false ASSUME_SORT_ORDER=coordinate CREATE_INDEX=true"
+                },
+            "samtools_index":
+                {
+                    "options": ""
+                },
+            "gatk_realigner_target_creator":
+                {
+                    "options": "-Xms1g -Xmx12g"
+                },
+            "gatk_indel_realigner":
+                {
+                    "options": "-Xms1g -Xmx12g"
+                },
+            "gatk_base_recalibrator":
+                {
+                    "options": "-Xms1g -Xmx12g"
+                },
+            "gatk_print_reads":
+                {
+                    "options": "-Xms1g -Xmx12g"
+                }
+        }
+}
