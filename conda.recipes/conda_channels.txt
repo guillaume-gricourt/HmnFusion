@@ -1,3 +1,0 @@
-conda-forge
-bioconda
-defaults
