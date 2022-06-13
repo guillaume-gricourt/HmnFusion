@@ -1,8 +1,10 @@
 import filecmp
+import json
 import re
 import sys
 import tempfile
 from enum import Enum
+from typing import Any, Dict
 
 from main_test import Main_test
 
@@ -29,6 +31,17 @@ def find_vaf(path: str):
     if m is None:
         return None
     return m.group(1)
+
+
+def simplify_json(path: str) -> Dict[Any, Any]:
+    data = json.load(open(path))
+    ix_software = None
+    for ix, metadata in enumerate(data["data"]):
+        if metadata[0] == "software":
+            ix_software = ix
+    if ix_software:
+        del data["data"][ix_software]
+    return data
 
 
 def quantification(
@@ -67,9 +80,13 @@ def quantification(
                 sim = res == theorical
         elif output_fmt == OutputFmt.json:
             if input_type == InputType.hmnfusion:
-                res = filecmp.cmp(fd.name, sample.quantification_1_json)
+                res = simplify_json(fd.name) == simplify_json(
+                    sample.quantification_1_json
+                )
             elif input_type == InputType.region:
-                res = filecmp.cmp(fd.name, sample.quantification_2_json)
+                res = simplify_json(fd.name) == simplify_json(
+                    sample.quantification_2_json
+                )
             sim = res
     return sim
 
