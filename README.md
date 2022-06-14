@@ -4,6 +4,7 @@
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![GitHub Super-Linter](https://github.com/guillaume-gricourt/HmnFusion/workflows/Tests/badge.svg)](https://github.com/marketplace/actions/super-linter)
 [![Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/guillaume-gricourt/5b62753442bc7c44ae2995299575af0a/raw/coverage.json)](code_coverage)  
+[![DOI](https://zenodo.org/badge/259869577.svg)](https://zenodo.org/badge/latestdoi/259869577)  
 
 ## Getting Started
 
@@ -11,13 +12,24 @@
 
 Install with `pip`
 ```bash
+# Replace the <version> for the version considered
 # Download from github
-wget https://github.com/guillaume-gricourt/HmnFusion/releases/download/1.1.0/pip.zip
+wget https://github.com/guillaume-gricourt/HmnFusion/releases/download/<version>/pip.zip
 unzip pip.zip
 # Install
-pip install hmnfusion-1.1.0-py3-none-any.whl
+pip install hmnfusion-<version>-py3-none-any.whl
 # Clean up
-rm pip.zip hmnfusion-1.1.0-py3-none-any.whl hmnfusion-1.1.0.tar.gz
+rm pip.zip hmnfusion-<version>-py3-none-any.whl hmnfusion-<version>.tar.gz
+```
+
+Install with `docker`
+```bash
+# Install HmnFusion
+docker pull ghcr.io/guillaume-gricourt/hmnfusion:<version>
+or
+docker pull ggricourt/hmnfusion:<version>
+# Install HmnFusion-Align
+docker pull ggricourt/hmnfusion-align:<version>
 ```
 
 ### Running
@@ -109,6 +121,23 @@ docker run -it \
     --name <i>sample_name</i> \
     --threads 4
 </pre>
+
+### Build BAM files
+Only the docker image hmnfusion-align could be use for this feature.  
+Be aware, the size of the image is near to 15Gb.  
+The reference files use to build BAM files could be cite with this DOI:  
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.6619597.svg)](https://doi.org/10.5281/zenodo.6619597)  
+<pre>
+docker run -it \
+    --rm \
+    hmnfusion-align:latest \
+    workflow-align \
+    --input-forward-fastq <i>file</i> \
+    --input-reverse-fastq <i>file</i> \
+    --output-directory <i>file</i> \
+    --threads 4
+</pre>
+
 
 ## Built with these main libraries
 
