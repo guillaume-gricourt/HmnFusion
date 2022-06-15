@@ -3,7 +3,7 @@ import unittest
 import pandas as pd
 from hmnfusion.bed import Bed
 from hmnfusion.region import Region
-from main_test import Main_test
+from tests.main_test import Main_test
 
 
 class TestBed(Main_test):

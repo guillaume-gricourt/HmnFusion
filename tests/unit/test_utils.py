@@ -4,7 +4,7 @@ import tempfile
 import unittest
 
 from hmnfusion import utils
-from main_test import Main_test
+from tests.main_test import Main_test
 
 
 class TestUtils(Main_test):
