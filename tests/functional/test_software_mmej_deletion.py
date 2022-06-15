@@ -3,7 +3,7 @@ import tempfile
 from typing import List
 
 import pandas as pd
-from main_test import Main_test
+from tests.main_test import Main_test
 
 
 def mmej_deletion(ref: str, samples: List[str], theorical: str) -> bool:
