@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import pysam
 from hmnfusion import mmej_deletion
-from main_test import Main_test
+from tests.main_test import Main_test
 
 
 class TestMmejDeletionMain(Main_test):

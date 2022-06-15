@@ -5,7 +5,7 @@ import tempfile
 from enum import Enum
 from typing import Tuple
 
-from main_test import Main_test
+from tests.main_test import Main_test
 
 
 class GenefuseFmt(Enum):
