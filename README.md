@@ -84,6 +84,18 @@ hmnfusion mmej-deletion \
     --output-hmnfusion-xlsx <i>file</i>
 </pre>
 
+### MMEJ - Fusion
+
+Extract MMEJ information from fusion breakpoints.
+<pre>
+hmnfusion mmej-fusion \
+    --input-hmnfusion-json <i>file</i> \
+    --input-sample-bam <i>file</i> \
+    --input-reference-fasta <i>file</i> \
+    --name <i>sample_name</i> \
+    --output-hmnfusion-xlsx <i>file</i>
+</pre>
+
 ## Docker
 
 ### Run ExtractFusion
