@@ -41,6 +41,9 @@ class Fusion:
         self._is_consensus = False
         self._software = software
         self._mmej = ""
+        self._samples = []
+        self._ref_firsts = []
+        self._ref_seconds = []
 
     # Getters Setters
     @property
@@ -210,7 +213,9 @@ class Fusion:
         self._first = self._second
         self.second = tmp
 
-    def set_mmej(self, path_reference: str, path_bam: str, interval: int = 60) -> None:
+    def set_mmej(
+        self, path_reference: str, path_bam: str, interval: int = 60, max_error: int = 0
+    ) -> None:
         """Set mmej attribute
 
         Parameters
@@ -219,8 +224,10 @@ class Fusion:
             Path of the reference fasta file
         path_bam: str
             Path of the sample bam
-        interval: int (default=60)
+        interval: int (default: 60)
             Interval to consider a consensus to detect mmej sequence
+        max_error: int (default: 0)
+            Number of error tolerate to define mmej
 
         Return
         ------
@@ -236,22 +243,29 @@ class Fusion:
         self.first.set_sequence_sample(path_bam)
         self.second.set_sequence_sample(path_bam)
         # Aggregate results
-        sample = self.first.split_sequence(reference=False)[0]
-        ref_first = self.first.split_sequence()[0]
-        ref_second = self.second.split_sequence()[0]
-        for s, rf, rs in zip(sample[::-1], ref_first[::-1], ref_second[::-1]):
+        self._samples = self.first.split_sequence(reference=False, zero_based=False)
+        self._ref_firsts = self.first.split_sequence(zero_based=False)
+        self._ref_seconds = self.second.split_sequence()
+
+        if len(self._samples[0]) != len(self._ref_firsts[0]):
+            self._samples[0] = self._ref_firsts[0]
+        if len(self._samples[1]) != len(self._ref_seconds[1]):
+            self._samples[1] = self._ref_seconds[1]
+
+        error = 0
+        for s, rf, rs in zip(
+            self._samples[0][::-1],
+            self._ref_firsts[0][::-1],
+            self._ref_seconds[0][::-1],
+        ):
             if s == rf == rs:
                 self.mmej += s
             else:
-                break
-        sample = self.first.split_sequence(reference=False)[1]
-        ref_first = self.first.split_sequence()[1]
-        ref_second = self.second.split_sequence()[1]
-        for s, rf, rs in zip(sample, ref_first, ref_second):
-            if s == rf == rs:
-                self.mmej += s
-            else:
-                break
+                if error < max_error:
+                    self.mmej += s
+                    error += 1
+                else:
+                    break
 
     def mmej_dataframe(self, separator: str = " | ") -> pd.DataFrame:
         """Represent mmej from fusion
@@ -268,13 +282,9 @@ class Fusion:
         """
         df = pd.DataFrame()
         col = self.first.format() + separator + self.second.format()
-        df.at["reference left", col] = separator.join(self.first.split_sequence())
-        df.at["reference right", col] = separator.join(self.second.split_sequence())
-        df.at["sample", col] = (
-            self.first.split_sequence(reference=False)[0]
-            + separator
-            + self.second.split_sequence(reference=False)[1]
-        )
+        df.at["reference left", col] = separator.join(self._ref_firsts)
+        df.at["reference right", col] = separator.join(self._ref_seconds)
+        df.at["sample", col] = separator.join(self._samples)
         df.at["mmej", col] = self.mmej
         return df
 

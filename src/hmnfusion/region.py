@@ -217,13 +217,17 @@ class Region(object):
             fmt += "-%s" % (end,)
         return fmt
 
-    def split_sequence(self, reference: bool = True) -> List[str]:
+    def split_sequence(
+        self, reference: bool = True, zero_based: bool = True
+    ) -> List[str]:
         """Return a string representation of the sequence
 
         Parameters
         ----------
         reference: bool (default: True)
             if True, format sequence_reference attribute, sequence_sample otherwise
+        zero_based: bool (default: True)
+            if True, add 1 to get the middle of the sequence
 
         Return
         ------
@@ -233,8 +237,11 @@ class Region(object):
         seq = self.sequence_sample
         if reference:
             seq = self.sequence_reference
-        seq_a = seq[: self.get_middle() + 1]
-        seq_b = seq[self.get_middle() + 1 :]
+        ix = 1
+        if not zero_based:
+            ix += 1
+        seq_a = seq[: self.get_middle() + ix]
+        seq_b = seq[self.get_middle() + ix :]
         return [seq_a, seq_b]
 
     def is_init(self) -> bool:
