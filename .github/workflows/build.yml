@@ -65,7 +65,7 @@ jobs:
           echo "$USER $PROJECT"
           github_changelog_generator --user "$USER" --project "$PROJECT" --no-unreleased
       - name: 'Upload Artifact Changelog'
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: changelog-artifact
           path: CHANGELOG.md
@@ -92,7 +92,7 @@ jobs:
           echo "::set-output name=version_path::${VERSION_PATH}"
           echo "::set-output name=version_dir::${VERSION_DIR}"
       - name: 'Upload Artifact Version'
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: version-artifact
           path: ${{ steps.update_version.outputs.version_path }}
@@ -187,7 +187,7 @@ jobs:
         run: |
           zip -r -j ${asset} ${bld_path}
       - name: 'Upload Artifact Package'
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: package-pip-artifact
           path: ${{ env.asset }}
