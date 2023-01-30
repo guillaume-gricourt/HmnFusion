@@ -103,7 +103,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: 'Badge version'
-        uses: schneegans/dynamic-badges-action@v1.1.0
+        uses: schneegans/dynamic-badges-action@v1.6.0
         with:
           auth: ${{ secrets.GIST }}
           gistID: 5b62753442bc7c44ae2995299575af0a
