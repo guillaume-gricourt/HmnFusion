@@ -13,29 +13,10 @@ on:
 
 jobs:
 
-  Lint:
-    runs-on: ubuntu-latest
-    steps:
-      - name: 'Checkout'
-        uses: actions/checkout@v3
-        with:
-          ref: ${{ github.ref }}
-          fetch-depth: 0
-      - name: Lint Code Base
-        uses: github/super-linter@v5
-        env:
-          VALIDATE_ALL_CODEBASE: false
-          VALIDATE_YAML: false
-          VALIDATE_DOCKERFILE_HADOLINT: false
-          VALIDATE_SNAKEMAKE_LINT: false
-          VALIDATE_PYTHON_ISORT: false
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
   BuildAndTest:
-    runs-on: ${{ matrix.os }}-latest
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        os: ["ubuntu"]
         python-version: ['3.8', '3.9', '3.10', '3.11']
     defaults:
       run:
@@ -49,22 +30,18 @@ jobs:
         uses: conda-incubator/setup-miniconda@v2
         with:
           miniconda-version: "latest"
-          environment-file: conda.recipes/conda_build_env.yaml
-          activate-environment: build
-          python-version: ${{ matrix.python-version }}
+          environment-file: recipes/workflow.yaml
+          mamba-version: "*"
+          channel-priority: true
+          use-mamba: true
       - name: 'Build pip package'
         run: |
-          pip install build
-          python3 -m build .
-      - name: 'Install pip package'
-        run: |
-          pip install ./dist/*whl
+          pip install --no-deps .
       - name: 'Show if it runs properly'
         run: |
           hmnfusion version
       - name: 'Run pytest'
         run: |
-          pip install pytest
           python -m pytest
 
   Coverage:
@@ -74,20 +51,25 @@ jobs:
         python-version: ['3.9']
     outputs:
       percent: ${{ steps.coverage.outputs.percent }}
+    defaults:
+      run:
+        shell: bash -l {0}
     steps:
       - name: 'Checkout'
         uses: actions/checkout@v3
         with:
           ref: ${{ github.ref }}
-      - name: 'Set up Python'
-        uses: actions/setup-python@v4
+      - name: 'Deploying miniconda'
+        uses: conda-incubator/setup-miniconda@v2
         with:
-          python-version: ${{ matrix.python-version }}
+          miniconda-version: "latest"
+          environment-file: recipes/workflow.yaml
+          mamba-version: "*"
+          channel-priority: true
+          use-mamba: true
       - name: 'Install Soft'
         run: |
-          pip install .
-      - name: 'Install Deps'
-        run: |
+          pip install --no-deps .
           pip install pytest-cov
       - name: 'Run coverage'
         id: coverage
@@ -95,7 +77,7 @@ jobs:
           coverage run -m pytest
           coverage json
           percent=$(python -c 'import json; data=json.load(open("coverage.json")); print(data["totals"]["percent_covered_display"])')
-          echo "::set-output name=percent::${percent}"
+          echo "percent=${percent}" >> "$GITHUB_OUTPUT"
 
   Badge:
     needs: Coverage

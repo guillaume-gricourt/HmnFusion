@@ -69,6 +69,8 @@ jobs:
     outputs:
       version_path: ${{ steps.update_version.outputs.version_path }}
       version_dir: ${{ steps.update_version.outputs.version_dir }}
+      recipe_path: ${{ steps.update_version.outputs.recipe_path }}
+      recipe_dir: ${{ steps.update_version.outputs.recipe_dir }}
     steps:
       - uses: actions/checkout@v3
       - name: 'Update _version.py'
@@ -81,25 +83,22 @@ jobs:
           sed -i "2s/.*/__version__ = \"$TAG\"/" "$VERSION_PATH"
           echo "version_path=$VERSION_PATH" >> "$GITHUB_OUTPUT"
           echo "version_dir=$VERSION_DIR" >> "$GITHUB_OUTPUT"
+
+          RECIPE_PATH=$(find . -name meta.yaml | head -n 1)
+          RECIPE_DIR=$(dirname "$RECIPE_PATH")
+          sed -i "2s/.*/{% set version = \"$TAG\" %}/" "$RECIPE_PATH"
+          echo "recipe_path=$RECIPE_PATH" >> "$GITHUB_OUTPUT"
+          echo "recipe_dir=$RECIPE_DIR" >> "$GITHUB_OUTPUT"
       - name: 'Upload Artifact Version'
         uses: actions/upload-artifact@v3
         with:
           name: version-artifact
           path: ${{ steps.update_version.outputs.version_path }}
-
-  Badge:
-    needs: TagRaw
-    runs-on: ubuntu-latest
-    steps:
-      - name: 'Badge version'
-        uses: schneegans/dynamic-badges-action@v1.6.0
+      - name: 'Upload Artifact Recipe'
+        uses: actions/upload-artifact@v3
         with:
-          auth: ${{ secrets.GIST }}
-          gistID: 5b62753442bc7c44ae2995299575af0a
-          filename: version.json
-          label: Version
-          message: ${{ needs.TagRaw.outputs.tag }}
-          color: green
+          name: recipe-artifact
+          path: ${{ steps.update_version.outputs.recipe_path }}
 
   Commit:
     needs: [Changelog, Version]
@@ -116,6 +115,11 @@ jobs:
         with:
           name: version-artifact
           path: ${{ needs.Version.outputs.version_dir }}
+      - name: 'Download Artifact Recipe'
+        uses: actions/download-artifact@v3
+        with:
+          name: recipe-artifact
+          path: ${{ needs.Version.outputs.recipe_dir }}
       - name: 'Download Artifact Changelog'
         uses: actions/download-artifact@v3
         with:
@@ -161,8 +165,46 @@ jobs:
           custom_tag: ${{ needs.TagRaw.outputs.tag }}
           tag_prefix:
 
+  BuildConda:
+    needs: [Tag]
+    runs-on: ubuntu-latest
+    env:
+      dirbuild: /tmp/build
+    outputs:
+      asset: ${{ steps.identify_asset.outputs.asset }}
+    defaults:
+      run:
+        shell: bash -l {0} # activate env conda
+    steps:
+      - name: 'Checkout'
+        uses: actions/checkout@v3
+      - name: 'Deploying miniconda'
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          miniconda-version: "latest"
+          environment-file: recipes/workflow.yaml
+          mamba-version: "*"
+          channel-priority: true
+          use-mamba: true
+      - name: 'Build conda package'
+        run: |
+          mkdir -p ${{ env.dirbuild }}
+          conda-build recipes --output-folder ${{ env.dirbuild }}
+      - name: 'Find name package'
+        id: identify_asset
+        run: |
+          filename=$(find ${{ env.dirbuild }} | head -n 1)
+          echo "asset=$filename" >> "$GITHUB_OUTPUT"
+      - name: 'Upload Artifact Package'
+        uses: actions/upload-artifact@v3
+        with:
+          name: package-conda-artifact
+          path: ${{ steps.identify_asset.outputs.asset }}
+          retention-days: 1
+          if-no-files-found: error
+
   BuildPip:
-    needs: Commit
+    needs: [Tag]
     runs-on: ${{ matrix.os }}-latest
     strategy:
       matrix:
@@ -202,7 +244,7 @@ jobs:
           if-no-files-found: error
 
   Release:
-    needs: [TagRaw, BuildPip]
+    needs: [TagRaw, BuildPip, BuildConda]
     runs-on: ubuntu-latest
     steps:
       - name: 'Download Artifact Package - Pip'
@@ -214,7 +256,7 @@ jobs:
         with:
           tag_name: ${{ needs.TagRaw.outputs.tag }}
           body: ${{ needs.TagRaw.outputs.changelog }}
-          files: ${{ needs.BuildPip.outputs.asset }}
+          files: ${{ needs.BuildPip.outputs.asset }},${{ needs.BuildConda.outputs.asset }}
 
   DockerHmnFusion:
     needs: [TagRaw, BuildPip]
