@@ -7,7 +7,7 @@ on:
 
 jobs:
 
-  Tag:
+  TagRaw:
     runs-on: ubuntu-latest
     outputs:
      tag: ${{ steps.tag_label.outputs.tag }}
@@ -31,15 +31,7 @@ jobs:
           TAG: ${{ steps.tag_raw.outputs.new_tag }}
         run: |
           TAG=$(echo "$TAG" | cut -f1 -d "-")
-          echo "::set-output name=tag::$TAG"
-      - name: 'Bump version and push tag'
-        id: tag
-        uses: mathieudutour/github-tag-action@v6.1
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          release_branches: stable
-          custom_tag: ${{ steps.tag_label.outputs.tag }}
-          tag_prefix:
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
 
   Changelog:
     runs-on: ubuntu-latest
@@ -72,34 +64,31 @@ jobs:
           retention-days: 1
 
   Version:
-    needs: Tag
+    needs: TagRaw
     runs-on: ubuntu-latest
     outputs:
       version_path: ${{ steps.update_version.outputs.version_path }}
       version_dir: ${{ steps.update_version.outputs.version_dir }}
     steps:
       - uses: actions/checkout@v3
-        with:
-          ref: stable
       - name: 'Update _version.py'
         id: update_version
         env:
-          TAG: ${{ needs.Tag.outputs.tag }}
+          TAG: ${{ needs.TagRaw.outputs.tag }}
         run: |
           VERSION_PATH=$(find . -name _version.py | head -n 1)
           VERSION_DIR=$(dirname "$VERSION_PATH")
           sed -i "2s/.*/__version__ = \"$TAG\"/" "$VERSION_PATH"
-          echo "::set-output name=version_path::${VERSION_PATH}"
-          echo "::set-output name=version_dir::${VERSION_DIR}"
+          echo "version_path=$VERSION_PATH" >> "$GITHUB_OUTPUT"
+          echo "version_dir=$VERSION_DIR" >> "$GITHUB_OUTPUT"
       - name: 'Upload Artifact Version'
         uses: actions/upload-artifact@v3
         with:
           name: version-artifact
           path: ${{ steps.update_version.outputs.version_path }}
-          retention-days: 1
 
   Badge:
-    needs: Tag
+    needs: TagRaw
     runs-on: ubuntu-latest
     steps:
       - name: 'Badge version'
@@ -109,11 +98,11 @@ jobs:
           gistID: 5b62753442bc7c44ae2995299575af0a
           filename: version.json
           label: Version
-          message: ${{ needs.Tag.outputs.tag }}
+          message: ${{ needs.TagRaw.outputs.tag }}
           color: green
 
   Commit:
-    needs: [ Tag, Changelog, Version ]
+    needs: [Changelog, Version]
     runs-on: ubuntu-latest
     steps:
       # Get Data
@@ -134,6 +123,8 @@ jobs:
       # Commit
       - name: 'Commit files'
         run: |
+          echo "show version file"
+          cat ${{ needs.Version.outputs.version_path }}
           git config --local user.email "$GITHUB_EMAIL"
           git config --local user.name "$GITHUB_USERNAME"
           git add .
@@ -146,13 +137,29 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           branch: ${{ github.ref }}
-          force: True
       - name: 'Update main branch'
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           branch: main
           force: True
+
+  Tag:
+    needs: [Commit, TagRaw]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: 'Bump version and push tag'
+        id: tag
+        uses: mathieudutour/github-tag-action@v6.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          release_branches: stable
+          custom_tag: ${{ needs.TagRaw.outputs.tag }}
+          tag_prefix:
 
   BuildPip:
     needs: Commit
@@ -195,7 +202,7 @@ jobs:
           if-no-files-found: error
 
   Release:
-    needs: [Tag, BuildPip]
+    needs: [TagRaw, BuildPip]
     runs-on: ubuntu-latest
     steps:
       - name: 'Download Artifact Package - Pip'
@@ -205,12 +212,12 @@ jobs:
       - name: 'Create Release'
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ needs.Tag.outputs.tag }}
-          body: ${{ needs.Tag.outputs.changelog }}
+          tag_name: ${{ needs.TagRaw.outputs.tag }}
+          body: ${{ needs.TagRaw.outputs.changelog }}
           files: ${{ needs.BuildPip.outputs.asset }}
 
   DockerHmnFusion:
-    needs: [Tag, BuildPip]
+    needs: [TagRaw, BuildPip]
     runs-on: ubuntu-latest
     permissions:
       packages: write
@@ -241,7 +248,7 @@ jobs:
       - name: 'Push image - Github'
         run: |
           IMAGE_ID=$(echo ghcr.io/${{ github.repository_owner }}/${{ env.image_name }} | tr '[:upper:]' '[:lower:]')
-          VERSION=${{ needs.Tag.outputs.tag }}
+          VERSION=${{ needs.TagRaw.outputs.tag }}
           echo "IMAGE_ID=$IMAGE_ID | VERSION=$VERSION"
           docker tag ${{ env.image_name }} "${IMAGE_ID}:${VERSION}"
           docker push "${IMAGE_ID}:${VERSION}"
@@ -254,14 +261,13 @@ jobs:
       - name: 'Push image - DockerHub'
         run: |
           IMAGE_ID=ggricourt/${{ env.image_name }}
-          VERSION=${{ needs.Tag.outputs.tag }}
+          VERSION=${{ needs.TagRaw.outputs.tag }}
           echo "IMAGE_ID=$IMAGE_ID | VERSION=$VERSION"
           docker tag ${{ env.image_name }} "${IMAGE_ID}:${VERSION}"
           docker push "${IMAGE_ID}:${VERSION}"
 
-
   DockerHmnFusionAlign:
-    needs: [Tag, BuildPip]
+    needs: [TagRaw, BuildPip]
     runs-on: ubuntu-latest
     permissions:
       packages: write
@@ -296,7 +302,7 @@ jobs:
       - name: 'Push image - DockerHub'
         run: |
           IMAGE_ID=ggricourt/${{ env.image_name }}
-          VERSION=${{ needs.Tag.outputs.tag }}
+          VERSION=${{ needs.TagRaw.outputs.tag }}
           echo "IMAGE_ID=$IMAGE_ID | VERSION=$VERSION"
           docker tag ${{ env.image_name }} "${IMAGE_ID}:${VERSION}"
           docker push "${IMAGE_ID}:${VERSION}"

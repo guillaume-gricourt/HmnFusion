@@ -5,6 +5,11 @@ on:
     branches:
       - main
       - stable
+  pull_request:
+    branches:
+      - main
+  schedule:
+    - cron:  '0 0 * * 1'
 
 jobs:
 
@@ -23,7 +28,7 @@ jobs:
           VALIDATE_YAML: false
           VALIDATE_DOCKERFILE_HADOLINT: false
           VALIDATE_SNAKEMAKE_LINT: false
-          DEFAULT_BRANCH: main
+          VALIDATE_PYTHON_ISORT: false
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   BuildAndTest:
@@ -31,7 +36,7 @@ jobs:
     strategy:
       matrix:
         os: ["ubuntu"]
-        python-version: ['3.7', '3.8', '3.9']
+        python-version: ['3.8', '3.9', '3.10', '3.11']
     defaults:
       run:
         shell: bash -l {0}

@@ -1,8 +1,9 @@
 import copy
 from json import JSONEncoder
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 import pandas as pd
+
 from hmnfusion import _version
 from hmnfusion import evidence as hmn_evidence
 from hmnfusion import region
@@ -41,9 +42,9 @@ class Fusion:
         self._is_consensus = False
         self._software = software
         self._mmej = ""
-        self._samples = []
-        self._ref_firsts = []
-        self._ref_seconds = []
+        self._samples: List[str] = []
+        self._ref_firsts: List[str] = []
+        self._ref_seconds: List[str] = []
 
     # Getters Setters
     @property
