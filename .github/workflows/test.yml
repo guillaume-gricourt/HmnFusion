@@ -5,6 +5,11 @@ on:
     branches:
       - main
       - stable
+  pull_request:
+    branches:
+      - main
+  schedule:
+    - cron:  '0 0 * * 1'
 
 jobs:
 
@@ -12,18 +17,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: 'Checkout'
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           ref: ${{ github.ref }}
           fetch-depth: 0
       - name: Lint Code Base
-        uses: github/super-linter@v4
+        uses: github/super-linter@v5
         env:
           VALIDATE_ALL_CODEBASE: false
           VALIDATE_YAML: false
           VALIDATE_DOCKERFILE_HADOLINT: false
           VALIDATE_SNAKEMAKE_LINT: false
-          DEFAULT_BRANCH: main
+          VALIDATE_PYTHON_ISORT: false
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   BuildAndTest:
@@ -31,13 +36,13 @@ jobs:
     strategy:
       matrix:
         os: ["ubuntu"]
-        python-version: ['3.7', '3.8', '3.9']
+        python-version: ['3.8', '3.9', '3.10', '3.11']
     defaults:
       run:
         shell: bash -l {0}
     steps:
       - name: 'Checkout'
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           ref: ${{ github.ref }}
       - name: 'Deploying miniconda'
@@ -71,11 +76,11 @@ jobs:
       percent: ${{ steps.coverage.outputs.percent }}
     steps:
       - name: 'Checkout'
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           ref: ${{ github.ref }}
       - name: 'Set up Python'
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
       - name: 'Install Soft'
@@ -97,7 +102,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: 'Badge version'
-        uses: schneegans/dynamic-badges-action@v1.1.0
+        uses: schneegans/dynamic-badges-action@v1.6.0
         with:
           auth: ${{ secrets.GIST }}
           gistID: 5b62753442bc7c44ae2995299575af0a

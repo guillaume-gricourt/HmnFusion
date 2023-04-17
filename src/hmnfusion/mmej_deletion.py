@@ -3,8 +3,9 @@ from typing import List
 
 import pandas as pd
 import pysam
-from hmnfusion import utils
 from natsort import natsorted
+
+from hmnfusion import utils
 
 
 class Conclude(utils.EnumNoValue):
@@ -381,7 +382,7 @@ class MmejDeletion(object):
             for header in df.columns:
                 df.at["no deletion found", header] = pd.NA
             df.to_excel(writer, sheet_name=sheet_name)
-            writer.save()
+            writer.close()
             return
 
         # Write output.
@@ -389,7 +390,7 @@ class MmejDeletion(object):
         ws = writer.sheets[sheet_name]  # pull worksheet object
         # Adjust width.
         utils.adjust_dim_worksheet(ws)
-        writer.save()
+        writer.close()
 
     # Meta functions
     def __key(self):
