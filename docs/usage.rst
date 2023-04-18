@@ -18,18 +18,20 @@ How to start with HmnFusion
 ---------------------------
 
 It depends what you have:
+
 * If you have FASTQ files, you need first to create BAM files, please go to `Create BAM files`_
 * If you have FASTQ, BAM files, please go to `Fusion callers`_
 * If you have FASTQ, BAM files, HTML of JSON from Genefuse and VCF from Lumpy, please go to `Fusion frequency`_ or `MMEJ sequences`_
 
-Questions about extra files: hg19 reference, BED files ? please read the `FAQ <faq>`.
+Questions about extra files: hg19 reference, BED files ? please read the :doc:`FAQ <faq>`.
 
 Create BAM files
 ----------------
 
-It's only available through docker
+It's only available through ``docker``
 
 .. code-block:: console
+
     $ docker run -it \
         --rm \
         hmnfusion-align:latest \
@@ -41,9 +43,11 @@ It's only available through docker
 
 Fusion callers
 --------------
+
 It will run Genefuse, Lumpy and HmnFusion, to detect and quantify fusions.
 
 .. code-block:: console
+
     $ hmnfusion workflow-fusion \
         # Sample
         --name <Name of sample> \
@@ -69,6 +73,7 @@ Fusion frequency
 It will extract fusions from Genefuse and Lumpy to quantify them.
 
 .. code-block:: console
+
     $ hmnfusion workflow-fusion \
         # Sample
         --input-lumpy-vcf <Lumpy Vcf file> \
@@ -86,6 +91,7 @@ MMEJ sequences
 Define fusions of interest.
 
 .. code-block:: console
+
     $ hmnfusion extractfusion \
         # Sample
         --input-genefuse-json <Genefuse, json file> \
@@ -99,6 +105,7 @@ Define fusions of interest.
 Extract MMEJ sequences.
 
 .. code-block:: console
+
     $ hmnfusion mmej-fusion \
         # Sample
         --input-hmnfusion-json <HmnFusion, json file> \

@@ -9,3 +9,4 @@ build
 *.tar.gz
 run.sh
 debug/
+_build

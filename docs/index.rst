@@ -1,4 +1,4 @@
-Welcome to neo4jsbml's documentation!
+Welcome to HmnFusion's documentation!
 =====================================
 
 Contents
@@ -12,4 +12,4 @@ Contents
    faq
    conduct
    contributing
-   changelog
+   change
