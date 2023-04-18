@@ -12,7 +12,7 @@ sphinx:
    configuration: docs/conf.py
 
 conda:
-  environment: recipes/workflow.yaml
+  environment: recipes/readthedocs.yaml
 
 formats:
   - pdf
