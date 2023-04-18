@@ -56,11 +56,20 @@ jobs:
           PROJECT=$(echo "$GITHUB_REPOSITORY" | sed -e 's/\// /g' | awk '{print $2}')
           echo "$USER $PROJECT"
           github_changelog_generator --user "$USER" --project "$PROJECT" --no-unreleased
-      - name: 'Upload Artifact Changelog'
+      - uses: docker://pandoc/core:2.9
+        with:
+          args: -o CHANGELOG.rst CHANGELOG.md
+      - name: 'Upload Artifact Changelog - md'
         uses: actions/upload-artifact@v3
         with:
-          name: changelog-artifact
+          name: changelog-md-artifact
           path: CHANGELOG.md
+          retention-days: 1
+      - name: 'Upload Artifact Changelog - rst'
+        uses: actions/upload-artifact@v3
+        with:
+          name: changelog-rst-artifact
+          path: CHANGELOG.rst
           retention-days: 1
 
   Version:
@@ -120,10 +129,15 @@ jobs:
         with:
           name: recipe-artifact
           path: ${{ needs.Version.outputs.recipe_dir }}
-      - name: 'Download Artifact Changelog'
+      - name: 'Download Artifact Changelog - md'
         uses: actions/download-artifact@v3
         with:
-          name: changelog-artifact
+          name: changelog-md-artifact
+      - name: 'Download Artifact Changelog - rst'
+        uses: actions/download-artifact@v3
+        with:
+          name: changelog-rst-artifact
+          path: docs/
       # Commit
       - name: 'Commit files'
         run: |
