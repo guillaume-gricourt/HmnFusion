@@ -26,7 +26,7 @@ Pull hmnfusion
 
     $ docker pull ghcr.io/guillaume-gricourt/hmnfusion:{{ version }}
 
-Pull hmmnfusion-align to create BAM files
+Pull ``hmmnfusion-align`` to create BAM files
 
 .. code-block:: console
 
@@ -34,8 +34,8 @@ Pull hmmnfusion-align to create BAM files
 
 The reference files used to build BAM files refer to the DOI 10.5281/zenodo.6619597
 
-.. note::
-    The size of the image is near to 15Gb
+.. warning::
+    The size of the image is almost 15Go
 
 
 Dependencies
@@ -46,5 +46,5 @@ But they are not installed with ``conda`` and ``pip``.
 You can install them in the current environment with this:
 
 .. code-block:: console
-    
+
     $ hmnfusion install-software
