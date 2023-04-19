@@ -18,3 +18,9 @@ dependencies:
   - pyyaml
   - requests
   - snakemake
+  # test
+  - anaconda-client
+  - conda-build
+  # docs
+  - sphinx
+  - sphinx_rtd_theme
