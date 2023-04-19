@@ -36,9 +36,9 @@ It's only available through ``docker``
         --rm \
         hmnfusion-align:latest \
         workflow-align \
-        --input-forward-fastq <i>file</i> \
-        --input-reverse-fastq <i>file</i> \
-        --output-directory <i>file</i> \
+        --input-forward-fastq <FASTQ forward, file> \
+        --input-reverse-fastq <FASTQ reverse, file> \
+        --output-directory <Output directory> \
         --threads 4
 
 Fusion callers
