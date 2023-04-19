@@ -16,22 +16,25 @@ Pip
 
     $ wget https://github.com/guillaume-gricourt/HmnFusion/releases/download/|version|/pip.zip
     $ unzip pip.zip
-    $ pip install hmnfusion-{{ version }}-py3-none-any.whl
-    $ rm pip.zip hmnfusion-{{ version }}-py3-none-any.whl hmnfusion-{{ version }}.tar.gz
+    $ pip install hmnfusion-|version|-py3-none-any.whl
+    $ rm pip.zip hmnfusion-|version|-py3-none-any.whl hmnfusion-|version|.tar.gz
 
 Docker
 ------
-Pull hmnfusion
+
+Pull ``hmnfusion``. It contains Genefuse, Lumpy and HmnFusion.
 
 .. code-block:: console
+   :substitutions:
 
-    $ docker pull ghcr.io/guillaume-gricourt/hmnfusion:{{ version }}
+    $ docker pull ghcr.io/guillaume-gricourt/hmnfusion:|version|
 
 Pull ``hmmnfusion-align`` to create BAM files
 
 .. code-block:: console
+   :substitutions:
 
-    $ docker pull ggricourt/hmnfusion-align:{{ version }}
+    $ docker pull ggricourt/hmnfusion-align:|version|
 
 The reference files used to build BAM files refer to the DOI 10.5281/zenodo.6619597
 
