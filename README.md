@@ -1,6 +1,6 @@
 # HmnFusion
 
-[![Github Release](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/guillaume-gricourt/5b62753442bc7c44ae2995299575af0a/raw/version.json)](version) [![Conda Release](https://img.shields.io/conda/vn/bioconda/hmnfusion.svg)](https://anaconda.org/bioconda/hmnfusion)  
+[![Github Version](https://img.shields.io/github/v/release/guillaume-gricourt/HmnFusion?display_name=tag&sort=semver)](version) [![Conda Release](https://img.shields.io/conda/vn/bioconda/hmnfusion.svg)](https://anaconda.org/bioconda/hmnfusion)  
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![GitHub Super-Linter](https://github.com/guillaume-gricourt/HmnFusion/workflows/Tests/badge.svg)](https://github.com/marketplace/actions/super-linter)
 [![Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/guillaume-gricourt/5b62753442bc7c44ae2995299575af0a/raw/coverage.json)](code_coverage)  

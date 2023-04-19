@@ -4,23 +4,24 @@ import setuptools
 import yaml
 
 # Version
+name = ""
 version = ""
 fversion = glob.glob("**/_version.py", recursive=True)[0]
 with open(fversion) as fid:
     lines = fid.read().splitlines()
+    name = lines[0].split("=")[-1].strip().replace('"', "")
     version = lines[1].split("=")[-1].strip().replace('"', "")
 
 # App name - dependencies
 env = {}
-with open("environment.yml") as fid:
+with open("recipes/workflow.yaml") as fid:
     env = yaml.safe_load(fid)
-name = env["name"]
 install_requires = env["dependencies"]
 
 setuptools.setup(
     name=name,
     version=version,
-    description="Analysis fusion from DNA genomics",
+    description="A tool to aggregate results of fusion produced by Genefuse and Lumpy and calculate allelic frequency",
     author=["guillaume-gricourt"],
     author_email=["guipagui@gmail.com"],
     classifiers=[
