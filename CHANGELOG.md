@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.2.8](https://github.com/guillaume-gricourt/HmnFusion/tree/1.2.8) (2023-04-19)
+
+[Full Changelog](https://github.com/guillaume-gricourt/HmnFusion/compare/1.2.7...1.2.8)
+
+**Merged pull requests:**
+
+- Read the docs [\#9](https://github.com/guillaume-gricourt/HmnFusion/pull/9) ([guillaume-gricourt](https://github.com/guillaume-gricourt))
+
 ## [1.2.7](https://github.com/guillaume-gricourt/HmnFusion/tree/1.2.7) (2023-04-17)
 
 [Full Changelog](https://github.com/guillaume-gricourt/HmnFusion/compare/1.2.6...1.2.7)

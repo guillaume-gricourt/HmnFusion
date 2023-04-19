@@ -234,8 +234,6 @@ jobs:
     steps:
       - name: 'Checkout'
         uses: actions/checkout@v3
-        with:
-          ref: stable
       - name: 'Deploying miniconda'
         uses: conda-incubator/setup-miniconda@v2
         with:
