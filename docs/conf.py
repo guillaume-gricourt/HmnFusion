@@ -38,6 +38,7 @@ extensions = [
     "sphinx.ext.autosummary",
     "sphinx.ext.intersphinx",
     "sphinx.ext.autosectionlabel",
+    "sphinx_substitution_extensions",
 ]
 autosectionlabel_prefix_document = True
 
@@ -79,6 +80,4 @@ html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
-html_context = {
-    "version": version,
-}
+rst_prolog = ".. |version| replace:: %s" % (version,)

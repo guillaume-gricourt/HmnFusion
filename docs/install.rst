@@ -12,8 +12,9 @@ Pip
 ---
 
 .. code-block:: console
+   :substitutions:
 
-    $ wget https://github.com/guillaume-gricourt/HmnFusion/releases/download/{{ version }}/pip.zip
+    $ wget https://github.com/guillaume-gricourt/HmnFusion/releases/download/|version|/pip.zip
     $ unzip pip.zip
     $ pip install hmnfusion-{{ version }}-py3-none-any.whl
     $ rm pip.zip hmnfusion-{{ version }}-py3-none-any.whl hmnfusion-{{ version }}.tar.gz
