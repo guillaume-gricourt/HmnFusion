@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.2.7](https://github.com/guillaume-gricourt/HmnFusion/tree/1.2.7) (2023-04-17)
+
+[Full Changelog](https://github.com/guillaume-gricourt/HmnFusion/compare/1.2.6...1.2.7)
+
+**Merged pull requests:**
+
+- style\(github\): super-linter [\#8](https://github.com/guillaume-gricourt/HmnFusion/pull/8) ([guillaume-gricourt](https://github.com/guillaume-gricourt))
+- chore\(deps\): bump github/super-linter from 4 to 5 [\#7](https://github.com/guillaume-gricourt/HmnFusion/pull/7) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump schneegans/dynamic-badges-action from 1.1.0 to 1.6.0 [\#6](https://github.com/guillaume-gricourt/HmnFusion/pull/6) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump actions/checkout from 2 to 3 [\#5](https://github.com/guillaume-gricourt/HmnFusion/pull/5) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump actions/download-artifact from 2 to 3 [\#4](https://github.com/guillaume-gricourt/HmnFusion/pull/4) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump actions/upload-artifact from 2 to 3 [\#3](https://github.com/guillaume-gricourt/HmnFusion/pull/3) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump mathieudutour/github-tag-action from 6.0 to 6.1 [\#2](https://github.com/guillaume-gricourt/HmnFusion/pull/2) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump actions/setup-python from 2 to 4 [\#1](https://github.com/guillaume-gricourt/HmnFusion/pull/1) ([dependabot[bot]](https://github.com/apps/dependabot))
+
 ## [1.2.6](https://github.com/guillaume-gricourt/HmnFusion/tree/1.2.6) (2022-09-16)
 
 [Full Changelog](https://github.com/guillaume-gricourt/HmnFusion/compare/1.2.4...1.2.6)

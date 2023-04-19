@@ -240,8 +240,10 @@ jobs:
         uses: conda-incubator/setup-miniconda@v2
         with:
           miniconda-version: "latest"
-          environment-file: conda.recipes/conda_build_env.yaml
-          activate-environment: build
+          environment-file: recipes/workflow.yaml
+          mamba-version: "*"
+          channel-priority: true
+          use-mamba: true
       - name: 'Build pip package'
         run: |
           pip install build
