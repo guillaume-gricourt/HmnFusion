@@ -86,7 +86,7 @@ jobs:
       - name: 'Badge version'
         uses: schneegans/dynamic-badges-action@v1.7.0
         with:
-          auth: ${{ secrets.GIST }}
+          auth: ${{ secrets.GIST_TOKEN }}
           gistID: 5b62753442bc7c44ae2995299575af0a
           filename: coverage.json
           label: CodeCoverage
