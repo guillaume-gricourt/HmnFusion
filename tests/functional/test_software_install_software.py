@@ -1,8 +1,10 @@
+import pytest
 import unittest
 
 from hmnfusion import install_software, utils
 
 
+@pytest.mark.skipif(not install_software.InstallSoftware.required(), reason="software required are not available")
 class Test_InstallSoftware(unittest.TestCase):
     def test_install_software(self):
         # Install
