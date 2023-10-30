@@ -68,7 +68,7 @@ class TestMmejDeletionMain(Main_test):
         )
         self.mmej_deletion_u2_df = pd.concat([self.value_1_df, self.value_2_df])
         self.mmej_deletion_u2_df["sample1"] = ["o", "o"]
-        self.mmej_deletion_u2_df["sample2"] = ["o", pd.NA]
+        self.mmej_deletion_u2_df["sample2"] = ["o", np.nan]
         self.mmej_deletion_u2_df_xlsx = self.mmej_deletion_u2_df.replace(
             {pd.NA: np.nan, "": np.nan}
         )
@@ -245,6 +245,7 @@ class TestMmejDeletion(TestMmejDeletionMain):
         for m in mmej_deletions:
             m.set_value_sequence(path=self.ref_mmej)
         df = mmej_deletion.MmejDeletion.to_dataframe(mmej_deletions=mmej_deletions)
+        df.replace("n", np.nan, inplace=True)
         self.assertTrue(self.mmej_deletion_u2_df.equals(df))
 
     def test_to_excel(self):
@@ -268,6 +269,7 @@ class TestMmejDeletion(TestMmejDeletionMain):
                 path=fod.name, mmej_deletions=mmej_deletions
             )
             df = pd.read_excel(fod.name)
+        df.replace("n", np.nan, inplace=True)
         self.assertTrue(self.mmej_deletion_u2_df_xlsx.equals(df))
 
 
