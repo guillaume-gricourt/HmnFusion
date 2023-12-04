@@ -27,7 +27,7 @@ jobs:
         with:
           ref: ${{ github.ref }}
       - name: 'Deploying miniconda'
-        uses: conda-incubator/setup-miniconda@v2
+        uses: conda-incubator/setup-miniconda@v3
         with:
           miniconda-version: "latest"
           environment-file: recipes/workflow.yaml
@@ -60,7 +60,7 @@ jobs:
         with:
           ref: ${{ github.ref }}
       - name: 'Deploying miniconda'
-        uses: conda-incubator/setup-miniconda@v2
+        uses: conda-incubator/setup-miniconda@v3
         with:
           miniconda-version: "latest"
           environment-file: recipes/workflow.yaml
