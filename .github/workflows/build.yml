@@ -60,13 +60,13 @@ jobs:
         with:
           args: -o CHANGELOG.rst CHANGELOG.md
       - name: 'Upload Artifact Changelog - md'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: changelog-md-artifact
           path: CHANGELOG.md
           retention-days: 1
       - name: 'Upload Artifact Changelog - rst'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: changelog-rst-artifact
           path: CHANGELOG.rst
@@ -99,12 +99,12 @@ jobs:
           echo "recipe_path=$RECIPE_PATH" >> "$GITHUB_OUTPUT"
           echo "recipe_dir=$RECIPE_DIR" >> "$GITHUB_OUTPUT"
       - name: 'Upload Artifact Version'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: version-artifact
           path: ${{ steps.update_version.outputs.version_path }}
       - name: 'Upload Artifact Recipe'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: recipe-artifact
           path: ${{ steps.update_version.outputs.recipe_path }}
@@ -209,7 +209,7 @@ jobs:
         run: |
           zip -r -j ${asset} ${bld_path}
       - name: 'Upload Artifact Package'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: package-pip-artifact
           path: ${{ env.asset }}
