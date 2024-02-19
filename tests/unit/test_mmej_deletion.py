@@ -246,7 +246,7 @@ class TestMmejDeletion(TestMmejDeletionMain):
             m.set_value_sequence(path=self.ref_mmej)
         df = mmej_deletion.MmejDeletion.to_dataframe(mmej_deletions=mmej_deletions)
         df.replace("n", np.nan, inplace=True)
-        self.assertTrue(self.mmej_deletion_u2_df.equals(df))
+        self.assertTrue(self.mmej_deletion_u2_df.compare(df).empty)
 
     def test_to_excel(self):
         """Test to_excel()"""
