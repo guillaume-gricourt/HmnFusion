@@ -7,7 +7,6 @@ import requests
 
 
 class DownloadZenodo(object):
-
     ZENODO_API = "https://zenodo.org/api/"
 
     def __init__(self, id: str, params: Dict[str, str]) -> None:
@@ -25,11 +24,12 @@ class DownloadZenodo(object):
 
     def download_file(self, url: str, path: str) -> None:
         try:
-            with requests.get(url, stream=True, params=self.params) as r:
-                self.check_request(request=r)
-                with open(path, "wb") as f:
-                    for chunk in r.iter_content(chunk_size=8192):
-                        f.write(chunk)
+            response = requests.get(url, stream=True, params=self.params)
+            self.check_request(request=response)
+            with open(path, "wb") as fod:
+                for chunk in response.iter_content(chunk_size=8192):
+                    fod.write(chunk)
+            response.close()
         except Exception as e:
             raise ValueError(str(e))
 

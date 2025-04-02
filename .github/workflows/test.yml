@@ -17,17 +17,17 @@ jobs:
     strategy:
       max-parallel: 2
       matrix:
-        python-version: ['3.9', '3.10', '3.11']
+        python-version: ['3.9', '3.10', '3.11', '3.12']
     defaults:
       run:
         shell: bash -l {0}
     steps:
       - name: 'Checkout'
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ github.ref }}
       - name: 'Deploying miniconda'
-        uses: conda-incubator/setup-miniconda@v2
+        uses: conda-incubator/setup-miniconda@v3
         with:
           miniconda-version: "latest"
           environment-file: recipes/workflow.yaml
@@ -56,11 +56,11 @@ jobs:
         shell: bash -l {0}
     steps:
       - name: 'Checkout'
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ github.ref }}
       - name: 'Deploying miniconda'
-        uses: conda-incubator/setup-miniconda@v2
+        uses: conda-incubator/setup-miniconda@v3
         with:
           miniconda-version: "latest"
           environment-file: recipes/workflow.yaml
@@ -84,9 +84,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: 'Badge version'
-        uses: schneegans/dynamic-badges-action@v1.6.0
+        uses: schneegans/dynamic-badges-action@v1.7.0
         with:
-          auth: ${{ secrets.GIST }}
+          auth: ${{ secrets.GIST_TOKEN }}
           gistID: 5b62753442bc7c44ae2995299575af0a
           filename: coverage.json
           label: CodeCoverage

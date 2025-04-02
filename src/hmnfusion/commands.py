@@ -721,7 +721,7 @@ def _cmd_install_software(args):
 
     logging.info("Check if software required are installed")
     if not install_software.InstallSoftware.required():
-        utils.abort("Failed")
+        utils.abort(AP, "Failed")
     if args.uninstall:
         if not install_software.InstallSoftware.uninstall_genefuse():
             logging.warning("GeneFuse could not be uninstall")
@@ -734,9 +734,9 @@ def _cmd_install_software(args):
                 "No folder in the path could not be written, change user to more level privileges"
             )
         if not install_software.InstallSoftware.install_genefuse(path=path):
-            utils.abort("Failed")
+            utils.abort(AP, "Failed")
         if not install_software.InstallSoftware.install_lumpy():
-            utils.abort("Failed")
+            utils.abort(AP, "Failed")
 
     logging.info("End - install-software")
 

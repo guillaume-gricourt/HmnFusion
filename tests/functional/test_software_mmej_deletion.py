@@ -2,6 +2,7 @@ import sys
 import tempfile
 from typing import List
 
+import numpy as np
 import pandas as pd
 from tests.main_test import Main_test
 
@@ -22,6 +23,9 @@ def mmej_deletion(ref: str, samples: List[str], theorical: str) -> bool:
         # compare data
         df = pd.read_excel(fd.name)
         df_theorical = pd.read_excel(theorical)
+        print(df)
+        df.replace("n", np.nan, inplace=True)
+        print(df_theorical)
         res = df.equals(df_theorical)
     return res
 

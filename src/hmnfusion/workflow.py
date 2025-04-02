@@ -1,6 +1,15 @@
+from pathlib import Path
 from typing import Any, Dict, List
 
-import snakemake
+from snakemake.api import (
+    ConfigSettings,
+    DeploymentSettings,
+    OutputSettings,
+    ResourceSettings,
+    SnakemakeApi,
+    StorageSettings,
+)
+from snakemake.settings.types import DeploymentMethod
 
 
 def run(
@@ -21,11 +30,14 @@ def run(
     bool
         True if the worklow complete without errors
     """
-    res = snakemake.snakemake(
-        snakefile,
-        config=config,
-        cores=kwargs.get("cores", 1),
-        use_conda=True,
-        printshellcmds=True,
-    )
-    return res
+    with SnakemakeApi(OutputSettings(verbose=True, show_failed_logs=True, printshellcmds=True)) as snakemake_api:
+        workflow_api = snakemake_api.workflow(
+            snakefile=Path(snakefile),
+            storage_settings=StorageSettings(),
+            resource_settings=ResourceSettings(cores=1),
+            deployment_settings=DeploymentSettings(deployment_method=[DeploymentMethod.CONDA]),
+            config_settings=ConfigSettings(config=config),
+        )
+        dag_api = workflow_api.dag()
+        dag_api.execute_workflow()
+    return True

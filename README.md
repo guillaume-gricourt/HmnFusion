@@ -31,7 +31,8 @@ pip install hmnfusion-<version>-py3-none-any.whl
 rm pip.zip hmnfusion-<version>-py3-none-any.whl hmnfusion-<version>.tar.gz
 ```
 
-Install with `docker`
+Install with `docker`  
+Specify `<version>` with digits, not using `latest`
 ```bash
 # Pull the image hmnfusion
 docker pull ghcr.io/guillaume-gricourt/hmnfusion:<version>
@@ -146,7 +147,7 @@ docker run -it \
 ### Build BAM files
 Only the docker image hmnfusion-align could be use for this feature.  
 Be aware, the size of the image is near to 15Gb.  
-The reference files use to build BAM files could be cite with this DOI:  
+The reference files use to build BAM files could be cited with this DOI:  
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.6619597.svg)](https://doi.org/10.5281/zenodo.6619597)  
 <pre>
 docker run -it \
@@ -160,13 +161,6 @@ docker run -it \
 </pre>
 
 
-## Built with these main libraries
-
-* [beautifulsoup4](https://pypi.org/project/beautifulsoup4) - Parsing efficiently HTML file
-* [pysam](https://github.com/pysam-developers/pysam) - Essential library to work with BAM and VCF files
-* [Pandas](https://github.com/pandas-dev/pandas) - Essential dataframe object
-* [Snakemake](https://snakemake.readthedocs.io/en/stable/) - Use workflow
-
 ## Versioning
 
 [SemVer](http://semver.org/) is used for versioning.
@@ -175,7 +169,3 @@ docker run -it \
 
 * **Guillaume Gricourt**  
 * **Dr. Ivan Sloma**  
-
-## License
-
-See the [LICENSE](LICENSE) file for details
