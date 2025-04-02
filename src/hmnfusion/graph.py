@@ -1,7 +1,7 @@
 import copy
 import itertools
 import json
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 import matplotlib.pyplot as plt
 import networkx as nx
@@ -463,7 +463,7 @@ class Graph(object):
             )
         return g
 
-    def to_json(self, path: str, metadata: Dict[Any, Any] = None) -> None:
+    def to_json(self, path: str, metadata: Optional[Dict[Any, Any]] = None) -> None:
         """Write graph to a JSON file.
 
         Parameters
