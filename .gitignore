@@ -10,3 +10,4 @@ build
 run.sh
 debug/
 _build
+.DS_Store
