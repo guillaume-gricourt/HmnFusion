@@ -1,13 +1,21 @@
 Changelog
 =========
 
+`1.2.12 <https://github.com/guillaume-gricourt/HmnFusion/tree/1.2.12>`__ (2023-04-19)
+-------------------------------------------------------------------------------------
+
+`Full
+Changelog <https://github.com/guillaume-gricourt/HmnFusion/compare/1.2.11...1.2.12>`__
+
+.. _section-1:
+
 `1.2.11 <https://github.com/guillaume-gricourt/HmnFusion/tree/1.2.11>`__ (2023-04-19)
 -------------------------------------------------------------------------------------
 
 `Full
 Changelog <https://github.com/guillaume-gricourt/HmnFusion/compare/1.2.10...1.2.11>`__
 
-.. _section-1:
+.. _section-2:
 
 `1.2.10 <https://github.com/guillaume-gricourt/HmnFusion/tree/1.2.10>`__ (2023-04-19)
 -------------------------------------------------------------------------------------
@@ -15,7 +23,7 @@ Changelog <https://github.com/guillaume-gricourt/HmnFusion/compare/1.2.10...1.2.
 `Full
 Changelog <https://github.com/guillaume-gricourt/HmnFusion/compare/1.2.9...1.2.10>`__
 
-.. _section-2:
+.. _section-3:
 
 `1.2.9 <https://github.com/guillaume-gricourt/HmnFusion/tree/1.2.9>`__ (2023-04-19)
 -----------------------------------------------------------------------------------
@@ -23,7 +31,7 @@ Changelog <https://github.com/guillaume-gricourt/HmnFusion/compare/1.2.9...1.2.1
 `Full
 Changelog <https://github.com/guillaume-gricourt/HmnFusion/compare/1.2.8...1.2.9>`__
 
-.. _section-3:
+.. _section-4:
 
 `1.2.8 <https://github.com/guillaume-gricourt/HmnFusion/tree/1.2.8>`__ (2023-04-19)
 -----------------------------------------------------------------------------------
@@ -37,7 +45,7 @@ Changelog <https://github.com/guillaume-gricourt/HmnFusion/compare/1.2.7...1.2.8
    `#9 <https://github.com/guillaume-gricourt/HmnFusion/pull/9>`__
    (`guillaume-gricourt <https://github.com/guillaume-gricourt>`__)
 
-.. _section-4:
+.. _section-5:
 
 `1.2.7 <https://github.com/guillaume-gricourt/HmnFusion/tree/1.2.7>`__ (2023-04-17)
 -----------------------------------------------------------------------------------
@@ -72,7 +80,7 @@ Changelog <https://github.com/guillaume-gricourt/HmnFusion/compare/1.2.6...1.2.7
    `#1 <https://github.com/guillaume-gricourt/HmnFusion/pull/1>`__
    (`dependabot[bot] <https://github.com/apps/dependabot>`__)
 
-.. _section-5:
+.. _section-6:
 
 `1.2.6 <https://github.com/guillaume-gricourt/HmnFusion/tree/1.2.6>`__ (2022-09-16)
 -----------------------------------------------------------------------------------
@@ -80,7 +88,7 @@ Changelog <https://github.com/guillaume-gricourt/HmnFusion/compare/1.2.6...1.2.7
 `Full
 Changelog <https://github.com/guillaume-gricourt/HmnFusion/compare/1.2.4...1.2.6>`__
 
-.. _section-6:
+.. _section-7:
 
 `1.2.4 <https://github.com/guillaume-gricourt/HmnFusion/tree/1.2.4>`__ (2022-09-16)
 -----------------------------------------------------------------------------------
@@ -88,7 +96,7 @@ Changelog <https://github.com/guillaume-gricourt/HmnFusion/compare/1.2.4...1.2.6
 `Full
 Changelog <https://github.com/guillaume-gricourt/HmnFusion/compare/1.2.5...1.2.4>`__
 
-.. _section-7:
+.. _section-8:
 
 `1.2.5 <https://github.com/guillaume-gricourt/HmnFusion/tree/1.2.5>`__ (2022-09-16)
 -----------------------------------------------------------------------------------
@@ -96,7 +104,7 @@ Changelog <https://github.com/guillaume-gricourt/HmnFusion/compare/1.2.5...1.2.4
 `Full
 Changelog <https://github.com/guillaume-gricourt/HmnFusion/compare/1.2.3...1.2.5>`__
 
-.. _section-8:
+.. _section-9:
 
 `1.2.3 <https://github.com/guillaume-gricourt/HmnFusion/tree/1.2.3>`__ (2022-06-15)
 -----------------------------------------------------------------------------------
@@ -104,7 +112,7 @@ Changelog <https://github.com/guillaume-gricourt/HmnFusion/compare/1.2.3...1.2.5
 `Full
 Changelog <https://github.com/guillaume-gricourt/HmnFusion/compare/1.2.2...1.2.3>`__
 
-.. _section-9:
+.. _section-10:
 
 `1.2.2 <https://github.com/guillaume-gricourt/HmnFusion/tree/1.2.2>`__ (2022-06-14)
 -----------------------------------------------------------------------------------
@@ -112,7 +120,7 @@ Changelog <https://github.com/guillaume-gricourt/HmnFusion/compare/1.2.2...1.2.3
 `Full
 Changelog <https://github.com/guillaume-gricourt/HmnFusion/compare/1.2.1...1.2.2>`__
 
-.. _section-10:
+.. _section-11:
 
 `1.2.1 <https://github.com/guillaume-gricourt/HmnFusion/tree/1.2.1>`__ (2022-06-14)
 -----------------------------------------------------------------------------------
@@ -120,7 +128,7 @@ Changelog <https://github.com/guillaume-gricourt/HmnFusion/compare/1.2.1...1.2.2
 `Full
 Changelog <https://github.com/guillaume-gricourt/HmnFusion/compare/1.2.0...1.2.1>`__
 
-.. _section-11:
+.. _section-12:
 
 `1.2.0 <https://github.com/guillaume-gricourt/HmnFusion/tree/1.2.0>`__ (2022-06-09)
 -----------------------------------------------------------------------------------
@@ -128,7 +136,7 @@ Changelog <https://github.com/guillaume-gricourt/HmnFusion/compare/1.2.0...1.2.1
 `Full
 Changelog <https://github.com/guillaume-gricourt/HmnFusion/compare/1.1.0...1.2.0>`__
 
-.. _section-12:
+.. _section-13:
 
 `1.1.0 <https://github.com/guillaume-gricourt/HmnFusion/tree/1.1.0>`__ (2022-05-06)
 -----------------------------------------------------------------------------------
@@ -136,7 +144,7 @@ Changelog <https://github.com/guillaume-gricourt/HmnFusion/compare/1.1.0...1.2.0
 `Full
 Changelog <https://github.com/guillaume-gricourt/HmnFusion/compare/1.0.3...1.1.0>`__
 
-.. _section-13:
+.. _section-14:
 
 `1.0.3 <https://github.com/guillaume-gricourt/HmnFusion/tree/1.0.3>`__ (2022-04-13)
 -----------------------------------------------------------------------------------
@@ -144,7 +152,7 @@ Changelog <https://github.com/guillaume-gricourt/HmnFusion/compare/1.0.3...1.1.0
 `Full
 Changelog <https://github.com/guillaume-gricourt/HmnFusion/compare/1.0.2...1.0.3>`__
 
-.. _section-14:
+.. _section-15:
 
 `1.0.2 <https://github.com/guillaume-gricourt/HmnFusion/tree/1.0.2>`__ (2022-04-13)
 -----------------------------------------------------------------------------------
@@ -152,7 +160,7 @@ Changelog <https://github.com/guillaume-gricourt/HmnFusion/compare/1.0.2...1.0.3
 `Full
 Changelog <https://github.com/guillaume-gricourt/HmnFusion/compare/1.0.1...1.0.2>`__
 
-.. _section-15:
+.. _section-16:
 
 `1.0.1 <https://github.com/guillaume-gricourt/HmnFusion/tree/1.0.1>`__ (2022-03-21)
 -----------------------------------------------------------------------------------
@@ -160,7 +168,7 @@ Changelog <https://github.com/guillaume-gricourt/HmnFusion/compare/1.0.1...1.0.2
 `Full
 Changelog <https://github.com/guillaume-gricourt/HmnFusion/compare/1.0.0...1.0.1>`__
 
-.. _section-16:
+.. _section-17:
 
 `1.0.0 <https://github.com/guillaume-gricourt/HmnFusion/tree/1.0.0>`__ (2022-03-16)
 -----------------------------------------------------------------------------------
@@ -168,7 +176,7 @@ Changelog <https://github.com/guillaume-gricourt/HmnFusion/compare/1.0.0...1.0.1
 `Full
 Changelog <https://github.com/guillaume-gricourt/HmnFusion/compare/0.8.0...1.0.0>`__
 
-.. _section-17:
+.. _section-18:
 
 `0.8.0 <https://github.com/guillaume-gricourt/HmnFusion/tree/0.8.0>`__ (2022-02-14)
 -----------------------------------------------------------------------------------
@@ -176,7 +184,7 @@ Changelog <https://github.com/guillaume-gricourt/HmnFusion/compare/0.8.0...1.0.0
 `Full
 Changelog <https://github.com/guillaume-gricourt/HmnFusion/compare/0.7.3...0.8.0>`__
 
-.. _section-18:
+.. _section-19:
 
 `0.7.3 <https://github.com/guillaume-gricourt/HmnFusion/tree/0.7.3>`__ (2021-08-08)
 -----------------------------------------------------------------------------------
@@ -184,7 +192,7 @@ Changelog <https://github.com/guillaume-gricourt/HmnFusion/compare/0.7.3...0.8.0
 `Full
 Changelog <https://github.com/guillaume-gricourt/HmnFusion/compare/0.7.2...0.7.3>`__
 
-.. _section-19:
+.. _section-20:
 
 `0.7.2 <https://github.com/guillaume-gricourt/HmnFusion/tree/0.7.2>`__ (2021-08-08)
 -----------------------------------------------------------------------------------
@@ -192,7 +200,7 @@ Changelog <https://github.com/guillaume-gricourt/HmnFusion/compare/0.7.2...0.7.3
 `Full
 Changelog <https://github.com/guillaume-gricourt/HmnFusion/compare/0.7.1...0.7.2>`__
 
-.. _section-20:
+.. _section-21:
 
 `0.7.1 <https://github.com/guillaume-gricourt/HmnFusion/tree/0.7.1>`__ (2021-06-16)
 -----------------------------------------------------------------------------------
@@ -200,7 +208,7 @@ Changelog <https://github.com/guillaume-gricourt/HmnFusion/compare/0.7.1...0.7.2
 `Full
 Changelog <https://github.com/guillaume-gricourt/HmnFusion/compare/0.7.0...0.7.1>`__
 
-.. _section-21:
+.. _section-22:
 
 `0.7.0 <https://github.com/guillaume-gricourt/HmnFusion/tree/0.7.0>`__ (2021-06-14)
 -----------------------------------------------------------------------------------
@@ -208,7 +216,7 @@ Changelog <https://github.com/guillaume-gricourt/HmnFusion/compare/0.7.0...0.7.1
 `Full
 Changelog <https://github.com/guillaume-gricourt/HmnFusion/compare/0.6.0...0.7.0>`__
 
-.. _section-22:
+.. _section-23:
 
 `0.6.0 <https://github.com/guillaume-gricourt/HmnFusion/tree/0.6.0>`__ (2021-03-08)
 -----------------------------------------------------------------------------------
@@ -216,7 +224,7 @@ Changelog <https://github.com/guillaume-gricourt/HmnFusion/compare/0.6.0...0.7.0
 `Full
 Changelog <https://github.com/guillaume-gricourt/HmnFusion/compare/0.5.0...0.6.0>`__
 
-.. _section-23:
+.. _section-24:
 
 `0.5.0 <https://github.com/guillaume-gricourt/HmnFusion/tree/0.5.0>`__ (2020-12-10)
 -----------------------------------------------------------------------------------

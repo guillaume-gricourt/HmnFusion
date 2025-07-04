@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.2.12](https://github.com/guillaume-gricourt/HmnFusion/tree/1.2.12) (2023-04-19)
+
+[Full Changelog](https://github.com/guillaume-gricourt/HmnFusion/compare/1.2.11...1.2.12)
+
 ## [1.2.11](https://github.com/guillaume-gricourt/HmnFusion/tree/1.2.11) (2023-04-19)
 
 [Full Changelog](https://github.com/guillaume-gricourt/HmnFusion/compare/1.2.10...1.2.11)

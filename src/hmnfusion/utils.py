@@ -230,10 +230,6 @@ def bam_to_fastq(path: str, compress: int = 4, threads: int = 1) -> Tuple[str, s
     tmp_sort = tempfile.NamedTemporaryFile(suffix=".bam")
     args = main_args + ["-n", "-o", tmp_sort.name, path]
     pysam.sort(*args)
-    # Fixmate bam.
-    tmp_fixmate = tempfile.NamedTemporaryFile(suffix=".bam")
-    args = main_args + [tmp_sort.name, tmp_fixmate.name]
-    pysam.fixmate(*args)
     # Label file.
     suffixes = ["R{0}", "fastq"]
     if compress > 0:
@@ -245,24 +241,32 @@ def bam_to_fastq(path: str, compress: int = 4, threads: int = 1) -> Tuple[str, s
     tmp_fq_rev = tempfile.NamedTemporaryFile(
         suffix=label_suffixes.format("2"), delete=False
     )
+    tmp_fq_singleton = tempfile.NamedTemporaryFile(
+        suffix=label_suffixes.format("3"), delete=False
+    )
+    tmp_fq_trash = tempfile.NamedTemporaryFile(
+        suffix=label_suffixes.format("4"), delete=False
+    )
     # Convert to fastq.
     args = main_args + [
         "-c",
         str(compress),
-        "-f",
-        "0x1",
-        "-F",
-        "0x900",
         "-1",
         tmp_fq_fwd.name,
         "-2",
         tmp_fq_rev.name,
-        tmp_fixmate.name,
+        "-s",
+        tmp_fq_singleton.name,
+        "-0",
+        tmp_fq_trash.name,
+        "-n",
+        tmp_sort.name,
     ]
     pysam.fastq(*args)
     # Clean up.
     tmp_sort.close()
-    tmp_fixmate.close()
+    tmp_fq_singleton.close()
+    tmp_fq_trash.close()
 
     return tmp_fq_fwd.name, tmp_fq_rev.name
 

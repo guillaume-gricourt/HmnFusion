@@ -181,8 +181,8 @@ class InstallSoftware(object):
             "bioconda",
             "-c",
             "conda-forge",
-            "-c",
-            "default",
+            "--override-channels",
+            "--yes",
             "lumpy-sv=" + cls.LUMPY_VERSION,
         ]
         ret = utils.cmdline(args)
@@ -209,6 +209,7 @@ class InstallSoftware(object):
             "-n",
             cls.LUMPY_ENV_NAME,
             "--all",
+            "--yes",
         ]
         ret = utils.cmdline(args)
         if ret.returncode > 0:
