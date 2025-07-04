@@ -1,5 +1,27 @@
 # Changelog
 
+## [1.3.0](https://github.com/guillaume-gricourt/HmnFusion/tree/1.3.0) (2025-04-02)
+
+[Full Changelog](https://github.com/guillaume-gricourt/HmnFusion/compare/1.2.12...1.3.0)
+
+**Fixed bugs:**
+
+- Fix tests [\#14](https://github.com/guillaume-gricourt/HmnFusion/pull/14) ([guillaume-gricourt](https://github.com/guillaume-gricourt))
+
+**Merged pull requests:**
+
+- chore\(deps\): bump github/super-linter from 5 to 6 [\#21](https://github.com/guillaume-gricourt/HmnFusion/pull/21) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump mathieudutour/github-tag-action from 6.1 to 6.2 [\#20](https://github.com/guillaume-gricourt/HmnFusion/pull/20) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump softprops/action-gh-release from 1 to 2 [\#19](https://github.com/guillaume-gricourt/HmnFusion/pull/19) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Tests: refactor use case [\#18](https://github.com/guillaume-gricourt/HmnFusion/pull/18) ([guillaume-gricourt](https://github.com/guillaume-gricourt))
+- chore\(deps\): bump actions/upload-artifact from 3 to 4 [\#17](https://github.com/guillaume-gricourt/HmnFusion/pull/17) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump actions/download-artifact from 3 to 4 [\#16](https://github.com/guillaume-gricourt/HmnFusion/pull/16) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump conda-incubator/setup-miniconda from 2 to 3 [\#15](https://github.com/guillaume-gricourt/HmnFusion/pull/15) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Add test python 3.12 [\#13](https://github.com/guillaume-gricourt/HmnFusion/pull/13) ([guillaume-gricourt](https://github.com/guillaume-gricourt))
+- chore\(deps\): bump schneegans/dynamic-badges-action from 1.6.0 to 1.7.0 [\#12](https://github.com/guillaume-gricourt/HmnFusion/pull/12) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump actions/checkout from 3 to 4 [\#11](https://github.com/guillaume-gricourt/HmnFusion/pull/11) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump mathieudutour/github-tag-action from 6.0 to 6.1 [\#10](https://github.com/guillaume-gricourt/HmnFusion/pull/10) ([dependabot[bot]](https://github.com/apps/dependabot))
+
 ## [1.2.12](https://github.com/guillaume-gricourt/HmnFusion/tree/1.2.12) (2023-04-19)
 
 [Full Changelog](https://github.com/guillaume-gricourt/HmnFusion/compare/1.2.11...1.2.12)
