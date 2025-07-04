@@ -24,3 +24,18 @@ dependencies:
   # docs
   - sphinx
   - sphinx_rtd_theme
+deps:
+  - beautifulsoup4
+  - et-xmlfile
+  - matplotlib
+  - lxml
+  - natsort
+  - networkx
+  - numpy
+  - openpyxl
+  - pandas
+  - pysam
+  - pytest
+  - pyyaml
+  - requests
+  - snakemake >= 9

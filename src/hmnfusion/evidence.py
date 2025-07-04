@@ -111,7 +111,7 @@ class Evidence(object):
         vaf = 0.0
         if self._depth > 0:
             vaf = (self.get_sum() / self._depth) * 100
-        return "{:.2f}".format(vaf).replace(".", ",")
+        return "{:.2f}".format(vaf)
 
     def get_max_count(self) -> int:
         """Get maximum among raw attribute and sum of all evidences.

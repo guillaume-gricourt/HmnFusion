@@ -16,7 +16,7 @@ with open(fversion) as fid:
 env = {}
 with open("recipes/workflow.yaml") as fid:
     env = yaml.safe_load(fid)
-install_requires = env["dependencies"]
+install_requires = env["deps"]
 
 setuptools.setup(
     name=name,
