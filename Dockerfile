@@ -1,6 +1,4 @@
-FROM  continuumio/miniconda3:4.10.3
-#FROM python:3.9-bullseye
-
+FROM continuumio/miniconda3:25.3.1-1
 
 RUN apt-get update
 RUN apt-get install -y \
@@ -27,10 +25,11 @@ RUN cd GeneFuse-0.6.1 && \
 # Lumpy
 RUN conda create -n lumpy-sv \
     -c bioconda -c conda-forge -c default \
-    lumpy-sv=0.3.1
+    lumpy-sv=0.3.1 samtools=1.3.1
 
 # HmnFusion
 COPY *whl /opt/
+#RUN conda activate base && \
 RUN pip install --no-cache-dir /opt/*whl
 
 ENTRYPOINT ["hmnfusion"]
