@@ -219,23 +219,23 @@ def write(filename: str, name: str, g: graph.Graph) -> None:
         ident_1 = ident
         if g.graph.nodes[n]["fusion"].second.is_init():
             ident_1 += "-1"
-        infos = ["SVTYPE=FUS"]
-        infos += ["SOFT=%s" % (g.graph.nodes[n]["fusion"].get_software(),)]
-        infos += ["FROM=%s" % ("-".join(g.label_build_from(n)),)]
-        infos += ["CONS=%s" % (g.graph.nodes[n]["is_consensus"],)]
-        infos += ["VAF=%s" % (g.graph.nodes[n]["fusion"].evidence.get_vaf(),)]
-        infos += ["DP=%s" % (g.graph.nodes[n]["fusion"].evidence.depth,)]
-        infos += ["SU=%s" % (g.graph.nodes[n]["fusion"].evidence.get_sum(),)]
-        infos += ["SR=%s" % (g.graph.nodes[n]["fusion"].evidence.split,)]
-        infos += ["PE=%s" % (g.graph.nodes[n]["fusion"].evidence.mate,)]
-        infos += ["SC=%s" % (g.graph.nodes[n]["fusion"].evidence.clipped,)]
+        formats = ["SVTYPE=FUS"]
+        formats += ["SOFT=%s" % (g.graph.nodes[n]["fusion"].get_software(),)]
+        formats += ["FROM=%s" % ("-".join(g.label_build_from(n)),)]
+        formats += ["CONS=%s" % (g.graph.nodes[n]["is_consensus"],)]
+        formats += ["VAF=%s" % (g.graph.nodes[n]["fusion"].evidence.get_vaf(),)]
+        formats += ["DP=%s" % (g.graph.nodes[n]["fusion"].evidence.depth,)]
+        formats += ["SU=%s" % (g.graph.nodes[n]["fusion"].evidence.get_sum(),)]
+        formats += ["SR=%s" % (g.graph.nodes[n]["fusion"].evidence.split,)]
+        formats += ["PE=%s" % (g.graph.nodes[n]["fusion"].evidence.mate,)]
+        formats += ["SC=%s" % (g.graph.nodes[n]["fusion"].evidence.clipped,)]
 
-        sinfos = ":".join(infos)
+        sformats = ";".join(formats)
         values = [
             g.graph.nodes[n]["fusion"].first.chrom,
             g.graph.nodes[n]["fusion"].first.position,
         ]
-        values += [ident_1, "N", "<FUS>", ".", ".", sinfos]
+        values += [ident_1, "N", "<FUS>", ".", ".", sformats]
         values += ["GT:VAF:DP:SU:SR:PE:SC"]
 
         infos_values = []

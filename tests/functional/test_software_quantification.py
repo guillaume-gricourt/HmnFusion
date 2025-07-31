@@ -27,7 +27,7 @@ class CompareQuantification(Enum):
 def find_vaf(path: str):
     with open(path) as fid:
         text = fid.read()
-    m = re.search(r"(VAF=\d{2},\d{2})", text)
+    m = re.search(r"(VAF=\d{2}\.\d{2})", text)
     if m is None:
         return None
     return m.group(1)
