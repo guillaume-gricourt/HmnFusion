@@ -39,7 +39,6 @@ class MmejFusion(object):
                 row += df.shape[0] + 1
 
             # Access the workbook and worksheet
-            workbook  = writer.book
             worksheet = writer.sheets[sheet_name]
 
             # Format
