@@ -2,7 +2,6 @@
 
 [![Github Version](https://img.shields.io/github/v/release/guillaume-gricourt/HmnFusion?display_name=tag&sort=semver)](version) [![Conda Release](https://img.shields.io/conda/vn/bioconda/hmnfusion.svg)](https://anaconda.org/bioconda/hmnfusion)  
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![GitHub Super-Linter](https://github.com/guillaume-gricourt/HmnFusion/workflows/Tests/badge.svg)](https://github.com/marketplace/actions/super-linter)
 [![Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/guillaume-gricourt/5b62753442bc7c44ae2995299575af0a/raw/coverage.json)](code_coverage)  
 [![DOI](https://zenodo.org/badge/259869577.svg)](https://zenodo.org/badge/latestdoi/259869577)  
 
@@ -159,13 +158,3 @@ docker run -it \
     --output-directory <i>file</i> \
     --threads 4
 </pre>
-
-
-## Versioning
-
-[SemVer](http://semver.org/) is used for versioning.
-
-## Authors
-
-* **Guillaume Gricourt**  
-* **Dr. Ivan Sloma**  
