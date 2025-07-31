@@ -28,18 +28,19 @@ class MmejFusion(object):
         # Write empty.
         if len(dfs) == 0:
             df = pd.DataFrame()
-            writer = pd.ExcelWriter(path)
-            df.to_excel(writer, sheet_name=sheet_name)
-            writer.save()
+            with pd.ExcelWriter(path) as writer:
+                df.to_excel(writer, sheet_name=sheet_name, index=False)
             return
         # Write output.
-        writer = pd.ExcelWriter(path)
-        row = 0
-        for df in dfs:
-            df.to_excel(writer, sheet_name=sheet_name, startrow=row)
-            row += df.shape[0] + 1
-        ws = writer.sheets[sheet_name]  # pull worksheet object
-        # Format
-        utils.adjust_dim_worksheet(ws)
-        # Write
-        writer.save()
+        with pd.ExcelWriter(path) as writer:
+            row = 0
+            for df in dfs:
+                df.to_excel(writer, sheet_name=sheet_name, startrow=row)
+                row += df.shape[0] + 1
+
+            # Access the workbook and worksheet
+            workbook  = writer.book
+            worksheet = writer.sheets[sheet_name]
+
+            # Format
+            utils.adjust_dim_worksheet(worksheet)
