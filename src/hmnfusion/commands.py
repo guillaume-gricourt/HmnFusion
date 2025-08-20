@@ -394,7 +394,7 @@ P_mmej_fusion.add_argument(
 )
 P_mmej_fusion.add_argument(
     "--fusion-exclude-flag",
-    default=7,
+    default=6,
     type=int,
     help="Exclude fusions with fusion-flag",
 )
