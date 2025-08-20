@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.5.0](https://github.com/guillaume-gricourt/HmnFusion/tree/1.5.0) (2025-08-20)
+
+[Full Changelog](https://github.com/guillaume-gricourt/HmnFusion/compare/1.4.0...1.5.0)
+
+**Merged pull requests:**
+
+- chore\(deps\): bump actions/checkout from 4 to 5 [\#24](https://github.com/guillaume-gricourt/HmnFusion/pull/24) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump actions/download-artifact from 4 to 5 [\#23](https://github.com/guillaume-gricourt/HmnFusion/pull/23) ([dependabot[bot]](https://github.com/apps/dependabot))
+
 ## [1.4.0](https://github.com/guillaume-gricourt/HmnFusion/tree/1.4.0) (2025-07-31)
 
 [Full Changelog](https://github.com/guillaume-gricourt/HmnFusion/compare/1.3.1...1.4.0)
