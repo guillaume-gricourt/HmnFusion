@@ -394,7 +394,7 @@ P_mmej_fusion.add_argument(
 )
 P_mmej_fusion.add_argument(
     "--fusion-exclude-flag",
-    default=7,
+    default=6,
     type=int,
     help="Exclude fusions with fusion-flag",
 )
@@ -765,7 +765,7 @@ def _cmd_fusion_flag(args):
     # Grep all attributes
     values = []
     for attr in dir(fusion_flag.FusionFlag):
-        if not attr.startswith("__"):
+        if not (attr.startswith("__") or attr[0].islower()):
             values.append((attr, fusion_flag.FusionFlag[attr].value))
     # Print values
     for value in sorted(values, key=lambda x: x[1]):
